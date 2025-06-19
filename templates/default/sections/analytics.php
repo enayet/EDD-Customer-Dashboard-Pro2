@@ -1,0 +1,86 @@
+<?php
+/**
+ * Analytics Section Template
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+$analytics = $dashboard_data->get_customer_analytics($customer);
+?>
+
+<h2 class="eddcdp-section-title"><?php _e('Purchase Analytics', EDDCDP_TEXT_DOMAIN); ?></h2>
+
+<div class="eddcdp-stats-grid">
+    <div class="eddcdp-stat-card">
+        <div class="eddcdp-stat-icon purchases">💰</div>
+        <div class="eddcdp-stat-number"><?php echo $dashboard_data->format_currency($analytics['total_spent']); ?></div>
+        <div class="eddcdp-stat-label"><?php _e('Total Spent', EDDCDP_TEXT_DOMAIN); ?></div>
+    </div>
+    
+    <div class="eddcdp-stat-card">
+        <div class="eddcdp-stat-icon downloads">📈</div>
+        <div class="eddcdp-stat-number"><?php echo $dashboard_data->format_currency($analytics['avg_per_order']); ?></div>
+        <div class="eddcdp-stat-label"><?php _e('Average Order Value', EDDCDP_TEXT_DOMAIN); ?></div>
+    </div>
+    
+    <div class="eddcdp-stat-card">
+        <div class="eddcdp-stat-icon licenses">📅</div>
+        <div class="eddcdp-stat-number"><?php echo $analytics['purchase_count']; ?></div>
+        <div class="eddcdp-stat-label"><?php _e('Total Orders', EDDCDP_TEXT_DOMAIN); ?></div>
+    </div>
+    
+    <div class="eddcdp-stat-card">
+        <div class="eddcdp-stat-icon wishlist">⭐</div>
+        <div class="eddcdp-stat-number">
+            <?php 
+            if ($analytics['first_purchase']) {
+                $days = round((time() - strtotime($analytics['first_purchase'])) / DAY_IN_SECONDS);
+                echo $days;
+            } else {
+                echo '0';
+            }
+            ?>
+        </div>
+        <div class="eddcdp-stat-label"><?php _e('Days as Customer', EDDCDP_TEXT_DOMAIN); ?></div>
+    </div>
+</div>
+
+<div class="eddcdp-analytics-details" style="margin-top: 30px;">
+    <div class="eddcdp-analytics-card" style="background: rgba(248, 250, 252, 0.8); border-radius: 12px; padding: 25px;">
+        <h3><?php _e('Purchase Timeline', EDDCDP_TEXT_DOMAIN); ?></h3>
+        <div style="margin-top: 15px;">
+            <?php if ($analytics['first_purchase']) : ?>
+                <p><strong><?php _e('First Purchase:', EDDCDP_TEXT_DOMAIN); ?></strong> <?php echo $dashboard_data->format_date($analytics['first_purchase']); ?></p>
+            <?php endif; ?>
+            
+            <?php if ($analytics['last_purchase']) : ?>
+                <p><strong><?php _e('Most Recent Purchase:', EDDCDP_TEXT_DOMAIN); ?></strong> <?php echo $dashboard_data->format_date($analytics['last_purchase']); ?></p>
+            <?php endif; ?>
+            
+            <?php if ($analytics['purchase_count'] > 1) : ?>
+                <?php 
+                $days_between = 0;
+                if ($analytics['first_purchase'] && $analytics['last_purchase']) {
+                    $days_between = round((strtotime($analytics['last_purchase']) - strtotime($analytics['first_purchase'])) / DAY_IN_SECONDS);
+                }
+                ?>
+                <p><strong><?php _e('Purchase Frequency:', EDDCDP_TEXT_DOMAIN); ?></strong> 
+                    <?php 
+                    if ($days_between > 0) {
+                        printf(__('Every %d days on average', EDDCDP_TEXT_DOMAIN), round($days_between / ($analytics['purchase_count'] - 1)));
+                    } else {
+                        _e('Multiple purchases', EDDCDP_TEXT_DOMAIN);
+                    }
+                    ?>
+                </p>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<div style="margin-top: 30px; padding: 40px; background: rgba(248, 250, 252, 0.8); border-radius: 12px; text-align: center;">
+    <h3>📊 <?php _e('Advanced Analytics Coming Soon', EDDCDP_TEXT_DOMAIN); ?></h3>
+    <p><?php _e('Detailed charts and insights about your purchase history will be available in future updates.', EDDCDP_TEXT_DOMAIN); ?></p>
+</div>

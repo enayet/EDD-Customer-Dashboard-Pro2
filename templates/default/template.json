@@ -1,0 +1,23 @@
+{
+    "name": "Default Dashboard",
+    "description": "Modern, clean dashboard interface with glassmorphism design",
+    "version": "1.0.0",
+    "author": "EDD Customer Dashboard Pro",
+    "screenshot": "screenshot.png",
+    "supports": {
+        "purchases": true,
+        "downloads": true,
+        "licenses": true,
+        "wishlist": true,
+        "analytics": true,
+        "support": true
+    },
+    "features": [
+        "Responsive design",
+        "Modern glassmorphism UI",
+        "Interactive animations",
+        "Mobile-friendly navigation",
+        "Copy-to-clipboard license keys",
+        "Ajax-powered downloads"
+    ]
+}

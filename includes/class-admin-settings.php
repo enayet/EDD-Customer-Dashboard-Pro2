@@ -125,7 +125,7 @@ class EDDCDP_Admin_Settings {
     public function render_settings_page() {
         ?>
         <div class="wrap eddcdp-admin">
-            <h1><?php _e('EDD Customer Dashboard Pro Settings', EDDCDP_TEXT_DOMAIN); ?></h1>
+            <h1><?php esc_html_e('EDD Customer Dashboard Pro Settings', EDDCDP_TEXT_DOMAIN); ?></h1>
             
             <div class="eddcdp-admin-content">
                 <form method="post" action="options.php">
@@ -136,22 +136,15 @@ class EDDCDP_Admin_Settings {
                     ?>
                 </form>
                 
-                <div class="eddcdp-sidebar">
+<!--
+                <div class="eddcdp-sidebar">                    
                     <div class="eddcdp-info-box">
-                        <h3><?php _e('Quick Links', EDDCDP_TEXT_DOMAIN); ?></h3>
-                        <ul>
-                            <li><a href="<?php echo admin_url('edit.php?post_type=download'); ?>"><?php _e('Downloads', EDDCDP_TEXT_DOMAIN); ?></a></li>
-                            <li><a href="<?php echo admin_url('edit.php?post_type=download&page=edd-payment-history'); ?>"><?php _e('Payment History', EDDCDP_TEXT_DOMAIN); ?></a></li>
-                            <li><a href="<?php echo admin_url('edit.php?post_type=download&page=edd-customers'); ?>"><?php _e('Customers', EDDCDP_TEXT_DOMAIN); ?></a></li>
-                        </ul>
-                    </div>
-                    
-                    <div class="eddcdp-info-box">
-                        <h3><?php _e('Shortcode', EDDCDP_TEXT_DOMAIN); ?></h3>
-                        <p><?php _e('Use this shortcode to display the dashboard:', EDDCDP_TEXT_DOMAIN); ?></p>
+                        <h3><?php esc_html_e('Shortcode', EDDCDP_TEXT_DOMAIN); ?></h3>
+                        <p><?php esc_html_e('Use this shortcode to display the dashboard:', EDDCDP_TEXT_DOMAIN); ?></p>
                         <code>[edd_customer_dashboard_pro]</code>
                     </div>
                 </div>
+-->
             </div>
         </div>
         <?php
@@ -161,15 +154,15 @@ class EDDCDP_Admin_Settings {
      * Section callbacks
      */
     public function general_section_callback() {
-        echo '<p>' . __('Configure general dashboard settings.', EDDCDP_TEXT_DOMAIN) . '</p>';
+        echo '<p>' . esc_html__('Configure general dashboard settings.', EDDCDP_TEXT_DOMAIN) . '</p>';
     }
     
     public function template_section_callback() {
-        echo '<p>' . __('Choose and configure your dashboard template.', EDDCDP_TEXT_DOMAIN) . '</p>';
+        echo '<p>' . esc_html__('Choose and configure your dashboard template.', EDDCDP_TEXT_DOMAIN) . '</p>';
     }
     
     public function sections_section_callback() {
-        echo '<p>' . __('Enable or disable specific dashboard sections.', EDDCDP_TEXT_DOMAIN) . '</p>';
+        echo '<p>' . esc_html__('Enable or disable specific dashboard sections.', EDDCDP_TEXT_DOMAIN) . '</p>';
     }
     
     /**
@@ -218,9 +211,9 @@ class EDDCDP_Admin_Settings {
                                 <h4><?php echo esc_html($template_info['name']); ?></h4>
                                 <p><?php echo esc_html($template_info['description']); ?></p>
                                 <div class="template-meta">
-                                    <span class="version"><?php printf(__('Version: %s', EDDCDP_TEXT_DOMAIN), $template_info['version']); ?></span>
+                                    <span class="version"><?php printf(esc_html__('Version: %s', EDDCDP_TEXT_DOMAIN), esc_html($template_info['version'])); ?></span>
                                     <?php if (isset($template_info['author'])) : ?>
-                                        <span class="author"><?php printf(__('by %s', EDDCDP_TEXT_DOMAIN), $template_info['author']); ?></span>
+                                        <span class="author"><?php printf(esc_html__('by %s', EDDCDP_TEXT_DOMAIN), esc_html($template_info['author'])); ?></span>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -258,7 +251,7 @@ class EDDCDP_Admin_Settings {
         // Active Template
         if (isset($input['active_template'])) {
             $template_loader = eddcdp()->get_template_loader();
-            if ($template_loader->template_exists($input['active_template'])) {
+            if ($template_loader && $template_loader->template_exists($input['active_template'])) {
                 $sanitized['active_template'] = sanitize_text_field($input['active_template']);
             } else {
                 $sanitized['active_template'] = 'default';

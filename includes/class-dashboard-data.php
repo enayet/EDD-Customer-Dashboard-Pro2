@@ -70,7 +70,12 @@ class EDDCDP_Dashboard_Data {
             return 0;
         }
         
-        $licenses = $licensing->get_license_keys_of_user(get_current_user_id());
+        $customer = edd_get_customer($customer_id);
+        if (!$customer || !$customer->user_id) {
+            return 0;
+        }
+        
+        $licenses = $licensing->get_license_keys_of_user($customer->user_id);
         $active = 0;
         
         if ($licenses) {
@@ -179,6 +184,7 @@ class EDDCDP_Dashboard_Data {
         $logs_table = $wpdb->prefix . 'edd_logs';
         
         if ($wpdb->get_var("SHOW TABLES LIKE '$logs_table'") == $logs_table) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $count = $wpdb->get_var($wpdb->prepare(
                 "SELECT COUNT(*) FROM $logs_table 
                 WHERE post_id = %d 
@@ -370,14 +376,19 @@ class EDDCDP_Dashboard_Data {
      * AJAX: Activate license
      */
     public function ajax_activate_license() {
-        check_ajax_referer('eddcdp_nonce', 'nonce');
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'eddcdp_nonce')) {
+            wp_send_json_error(__('Security verification failed.', EDDCDP_TEXT_DOMAIN));
+        }
         
         if (!is_user_logged_in()) {
             wp_send_json_error(__('Please log in first.', EDDCDP_TEXT_DOMAIN));
         }
         
-        $license_key = sanitize_text_field($_POST['license_key']);
-        $site_url = esc_url_raw($_POST['site_url']);
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        $license_key = sanitize_text_field(wp_unslash($_POST['license_key']));
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        $site_url = esc_url_raw(wp_unslash($_POST['site_url']));
         
         if (empty($license_key) || empty($site_url)) {
             wp_send_json_error(__('License key and site URL are required.', EDDCDP_TEXT_DOMAIN));
@@ -422,14 +433,19 @@ class EDDCDP_Dashboard_Data {
      * AJAX: Deactivate license
      */
     public function ajax_deactivate_license() {
-        check_ajax_referer('eddcdp_nonce', 'nonce');
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'eddcdp_nonce')) {
+            wp_send_json_error(__('Security verification failed.', EDDCDP_TEXT_DOMAIN));
+        }
         
         if (!is_user_logged_in()) {
             wp_send_json_error(__('Please log in first.', EDDCDP_TEXT_DOMAIN));
         }
         
-        $license_key = sanitize_text_field($_POST['license_key']);
-        $site_url = esc_url_raw($_POST['site_url']);
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        $license_key = sanitize_text_field(wp_unslash($_POST['license_key']));
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        $site_url = esc_url_raw(wp_unslash($_POST['site_url']));
         
         if (empty($license_key) || empty($site_url)) {
             wp_send_json_error(__('License key and site URL are required.', EDDCDP_TEXT_DOMAIN));
@@ -464,12 +480,16 @@ class EDDCDP_Dashboard_Data {
      * AJAX: Remove wishlist item
      */
     public function ajax_remove_wishlist() {
-        check_ajax_referer('eddcdp_nonce', 'nonce');
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'eddcdp_nonce')) {
+            wp_send_json_error(__('Security verification failed.', EDDCDP_TEXT_DOMAIN));
+        }
         
         if (!is_user_logged_in()) {
             wp_send_json_error(__('Please log in first.', EDDCDP_TEXT_DOMAIN));
         }
         
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing
         $download_id = absint($_POST['download_id']);
         
         if (empty($download_id)) {
@@ -501,88 +521,5 @@ class EDDCDP_Dashboard_Data {
         } else {
             wp_send_json_error(__('Failed to remove item from wishlist.', EDDCDP_TEXT_DOMAIN));
         }
-    }
-    
-    /**
-     * Get download count with caching
-     */
-    public function get_download_count_cached($customer_id) {
-        $cache_key = 'eddcdp_download_count_' . $customer_id;
-        $count = wp_cache_get($cache_key, 'eddcdp');
-        
-        if (false === $count) {
-            $count = $this->get_download_count($customer_id);
-            wp_cache_set($cache_key, $count, 'eddcdp', HOUR_IN_SECONDS);
-        }
-        
-        return $count;
-    }
-    
-    /**
-     * Clear customer cache
-     */
-    public function clear_customer_cache($customer_id) {
-        wp_cache_delete('eddcdp_download_count_' . $customer_id, 'eddcdp');
-        wp_cache_delete('eddcdp_license_count_' . $customer_id, 'eddcdp');
-        wp_cache_delete('eddcdp_wishlist_count_' . $customer_id, 'eddcdp');
-    }
-    
-    /**
-     * Validate license key format
-     */
-    public function validate_license_key($license_key) {
-        if (empty($license_key)) {
-            return false;
-        }
-        
-        // Basic validation - adjust according to your license key format
-        if (strlen($license_key) < 10) {
-            return false;
-        }
-        
-        return true;
-    }
-    
-    /**
-     * Validate site URL
-     */
-    public function validate_site_url($site_url) {
-        if (empty($site_url)) {
-            return false;
-        }
-        
-        // Check if it's a valid URL
-        if (!filter_var($site_url, FILTER_VALIDATE_URL)) {
-            return false;
-        }
-        
-        // Check if it starts with http/https
-        if (!preg_match('/^https?:\/\//', $site_url)) {
-            return false;
-        }
-        
-        return true;
-    }
-    
-    /**
-     * Get customer support tickets (if support plugin is active)
-     */
-    public function get_customer_support_tickets($user_id) {
-        // This would integrate with your support ticket system
-        // Example implementation for common support plugins
-        
-        $tickets = array();
-        
-        // Example: Integration with WP Support Plus
-        if (class_exists('WP_Support_Plus')) {
-            // Add integration code here
-        }
-        
-        // Example: Integration with Awesome Support
-        if (function_exists('wpas_get_tickets')) {
-            // Add integration code here
-        }
-        
-        return apply_filters('eddcdp_customer_support_tickets', $tickets, $user_id);
     }
 }

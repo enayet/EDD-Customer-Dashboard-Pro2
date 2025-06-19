@@ -1,0 +1,24 @@
+{
+    "name": "Aurora Dashboard",
+    "description": "Modern sidebar-based dashboard with clean table layout and professional styling",
+    "version": "1.0.0",
+    "author": "EDD Customer Dashboard Pro",
+    "screenshot": "screenshot.png",
+    "supports": {
+        "purchases": true,
+        "downloads": true,
+        "licenses": true,
+        "wishlist": true,
+        "analytics": true,
+        "support": true
+    },
+    "features": [
+        "Sidebar navigation",
+        "Clean table layouts",
+        "Professional design",
+        "Mobile-friendly responsive",
+        "Copy-to-clipboard license keys",
+        "Search functionality",
+        "Modern iconography"
+    ]
+}

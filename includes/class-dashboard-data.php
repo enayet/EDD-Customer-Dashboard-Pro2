@@ -1,6 +1,6 @@
 <?php
 /**
- * Dashboard Data Class
+ * Dashboard Data Class - Fixed superglobal array index issues
  * 
  * Handles data retrieval and processing for dashboard sections
  */
@@ -182,17 +182,27 @@ class EDDCDP_Dashboard_Data {
         
         // Try to get from EDD logs table if it exists
         $logs_table = $wpdb->prefix . 'edd_logs';
-        // Check if table exists using proper preparation
+        
+        // Check if table exists - FIXED: Use esc_like() for table name safety
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-        if ($wpdb->get_var("SHOW TABLES LIKE '$logs_table'") == $logs_table) {
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-            $count = $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM $logs_table 
+        $table_exists = $wpdb->get_var($wpdb->prepare(
+            "SHOW TABLES LIKE %s",
+            $wpdb->esc_like($logs_table)
+        ));
+        
+        if ($table_exists === $logs_table) {
+            // FIXED: Properly prepare the entire query including table name safety
+            // Since table names can't be parameterized, we validate it's safe first
+            $safe_table_name = esc_sql($logs_table);
+            
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$safe_table_name}` 
                 WHERE post_id = %d 
                 AND meta_value LIKE %s 
-                AND log_type = 'file_download'",
+                AND log_type = %s",
                 $download_id,
-                '%' . $payment_id . '%'
+                '%' . $wpdb->esc_like((string) $payment_id) . '%',
+                'file_download'
             ));
             
             return intval($count);
@@ -374,11 +384,11 @@ class EDDCDP_Dashboard_Data {
     }
     
     /**
-     * AJAX: Activate license
+     * AJAX: Activate license - FIXED superglobal array access
      */
     public function ajax_activate_license() {
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'eddcdp_nonce')) {
+        // FIXED: Check if nonce exists before accessing it
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'eddcdp_nonce')) {
             wp_send_json_error(__('Security verification failed.', 'edd-customer-dashboard-pro'));
         }
         
@@ -386,9 +396,12 @@ class EDDCDP_Dashboard_Data {
             wp_send_json_error(__('Please log in first.', 'edd-customer-dashboard-pro'));
         }
         
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        // FIXED: Check if required POST data exists before accessing
+        if (!isset($_POST['license_key']) || !isset($_POST['site_url'])) {
+            wp_send_json_error(__('Required parameters missing.', 'edd-customer-dashboard-pro'));
+        }
+        
         $license_key = sanitize_text_field(wp_unslash($_POST['license_key']));
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing
         $site_url = esc_url_raw(wp_unslash($_POST['site_url']));
         
         if (empty($license_key) || empty($site_url)) {
@@ -431,11 +444,11 @@ class EDDCDP_Dashboard_Data {
     }
     
     /**
-     * AJAX: Deactivate license
+     * AJAX: Deactivate license - FIXED superglobal array access
      */
     public function ajax_deactivate_license() {
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'eddcdp_nonce')) {
+        // FIXED: Check if nonce exists before accessing it
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'eddcdp_nonce')) {
             wp_send_json_error(__('Security verification failed.', 'edd-customer-dashboard-pro'));
         }
         
@@ -443,9 +456,12 @@ class EDDCDP_Dashboard_Data {
             wp_send_json_error(__('Please log in first.', 'edd-customer-dashboard-pro'));
         }
         
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        // FIXED: Check if required POST data exists before accessing
+        if (!isset($_POST['license_key']) || !isset($_POST['site_url'])) {
+            wp_send_json_error(__('Required parameters missing.', 'edd-customer-dashboard-pro'));
+        }
+        
         $license_key = sanitize_text_field(wp_unslash($_POST['license_key']));
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing
         $site_url = esc_url_raw(wp_unslash($_POST['site_url']));
         
         if (empty($license_key) || empty($site_url)) {
@@ -478,11 +494,11 @@ class EDDCDP_Dashboard_Data {
     }
     
     /**
-     * AJAX: Remove wishlist item
+     * AJAX: Remove wishlist item - FIXED superglobal array access
      */
     public function ajax_remove_wishlist() {
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'eddcdp_nonce')) {
+        // FIXED: Check if nonce exists before accessing it
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'eddcdp_nonce')) {
             wp_send_json_error(__('Security verification failed.', 'edd-customer-dashboard-pro'));
         }
         
@@ -490,7 +506,11 @@ class EDDCDP_Dashboard_Data {
             wp_send_json_error(__('Please log in first.', 'edd-customer-dashboard-pro'));
         }
         
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        // FIXED: Check if download_id exists before accessing
+        if (!isset($_POST['download_id'])) {
+            wp_send_json_error(__('Download ID parameter missing.', 'edd-customer-dashboard-pro'));
+        }
+        
         $download_id = absint($_POST['download_id']);
         
         if (empty($download_id)) {

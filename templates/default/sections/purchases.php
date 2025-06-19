@@ -1,6 +1,6 @@
 <?php
 /**
- * Purchases Section Template
+ * Purchases Section Template - Fixed translator comments
  */
 
 if (!defined('ABSPATH')) {
@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 $payments = $dashboard_data->get_customer_purchases($customer);
 ?>
 
-<h2 class="eddcdp-section-title"><?php _e('Your Orders & Purchases', 'edd-customer-dashboard-pro'); ?></h2>
+<h2 class="eddcdp-section-title"><?php esc_html_e('Your Orders & Purchases', 'edd-customer-dashboard-pro'); ?></h2>
 
 <div class="eddcdp-purchase-list">
     <?php if ($payments) : ?>
@@ -25,19 +25,23 @@ $payments = $dashboard_data->get_customer_purchases($customer);
                                 $first_download = get_the_title($downloads[0]['id']);
                                 echo esc_html($first_download);
                                 if (count($downloads) > 1) {
-                                    printf(__(' + %d more', 'edd-customer-dashboard-pro'), count($downloads) - 1);
+                                    // translators: %d is the number of additional items in the order
+                                    printf(esc_html__(' + %d more', 'edd-customer-dashboard-pro'), count($downloads) - 1);
                                 }
                             }
                             ?>
                         </div>
                         <div class="eddcdp-order-meta">
-                            <span class="eddcdp-order-number"><?php printf(__('Order #%s', 'edd-customer-dashboard-pro'), $payment->number); ?></span>
-                            <span class="eddcdp-order-date"><?php echo $dashboard_data->format_date($payment->date); ?></span>
-                            <span class="eddcdp-order-total"><?php echo $dashboard_data->format_currency($payment->total); ?></span>
+                            <span class="eddcdp-order-number"><?php 
+                            // translators: %s is the order number
+                            printf(esc_html__('Order #%s', 'edd-customer-dashboard-pro'), esc_html($payment->number)); 
+                            ?></span>
+                            <span class="eddcdp-order-date"><?php echo esc_html($dashboard_data->format_date($payment->date)); ?></span>
+                            <span class="eddcdp-order-total"><?php echo esc_html($dashboard_data->format_currency($payment->total)); ?></span>
                         </div>
                     </div>
                     <span class="eddcdp-status-badge eddcdp-status-<?php echo esc_attr($payment->status); ?>">
-                        <?php echo $dashboard_data->get_payment_status_label($payment); ?>
+                        <?php echo esc_html($dashboard_data->get_payment_status_label($payment)); ?>
                     </span>
                 </div>
                 
@@ -46,9 +50,12 @@ $payments = $dashboard_data->get_customer_purchases($customer);
                         <?php foreach ($downloads as $download) : ?>
                             <div class="eddcdp-product-row">
                                 <div class="eddcdp-product-details">
-                                    <strong><?php echo get_the_title($download['id']); ?></strong>
+                                    <strong><?php echo esc_html(get_the_title($download['id'])); ?></strong>
                                     <?php if (edd_use_skus() && edd_get_download_sku($download['id'])) : ?>
-                                        <div class="eddcdp-product-meta"><?php printf(__('SKU: %s', 'edd-customer-dashboard-pro'), edd_get_download_sku($download['id'])); ?></div>
+                                        <div class="eddcdp-product-meta"><?php 
+                                        // translators: %s is the product SKU/stock keeping unit
+                                        printf(esc_html__('SKU: %s', 'edd-customer-dashboard-pro'), esc_html(edd_get_download_sku($download['id']))); 
+                                        ?></div>
                                     <?php endif; ?>
                                 </div>
                                 <div class="eddcdp-product-actions">
@@ -56,8 +63,8 @@ $payments = $dashboard_data->get_customer_purchases($customer);
                                         <?php 
                                         $download_files = $dashboard_data->get_download_files($download['id']);
                                         if ($download_files) : ?>
-                                            <a href="<?php echo $dashboard_data->get_download_url($payment->key, $payment->email, 0, $download['id']); ?>" class="eddcdp-btn eddcdp-btn-download">
-                                                🔽 <?php _e('Download', 'edd-customer-dashboard-pro'); ?>
+                                            <a href="<?php echo esc_url($dashboard_data->get_download_url($payment->key, $payment->email, 0, $download['id'])); ?>" class="eddcdp-btn eddcdp-btn-download">
+                                                🔽 <?php esc_html_e('Download', 'edd-customer-dashboard-pro'); ?>
                                             </a>
                                         <?php endif; ?>
                                     <?php endif; ?>
@@ -68,17 +75,17 @@ $payments = $dashboard_data->get_customer_purchases($customer);
                 <?php endif; ?>
                 
                 <div class="eddcdp-order-actions">
-                    <a href="<?php echo $dashboard_data->get_receipt_url($payment); ?>" class="eddcdp-btn eddcdp-btn-secondary">
-                        📋 <?php _e('Order Details', 'edd-customer-dashboard-pro'); ?>
+                    <a href="<?php echo esc_url($dashboard_data->get_receipt_url($payment)); ?>" class="eddcdp-btn eddcdp-btn-secondary">
+                        📋 <?php esc_html_e('Order Details', 'edd-customer-dashboard-pro'); ?>
                     </a>
                     <?php if (function_exists('edd_get_receipt_page_uri')) : ?>
-                        <a href="<?php echo edd_get_receipt_page_uri($payment->ID); ?>" class="eddcdp-btn eddcdp-btn-secondary">
-                            📄 <?php _e('View Invoice', 'edd-customer-dashboard-pro'); ?>
+                        <a href="<?php echo esc_url(edd_get_receipt_page_uri($payment->ID)); ?>" class="eddcdp-btn eddcdp-btn-secondary">
+                            📄 <?php esc_html_e('View Invoice', 'edd-customer-dashboard-pro'); ?>
                         </a>
                     <?php endif; ?>
                     <?php if ($dashboard_data->is_licensing_active()) : ?>
                         <a href="#" class="eddcdp-btn eddcdp-btn-secondary" onclick="document.querySelector('[data-section=licenses]').click(); return false;">
-                            🔑 <?php _e('Manage Licenses', 'edd-customer-dashboard-pro'); ?>
+                            🔑 <?php esc_html_e('Manage Licenses', 'edd-customer-dashboard-pro'); ?>
                         </a>
                     <?php endif; ?>
                 </div>
@@ -87,9 +94,9 @@ $payments = $dashboard_data->get_customer_purchases($customer);
     <?php else : ?>
         <div class="eddcdp-empty-state">
             <div class="eddcdp-empty-icon">📦</div>
-            <h3><?php _e('No purchases yet', 'edd-customer-dashboard-pro'); ?></h3>
-            <p><?php _e('When you make your first purchase, it will appear here.', 'edd-customer-dashboard-pro'); ?></p>
-            <a href="<?php echo edd_get_checkout_uri(); ?>" class="eddcdp-btn"><?php _e('Browse Products', 'edd-customer-dashboard-pro'); ?></a>
+            <h3><?php esc_html_e('No purchases yet', 'edd-customer-dashboard-pro'); ?></h3>
+            <p><?php esc_html_e('When you make your first purchase, it will appear here.', 'edd-customer-dashboard-pro'); ?></p>
+            <a href="<?php echo esc_url(edd_get_checkout_uri()); ?>" class="eddcdp-btn"><?php esc_html_e('Browse Products', 'edd-customer-dashboard-pro'); ?></a>
         </div>
     <?php endif; ?>
 </div>

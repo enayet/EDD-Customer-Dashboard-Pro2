@@ -179,6 +179,7 @@ class EDDCDP_Admin_Settings {
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             $activated_template = isset($_GET['activated_template']) ? sanitize_text_field(wp_unslash($_GET['activated_template'])) : '';
             echo '<div class="notice notice-success is-dismissible"><p>' . 
+                 // translators: %s is the template name that was activated
                  sprintf(esc_html__('Template "%s" activated successfully!', 'edd-customer-dashboard-pro'), esc_html($activated_template)) . 
                  '</p></div>';
         }
@@ -338,11 +339,17 @@ class EDDCDP_Admin_Settings {
                     
                     <div class="eddcdp-template-meta">
                         <span class="eddcdp-template-version">
-                            <?php printf(esc_html__('Version: %s', 'edd-customer-dashboard-pro'), esc_html($template_info['version'])); ?>
+                            <?php 
+                            // translators: %s is the version number of the template
+                            printf(esc_html__('Version: %s', 'edd-customer-dashboard-pro'), esc_html($template_info['version'])); 
+                            ?>
                         </span>
                         <?php if (isset($template_info['author'])) : ?>
                             <span class="eddcdp-template-author">
-                                <?php printf(esc_html__('by %s', 'edd-customer-dashboard-pro'), esc_html($template_info['author'])); ?>
+                                <?php 
+                                    // translators: %s is the name of the template author
+                                    printf(esc_html__('by %s', 'edd-customer-dashboard-pro'), esc_html($template_info['author']));      
+                                ?>
                             </span>
                         <?php endif; ?>
                     </div>

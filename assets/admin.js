@@ -237,8 +237,4 @@ jQuery(document).ready(function($) {
     // Trigger custom event when admin page is fully loaded
     $(document).trigger('eddcdp:admin:ready');
     
-    // Debug mode helpers
-    if (window.console && window.console.log) {
-        console.log('EDD Customer Dashboard Pro Admin - Version:', window.eddcdp_version || 'Unknown');
-    }
 });

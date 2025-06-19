@@ -1,18 +1,17 @@
 <?php
 /**
  * Plugin Name: EDD Customer Dashboard Pro
- * Plugin URI: https://yourwebsite.com/
+ * Plugin URI: https://theweblab.xyz/
  * Description: Modern, template-based dashboard interface for Easy Digital Downloads customers
  * Version: 1.0.0
- * Author: Your Name
- * Author URI: https://yourwebsite.com/
+ * Author: TheWebLab
+ * Author URI: https://theweblab.xyz/
  * License: GPL v2 or later
  * Text Domain: edd-customer-dashboard-pro
  * Domain Path: /languages
- * Requires at least: 5.0
- * Tested up to: 6.4
+ * Requires at least: 6.0
+ * Tested up to: 6.8
  * Requires PHP: 7.4
- * Network: false
  */
 
 // Prevent direct access
@@ -220,7 +219,7 @@ class EDD_Customer_Dashboard_Pro {
      */
     public function edd_missing_notice() {
         $message = esc_html__('EDD Customer Dashboard Pro requires Easy Digital Downloads to be installed and activated.', 'edd-customer-dashboard-pro');
-        echo '<div class="notice notice-error"><p>' . $message . '</p></div>';
+        echo '<div class="notice notice-error"><p>' . esc_html($message) . '</p></div>';
     }
     
     /**
@@ -348,14 +347,6 @@ class EDD_Customer_Dashboard_Pro {
         return EDDCDP_VERSION;
     }
     
-    /**
-     * Log debug information
-     */
-    public function log($message, $level = 'info') {
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log(sprintf('[EDDCDP %s] %s', strtoupper($level), $message));
-        }
-    }
 }
 
 /**

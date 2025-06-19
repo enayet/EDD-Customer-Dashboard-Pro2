@@ -1,6 +1,6 @@
 <?php
 /**
- * Downloads Section Template
+ * Downloads Section Template - Fixed translator comments
  */
 
 if (!defined('ABSPATH')) {
@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 $downloads = $dashboard_data->get_customer_downloads($customer);
 ?>
 
-<h2 class="eddcdp-section-title"><?php _e('Download History', 'edd-customer-dashboard-pro'); ?></h2>
+<h2 class="eddcdp-section-title"><?php esc_html_e('Download History', 'edd-customer-dashboard-pro'); ?></h2>
 
 <div class="eddcdp-purchase-list">
     <?php if ($downloads) : ?>
@@ -23,25 +23,30 @@ $downloads = $dashboard_data->get_customer_downloads($customer);
             ?>
             <div class="eddcdp-purchase-item">
                 <div class="eddcdp-purchase-header">
-                    <div class="eddcdp-product-name"><?php echo get_the_title($download['id']); ?></div>
+                    <div class="eddcdp-product-name"><?php echo esc_html(get_the_title($download['id'])); ?></div>
                     <div class="eddcdp-purchase-date">
-                        <?php printf(__('Purchased: %s', 'edd-customer-dashboard-pro'), $dashboard_data->format_date($payment->date)); ?>
+                        <?php 
+                        // translators: %s is the purchase date
+                        printf(esc_html__('Purchased: %s', 'edd-customer-dashboard-pro'), esc_html($dashboard_data->format_date($payment->date))); 
+                        ?>
                     </div>
                 </div>
                 <div style="margin-top: 10px; color: #666;">
                     <?php
                     if (is_numeric($downloads_remaining) && $download_limit > 0) {
+                        // translators: %1$d is the number of downloads remaining, %2$d is the total download limit
                         printf(
-                            __('<strong>Downloads remaining:</strong> %d of %d', 'edd-customer-dashboard-pro'),
-                            $downloads_remaining,
-                            $download_limit
+                            esc_html__('Downloads remaining: %1$d of %2$d', 'edd-customer-dashboard-pro'),
+                            esc_html($downloads_remaining),
+                            esc_html($download_limit)
                         );
-                    } elseif ($downloads_remaining === __('Unlimited', 'edd-customer-dashboard-pro') || $download_limit == 0) {
-                        _e('<strong>Downloads remaining:</strong> Unlimited', 'edd-customer-dashboard-pro');
+                    } elseif ($downloads_remaining === esc_html__('Unlimited', 'edd-customer-dashboard-pro') || $download_limit == 0) {
+                        esc_html_e('Downloads remaining: Unlimited', 'edd-customer-dashboard-pro');
                     } else {
+                        // translators: %s is the number or status of downloads remaining
                         printf(
-                            __('<strong>Downloads remaining:</strong> %s', 'edd-customer-dashboard-pro'),
-                            $downloads_remaining
+                            esc_html__('Downloads remaining: %s', 'edd-customer-dashboard-pro'),
+                            esc_html($downloads_remaining)
                         );
                     }
                     ?>
@@ -52,8 +57,8 @@ $downloads = $dashboard_data->get_customer_downloads($customer);
                         <?php 
                         $download_files = $dashboard_data->get_download_files($download['id']);
                         if ($download_files) : ?>
-                            <a href="<?php echo $dashboard_data->get_download_url($payment->key, $payment->email, 0, $download['id']); ?>" class="eddcdp-btn eddcdp-btn-download">
-                                🔽 <?php _e('Download', 'edd-customer-dashboard-pro'); ?>
+                            <a href="<?php echo esc_url($dashboard_data->get_download_url($payment->key, $payment->email, 0, $download['id'])); ?>" class="eddcdp-btn eddcdp-btn-download">
+                                🔽 <?php esc_html_e('Download', 'edd-customer-dashboard-pro'); ?>
                             </a>
                         <?php endif; ?>
                     </div>
@@ -63,8 +68,8 @@ $downloads = $dashboard_data->get_customer_downloads($customer);
     <?php else : ?>
         <div class="eddcdp-empty-state">
             <div class="eddcdp-empty-icon">⬇️</div>
-            <h3><?php _e('No downloads yet', 'edd-customer-dashboard-pro'); ?></h3>
-            <p><?php _e('Your download history will appear here.', 'edd-customer-dashboard-pro'); ?></p>
+            <h3><?php esc_html_e('No downloads yet', 'edd-customer-dashboard-pro'); ?></h3>
+            <p><?php esc_html_e('Your download history will appear here.', 'edd-customer-dashboard-pro'); ?></p>
         </div>
     <?php endif; ?>
 </div>

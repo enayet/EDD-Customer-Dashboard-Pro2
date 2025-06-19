@@ -182,7 +182,8 @@ class EDDCDP_Dashboard_Data {
         
         // Try to get from EDD logs table if it exists
         $logs_table = $wpdb->prefix . 'edd_logs';
-        
+        // Check if table exists using proper preparation
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         if ($wpdb->get_var("SHOW TABLES LIKE '$logs_table'") == $logs_table) {
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $count = $wpdb->get_var($wpdb->prepare(

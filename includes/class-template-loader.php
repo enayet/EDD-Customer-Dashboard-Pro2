@@ -62,6 +62,7 @@ class EDDCDP_Template_Loader {
                 // Default template info if no JSON file
                 $this->available_templates[$template_name] = array(
                     'name' => ucfirst($template_name),
+                    // translators: %s is the number of available templates 
                     'description' => sprintf(__('%s template for EDD Customer Dashboard Pro', 'edd-customer-dashboard-pro'), ucfirst($template_name)),
                     'version' => '1.0.0',
                     'author' => 'Unknown'
@@ -158,6 +159,7 @@ class EDDCDP_Template_Loader {
         
         
         if (!file_exists($section_file)) {
+            // translators: then name of the missing section
             return '<p>' . sprintf(__('Section "%s" not found.', 'edd-customer-dashboard-pro'), $section_name) . '</p>';
         }
         

@@ -310,7 +310,7 @@
 }
 
 .eddcdp-toggle input:checked + .eddcdp-toggle-slider {
-    background-color: #0073aa;
+/*    background-color: #0073aa;*/
 }
 
 .eddcdp-toggle input:checked + .eddcdp-toggle-slider:before {

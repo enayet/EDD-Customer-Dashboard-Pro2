@@ -95,7 +95,7 @@ if (!defined('ABSPATH')) {
     <h3><?php esc_html_e('Still Need Help?', 'edd-customer-dashboard-pro'); ?></h3>
     <p><?php esc_html_e('Our support team is here to help you with any questions or issues.', 'edd-customer-dashboard-pro'); ?></p>
     <div style="margin-top: 20px;">
-        <a href="mailto:<?php echo get_option('admin_email'); ?>" class="eddcdp-btn eddcdp-btn-secondary">
+        <a href="mailto:<?php echo esc_attr(get_option('admin_email')); ?>" class="eddcdp-btn eddcdp-btn-secondary">
             ✉️ <?php esc_html_e('Email Support', 'edd-customer-dashboard-pro'); ?>
         </a>
     </div>

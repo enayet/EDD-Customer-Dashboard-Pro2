@@ -21,10 +21,60 @@ class EDDCDP_Admin_Settings {
     /**
      * Register settings (for WordPress compatibility)
      */
-    public function register_settings() {
-        // Register for WordPress compatibility, but we handle saving manually
-        register_setting('eddcdp_settings_group', 'eddcdp_settings');
+//    public function register_settings() {
+//        register_setting('eddcdp_settings_group', 'eddcdp_settings');
+//    }
+    
+public function register_settings() {
+    register_setting(
+        'eddcdp_settings_group', 
+        'eddcdp_settings',
+        array(
+            'type' => 'array',
+            'sanitize_callback' => array($this, 'sanitize_settings'),
+            'default' => array()
+        )
+    );
+}
+
+/**
+ * Sanitize settings before saving
+ */    
+    
+public function sanitize_settings($settings) {
+    if (!is_array($settings)) {
+        return array();
     }
+    
+    $sanitized = array();
+    
+    // Sanitize active template
+    if (isset($settings['active_template'])) {
+        $sanitized['active_template'] = sanitize_text_field($settings['active_template']);
+    }
+    
+    // Sanitize replace_edd_pages boolean
+    $sanitized['replace_edd_pages'] = isset($settings['replace_edd_pages']) ? 
+        (bool) $settings['replace_edd_pages'] : false;
+    
+    // Sanitize enabled sections
+    if (isset($settings['enabled_sections']) && is_array($settings['enabled_sections'])) {
+        $sanitized['enabled_sections'] = array();
+        $allowed_sections = array_keys($this->get_available_sections());
+        
+        foreach ($settings['enabled_sections'] as $section_key => $enabled) {
+            // Only allow valid section keys
+            if (in_array($section_key, $allowed_sections, true)) {
+                $sanitized['enabled_sections'][sanitize_key($section_key)] = (bool) $enabled;
+            }
+        }
+    } else {
+        $sanitized['enabled_sections'] = array();
+    }
+    
+    return $sanitized;
+}    
+    
     
     /**
      * Handle all form submissions manually

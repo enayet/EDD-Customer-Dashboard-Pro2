@@ -35,8 +35,7 @@ $downloads = $dashboard_data->get_customer_downloads($customer);
                     <?php
                     if (is_numeric($downloads_remaining) && $download_limit > 0) {
                         // translators: %1$d is the number of downloads remaining, %2$d is the total download limit
-                        printf(
-                            esc_html__('Downloads remaining: %1$d of %2$d', 'edd-customer-dashboard-pro'),
+                        printf( esc_html__('Downloads remaining: %1$d of %2$d', 'edd-customer-dashboard-pro'),
                             esc_html($downloads_remaining),
                             esc_html($download_limit)
                         );
@@ -44,8 +43,7 @@ $downloads = $dashboard_data->get_customer_downloads($customer);
                         esc_html_e('Downloads remaining: Unlimited', 'edd-customer-dashboard-pro');
                     } else {
                         // translators: %s is the number or status of downloads remaining
-                        printf(
-                            esc_html__('Downloads remaining: %s', 'edd-customer-dashboard-pro'),
+                        printf( esc_html__('Downloads remaining: %s', 'edd-customer-dashboard-pro'),
                             esc_html($downloads_remaining)
                         );
                     }

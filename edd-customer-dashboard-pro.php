@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('EDDCDP_VERSION', '1.0.0');
+define('EDDCDP_VERSION', '1.0.5');
 define('EDDCDP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('EDDCDP_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('EDDCDP_PLUGIN_FILE', __FILE__);
@@ -230,13 +230,9 @@ class EDD_Customer_Dashboard_Pro {
         if (!is_user_logged_in() || !$this->template_loader) {
             return;
         }
-        
-        // Get active template
-        $settings = get_option('eddcdp_settings', array());
-        $active_template = isset($settings['active_template']) ? sanitize_text_field($settings['active_template']) : 'default';
-        
-        // Enqueue template-specific assets
-        $this->template_loader->enqueue_template_assets($active_template);
+
+        // Enqueue active template assets (no need to specify template name)
+        $this->template_loader->enqueue_template_assets();
     }
     
     /**
@@ -275,20 +271,19 @@ class EDD_Customer_Dashboard_Pro {
             }
             return '<p>' . esc_html__('Please log in to view your dashboard.', 'edd-customer-dashboard-pro') . '</p>';
         }
-        
+
         // Get current user and customer
         $user = wp_get_current_user();
         $customer = edd_get_customer_by('user_id', $user->ID);
-        
+
         if (!$customer) {
             return '<p>' . esc_html__('No customer data found.', 'edd-customer-dashboard-pro') . '</p>';
         }
-        
+
         // Get settings with proper sanitization
         $settings = get_option('eddcdp_settings', array());
-        $active_template = isset($settings['active_template']) ? sanitize_text_field($settings['active_template']) : 'default';
         $enabled_sections = isset($settings['enabled_sections']) && is_array($settings['enabled_sections']) ? $settings['enabled_sections'] : array();
-        
+
         // Prepare data for template
         $template_data = array(
             'user' => $user,
@@ -297,15 +292,16 @@ class EDD_Customer_Dashboard_Pro {
             'enabled_sections' => $enabled_sections,
             'dashboard_data' => $this->dashboard_data
         );
-        
+
         // Apply filters to template data
-        $template_data = apply_filters('eddcdp_template_data', $template_data, $active_template);
-        
-        // Load template
+        $template_data = apply_filters('eddcdp_template_data', $template_data);
+
+        // Load template using active template (no need to specify template name)
         if ($this->template_loader) {
-            return $this->template_loader->load_template($active_template, $template_data);
+            do_action('eddcdp_dashboard_loaded', $template_data);
+            return $this->template_loader->load_template(null, $template_data);
         }
-        
+
         return '<p>' . esc_html__('Dashboard template not available.', 'edd-customer-dashboard-pro') . '</p>';
     }
     

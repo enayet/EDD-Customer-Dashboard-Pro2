@@ -1,13 +1,6 @@
 jQuery(document).ready(function($) {
     
-    // Template selection handling
-    $('.eddcdp-template-option').on('click', function() {
-        $(this).find('input[type="radio"]').prop('checked', true);
-        $('.eddcdp-template-option').removeClass('selected');
-        $(this).addClass('selected');
-    });
-    
-    // Toggle switches
+    // Toggle switches only
     $('.eddcdp-toggle input').on('change', function() {
         const $toggle = $(this).closest('.eddcdp-toggle');
         if ($(this).is(':checked')) {
@@ -33,18 +26,18 @@ jQuery(document).ready(function($) {
         }
     });
     
-    // Initialize selected template
-    const selectedTemplate = $('input[name="eddcdp_settings[active_template]"]:checked').closest('.eddcdp-template-option');
-    selectedTemplate.addClass('selected');
-    
     // Initialize active toggles
     $('.eddcdp-toggle input:checked').each(function() {
         $(this).closest('.eddcdp-toggle').addClass('active');
     });
     
     // Settings save feedback
-    if (window.location.search.includes('settings-updated=true')) {
-        const $notice = $('<div class="notice notice-success is-dismissible"><p>Settings saved successfully!</p></div>');
+    if (window.location.search.includes('settings-updated=true') || window.location.search.includes('template_activated=1')) {
+        const message = window.location.search.includes('template_activated=1') ? 
+            'Template activated successfully!' : 
+            'Settings saved successfully!';
+            
+        const $notice = $('<div class="notice notice-success is-dismissible"><p>' + message + '</p></div>');
         $('.wrap h1').after($notice);
         
         setTimeout(function() {

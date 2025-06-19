@@ -25,8 +25,8 @@ class EDDCDP_Admin_Settings {
     public function add_admin_menu() {
         add_submenu_page(
             'edit.php?post_type=download',
-            __('Customer Dashboard Pro', EDDCDP_TEXT_DOMAIN),
-            __('Dashboard Pro', EDDCDP_TEXT_DOMAIN),
+            __('Customer Dashboard Pro', 'edd-customer-dashboard-pro'),
+            __('Dashboard Pro', 'edd-customer-dashboard-pro'),
             'manage_shop_settings',
             $this->settings_slug,
             array($this, 'render_settings_page')
@@ -42,7 +42,7 @@ class EDDCDP_Admin_Settings {
         // General Settings Section
         add_settings_section(
             'eddcdp_general_section',
-            __('General Settings', EDDCDP_TEXT_DOMAIN),
+            __('General Settings', 'edd-customer-dashboard-pro'),
             array($this, 'general_section_callback'),
             $this->settings_slug
         );
@@ -50,7 +50,7 @@ class EDDCDP_Admin_Settings {
         // Template Settings Section
         add_settings_section(
             'eddcdp_template_section',
-            __('Template Settings', EDDCDP_TEXT_DOMAIN),
+            __('Template Settings', 'edd-customer-dashboard-pro'),
             array($this, 'template_section_callback'),
             $this->settings_slug
         );
@@ -58,7 +58,7 @@ class EDDCDP_Admin_Settings {
         // Sections Settings Section
         add_settings_section(
             'eddcdp_sections_section',
-            __('Dashboard Sections', EDDCDP_TEXT_DOMAIN),
+            __('Dashboard Sections', 'edd-customer-dashboard-pro'),
             array($this, 'sections_section_callback'),
             $this->settings_slug
         );
@@ -74,20 +74,20 @@ class EDDCDP_Admin_Settings {
         // Replace EDD Pages
         add_settings_field(
             'replace_edd_pages',
-            __('Replace EDD Pages', EDDCDP_TEXT_DOMAIN),
+            __('Replace EDD Pages', 'edd-customer-dashboard-pro'),
             array($this, 'checkbox_field_callback'),
             $this->settings_slug,
             'eddcdp_general_section',
             array(
                 'field' => 'replace_edd_pages',
-                'description' => __('Replace default EDD customer pages with Dashboard Pro', EDDCDP_TEXT_DOMAIN)
+                'description' => __('Replace default EDD customer pages with Dashboard Pro', 'edd-customer-dashboard-pro')
             )
         );
         
         // Active Template
         add_settings_field(
             'active_template',
-            __('Active Template', EDDCDP_TEXT_DOMAIN),
+            __('Active Template', 'edd-customer-dashboard-pro'),
             array($this, 'template_field_callback'),
             $this->settings_slug,
             'eddcdp_template_section'
@@ -125,7 +125,7 @@ class EDDCDP_Admin_Settings {
     public function render_settings_page() {
         ?>
         <div class="wrap eddcdp-admin">
-            <h1><?php esc_html_e('EDD Customer Dashboard Pro Settings', EDDCDP_TEXT_DOMAIN); ?></h1>
+            <h1><?php esc_html_e('EDD Customer Dashboard Pro Settings', 'edd-customer-dashboard-pro'); ?></h1>
             
             <div class="eddcdp-admin-content">
                 <form method="post" action="options.php">
@@ -139,8 +139,8 @@ class EDDCDP_Admin_Settings {
 <!--
                 <div class="eddcdp-sidebar">                    
                     <div class="eddcdp-info-box">
-                        <h3><?php esc_html_e('Shortcode', EDDCDP_TEXT_DOMAIN); ?></h3>
-                        <p><?php esc_html_e('Use this shortcode to display the dashboard:', EDDCDP_TEXT_DOMAIN); ?></p>
+                        <h3><?php esc_html_e('Shortcode', 'edd-customer-dashboard-pro'); ?></h3>
+                        <p><?php esc_html_e('Use this shortcode to display the dashboard:', 'edd-customer-dashboard-pro'); ?></p>
                         <code>[edd_customer_dashboard_pro]</code>
                     </div>
                 </div>
@@ -154,15 +154,15 @@ class EDDCDP_Admin_Settings {
      * Section callbacks
      */
     public function general_section_callback() {
-        echo '<p>' . esc_html__('Configure general dashboard settings.', EDDCDP_TEXT_DOMAIN) . '</p>';
+        echo '<p>' . esc_html__('Configure general dashboard settings.', 'edd-customer-dashboard-pro') . '</p>';
     }
     
     public function template_section_callback() {
-        echo '<p>' . esc_html__('Choose and configure your dashboard template.', EDDCDP_TEXT_DOMAIN) . '</p>';
+        echo '<p>' . esc_html__('Choose and configure your dashboard template.', 'edd-customer-dashboard-pro') . '</p>';
     }
     
     public function sections_section_callback() {
-        echo '<p>' . esc_html__('Enable or disable specific dashboard sections.', EDDCDP_TEXT_DOMAIN) . '</p>';
+        echo '<p>' . esc_html__('Enable or disable specific dashboard sections.', 'edd-customer-dashboard-pro') . '</p>';
     }
     
     /**
@@ -211,9 +211,9 @@ class EDDCDP_Admin_Settings {
                                 <h4><?php echo esc_html($template_info['name']); ?></h4>
                                 <p><?php echo esc_html($template_info['description']); ?></p>
                                 <div class="template-meta">
-                                    <span class="version"><?php printf(esc_html__('Version: %s', EDDCDP_TEXT_DOMAIN), esc_html($template_info['version'])); ?></span>
+                                    <span class="version"><?php printf(esc_html__('Version: %s', 'edd-customer-dashboard-pro'), esc_html($template_info['version'])); ?></span>
                                     <?php if (isset($template_info['author'])) : ?>
-                                        <span class="author"><?php printf(esc_html__('by %s', EDDCDP_TEXT_DOMAIN), esc_html($template_info['author'])); ?></span>
+                                        <span class="author"><?php printf(esc_html__('by %s', 'edd-customer-dashboard-pro'), esc_html($template_info['author'])); ?></span>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -276,12 +276,12 @@ class EDDCDP_Admin_Settings {
      */
     private function get_available_sections() {
         return array(
-            'purchases' => __('Purchases', EDDCDP_TEXT_DOMAIN),
-            'downloads' => __('Downloads', EDDCDP_TEXT_DOMAIN),
-            'licenses' => __('Licenses', EDDCDP_TEXT_DOMAIN),
-            'wishlist' => __('Wishlist', EDDCDP_TEXT_DOMAIN),
-            'analytics' => __('Analytics', EDDCDP_TEXT_DOMAIN),
-            'support' => __('Support', EDDCDP_TEXT_DOMAIN)
+            'purchases' => __('Purchases', 'edd-customer-dashboard-pro'),
+            'downloads' => __('Downloads', 'edd-customer-dashboard-pro'),
+            'licenses' => __('Licenses', 'edd-customer-dashboard-pro'),
+            'wishlist' => __('Wishlist', 'edd-customer-dashboard-pro'),
+            'analytics' => __('Analytics', 'edd-customer-dashboard-pro'),
+            'support' => __('Support', 'edd-customer-dashboard-pro')
         );
     }
 }

@@ -42,7 +42,7 @@ class EDDCDP_Template_Loader {
                 // Default template info if no JSON file
                 $this->available_templates[$template_name] = array(
                     'name' => ucfirst($template_name),
-                    'description' => sprintf(__('%s template for EDD Customer Dashboard Pro', EDDCDP_TEXT_DOMAIN), ucfirst($template_name)),
+                    'description' => sprintf(__('%s template for EDD Customer Dashboard Pro', 'edd-customer-dashboard-pro'), ucfirst($template_name)),
                     'version' => '1.0.0',
                     'author' => 'Unknown'
                 );
@@ -97,7 +97,7 @@ class EDDCDP_Template_Loader {
         $template_file = $this->get_template_dir($template_name) . 'dashboard.php';
         
         if (!file_exists($template_file)) {
-            return '<p>' . __('Template not found.', EDDCDP_TEXT_DOMAIN) . '</p>';
+            return '<p>' . __('Template not found.', 'edd-customer-dashboard-pro') . '</p>';
         }
         
         // Extract data for template
@@ -119,7 +119,7 @@ class EDDCDP_Template_Loader {
         $section_file = $this->get_template_dir($template_name) . 'sections/' . $section_name . '.php';
         
         if (!file_exists($section_file)) {
-            return '<p>' . sprintf(__('Section "%s" not found.', EDDCDP_TEXT_DOMAIN), $section_name) . '</p>';
+            return '<p>' . sprintf(__('Section "%s" not found.', 'edd-customer-dashboard-pro'), $section_name) . '</p>';
         }
         
         // Extract data for template
@@ -167,7 +167,7 @@ class EDDCDP_Template_Loader {
             wp_localize_script('eddcdp-template-' . $template_name, 'eddcdp_ajax', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('eddcdp_nonce'),
-                'text_domain' => EDDCDP_TEXT_DOMAIN
+                'text_domain' => 'edd-customer-dashboard-pro'
             ));
         }
     }

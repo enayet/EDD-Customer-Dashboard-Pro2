@@ -164,7 +164,7 @@ class EDDCDP_Dashboard_Data {
      */
     private function get_downloads_remaining($download_id, $payment_id, $download_limit) {
         if (empty($download_limit) || $download_limit == 0) {
-            return __('Unlimited', EDDCDP_TEXT_DOMAIN);
+            return __('Unlimited', 'edd-customer-dashboard-pro');
         }
         
         // Get download count from payment meta or logs
@@ -378,11 +378,11 @@ class EDDCDP_Dashboard_Data {
     public function ajax_activate_license() {
         // phpcs:ignore WordPress.Security.NonceVerification.Missing
         if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'eddcdp_nonce')) {
-            wp_send_json_error(__('Security verification failed.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('Security verification failed.', 'edd-customer-dashboard-pro'));
         }
         
         if (!is_user_logged_in()) {
-            wp_send_json_error(__('Please log in first.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('Please log in first.', 'edd-customer-dashboard-pro'));
         }
         
         // phpcs:ignore WordPress.Security.NonceVerification.Missing
@@ -391,41 +391,41 @@ class EDDCDP_Dashboard_Data {
         $site_url = esc_url_raw(wp_unslash($_POST['site_url']));
         
         if (empty($license_key) || empty($site_url)) {
-            wp_send_json_error(__('License key and site URL are required.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('License key and site URL are required.', 'edd-customer-dashboard-pro'));
         }
         
         if (!$this->is_licensing_active()) {
-            wp_send_json_error(__('Software Licensing is not active.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('Software Licensing is not active.', 'edd-customer-dashboard-pro'));
         }
         
         // Get license
         $license = edd_software_licensing()->get_license($license_key);
         if (!$license) {
-            wp_send_json_error(__('Invalid license key.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid license key.', 'edd-customer-dashboard-pro'));
         }
         
         // Check if user owns this license
         if ($license->user_id != get_current_user_id()) {
-            wp_send_json_error(__('You do not own this license.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('You do not own this license.', 'edd-customer-dashboard-pro'));
         }
         
         // Check if license is expired
         if ($license->is_expired()) {
-            wp_send_json_error(__('This license has expired.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('This license has expired.', 'edd-customer-dashboard-pro'));
         }
         
         // Check activation limit
         if ($license->activation_limit > 0 && $license->activation_count >= $license->activation_limit) {
-            wp_send_json_error(__('License activation limit reached.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('License activation limit reached.', 'edd-customer-dashboard-pro'));
         }
         
         // Activate license
         $result = $license->add_site($site_url);
         
         if ($result) {
-            wp_send_json_success(__('License activated successfully!', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_success(__('License activated successfully!', 'edd-customer-dashboard-pro'));
         } else {
-            wp_send_json_error(__('Failed to activate license. The site may already be activated.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('Failed to activate license. The site may already be activated.', 'edd-customer-dashboard-pro'));
         }
     }
     
@@ -435,11 +435,11 @@ class EDDCDP_Dashboard_Data {
     public function ajax_deactivate_license() {
         // phpcs:ignore WordPress.Security.NonceVerification.Missing
         if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'eddcdp_nonce')) {
-            wp_send_json_error(__('Security verification failed.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('Security verification failed.', 'edd-customer-dashboard-pro'));
         }
         
         if (!is_user_logged_in()) {
-            wp_send_json_error(__('Please log in first.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('Please log in first.', 'edd-customer-dashboard-pro'));
         }
         
         // phpcs:ignore WordPress.Security.NonceVerification.Missing
@@ -448,31 +448,31 @@ class EDDCDP_Dashboard_Data {
         $site_url = esc_url_raw(wp_unslash($_POST['site_url']));
         
         if (empty($license_key) || empty($site_url)) {
-            wp_send_json_error(__('License key and site URL are required.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('License key and site URL are required.', 'edd-customer-dashboard-pro'));
         }
         
         if (!$this->is_licensing_active()) {
-            wp_send_json_error(__('Software Licensing is not active.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('Software Licensing is not active.', 'edd-customer-dashboard-pro'));
         }
         
         // Get license
         $license = edd_software_licensing()->get_license($license_key);
         if (!$license) {
-            wp_send_json_error(__('Invalid license key.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('Invalid license key.', 'edd-customer-dashboard-pro'));
         }
         
         // Check if user owns this license
         if ($license->user_id != get_current_user_id()) {
-            wp_send_json_error(__('You do not own this license.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('You do not own this license.', 'edd-customer-dashboard-pro'));
         }
         
         // Deactivate license
         $result = $license->remove_site($site_url);
         
         if ($result) {
-            wp_send_json_success(__('License deactivated successfully!', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_success(__('License deactivated successfully!', 'edd-customer-dashboard-pro'));
         } else {
-            wp_send_json_error(__('Failed to deactivate license.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('Failed to deactivate license.', 'edd-customer-dashboard-pro'));
         }
     }
     
@@ -482,29 +482,29 @@ class EDDCDP_Dashboard_Data {
     public function ajax_remove_wishlist() {
         // phpcs:ignore WordPress.Security.NonceVerification.Missing
         if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'eddcdp_nonce')) {
-            wp_send_json_error(__('Security verification failed.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('Security verification failed.', 'edd-customer-dashboard-pro'));
         }
         
         if (!is_user_logged_in()) {
-            wp_send_json_error(__('Please log in first.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('Please log in first.', 'edd-customer-dashboard-pro'));
         }
         
         // phpcs:ignore WordPress.Security.NonceVerification.Missing
         $download_id = absint($_POST['download_id']);
         
         if (empty($download_id)) {
-            wp_send_json_error(__('Download ID is required.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('Download ID is required.', 'edd-customer-dashboard-pro'));
         }
         
         if (!$this->is_wishlist_active()) {
-            wp_send_json_error(__('Wish Lists is not active.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('Wish Lists is not active.', 'edd-customer-dashboard-pro'));
         }
         
         // Get user's wishlist
         $wish_lists = edd_wl_get_wish_lists(array('user_id' => get_current_user_id()));
         
         if (!$wish_lists) {
-            wp_send_json_error(__('No wishlist found.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('No wishlist found.', 'edd-customer-dashboard-pro'));
         }
         
         $removed = false;
@@ -517,9 +517,9 @@ class EDDCDP_Dashboard_Data {
         }
         
         if ($removed) {
-            wp_send_json_success(__('Item removed from wishlist!', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_success(__('Item removed from wishlist!', 'edd-customer-dashboard-pro'));
         } else {
-            wp_send_json_error(__('Failed to remove item from wishlist.', EDDCDP_TEXT_DOMAIN));
+            wp_send_json_error(__('Failed to remove item from wishlist.', 'edd-customer-dashboard-pro'));
         }
     }
 }

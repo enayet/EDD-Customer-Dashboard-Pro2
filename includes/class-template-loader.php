@@ -144,7 +144,8 @@ class EDDCDP_Template_Loader {
      * Load template section - FIXED PARAMETER ORDER
      */
     public function load_section($section_name, $template_name = null, $data = array()) {
-        if ($template_name === null) {
+
+        if ($template_name == null) {
             $template_name = $this->active_template;
         }
         
@@ -153,6 +154,8 @@ class EDDCDP_Template_Loader {
         }
         
         $section_file = $this->get_template_dir($template_name) . 'sections/' . $section_name . '.php';
+        
+        
         
         if (!file_exists($section_file)) {
             return '<p>' . sprintf(__('Section "%s" not found.', 'edd-customer-dashboard-pro'), $section_name) . '</p>';

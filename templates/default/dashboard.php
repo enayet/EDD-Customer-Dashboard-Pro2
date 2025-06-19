@@ -9,6 +9,7 @@ if (!defined('ABSPATH')) {
 
 $template_loader = eddcdp()->get_template_loader();
 $active_template = $template_loader->get_active_template();
+
 ?>
 
 <div class="eddcdp-dashboard-container">

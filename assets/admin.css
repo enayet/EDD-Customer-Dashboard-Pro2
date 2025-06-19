@@ -1,4 +1,4 @@
-/* EDD Customer Dashboard Pro - Complete Admin CSS - 3 Templates Per Row */
+/* EDD Customer Dashboard Pro - Admin CSS */
 
 .eddcdp-admin {
     max-width: 1200px;
@@ -153,39 +153,44 @@
     font-size: 16px;
 }
 
-.template-actions .button {
+.template-actions .button,
+.template-actions form {
     width: 100%;
+}
+
+.template-actions .button {
     text-align: center;
     justify-content: center;
 }
 
 /* Activate Button Styling */
-.template-actions .button-primary {
-    background: #0073aa;
-    border-color: #0073aa;
-    color: #fff;
-    width: 100%;
-    text-align: center;
-    padding: 8px 16px;
-    font-size: 13px;
-    font-weight: 600;
-    border-radius: 4px;
-    text-decoration: none;
-    transition: all 0.3s ease;
+.eddcdp-activate-template-btn {
+    background: #0073aa !important;
+    border-color: #0073aa !important;
+    color: #fff !important;
+    width: 100% !important;
+    text-align: center !important;
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+    text-decoration: none !important;
+    transition: all 0.3s ease !important;
+    cursor: pointer !important;
 }
 
-.template-actions .button-primary:hover {
-    background: #005a87;
-    border-color: #005a87;
-    color: #fff;
+.eddcdp-activate-template-btn:hover {
+    background: #005a87 !important;
+    border-color: #005a87 !important;
+    color: #fff !important;
     transform: translateY(-1px);
     box-shadow: 0 2px 5px rgba(0, 115, 170, 0.3);
 }
 
-.template-actions .button-primary:focus {
-    background: #005a87;
-    border-color: #005a87;
-    color: #fff;
+.eddcdp-activate-template-btn:focus {
+    background: #005a87 !important;
+    border-color: #005a87 !important;
+    color: #fff !important;
     box-shadow: 0 0 0 2px rgba(0, 115, 170, 0.3);
 }
 
@@ -203,8 +208,6 @@
     font-weight: 600;
     z-index: 10;
 }
-
-
 
 /* Toggle Switch */
 .eddcdp-toggle {
@@ -344,24 +347,5 @@
     .eddcdp-info-box {
         margin: 0 10px 15px;
         padding: 15px;
-    }
-}
-
-/* Print Styles */
-@media print {
-    .eddcdp-template-option {
-        break-inside: avoid;
-        margin-bottom: 20px;
-    }
-    
-    .template-preview img {
-        max-height: none;
-        height: auto;
-    }
-    
-    .eddcdp-toggle,
-    .template-actions,
-    .button {
-        display: none;
     }
 }

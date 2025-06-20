@@ -1,6 +1,6 @@
 <?php
 /**
- * Purchases Section Template - Fixed translator comments
+ * Enhanced Purchases Section Template with Receipt Links
  */
 
 if (!defined('ABSPATH')) {
@@ -53,7 +53,7 @@ $payments = $dashboard_data->get_customer_purchases($customer);
                                     <strong><?php echo esc_html(get_the_title($download['id'])); ?></strong>
                                     <?php if (edd_use_skus() && edd_get_download_sku($download['id'])) : ?>
                                         <div class="eddcdp-product-meta"><?php 
-                                        // translators: %s is the product SKU/stock keeping unit
+                                        // translators: %s is the product SKU
                                         printf(esc_html__('SKU: %s', 'edd-customer-dashboard-pro'), esc_html(edd_get_download_sku($download['id']))); 
                                         ?></div>
                                     <?php endif; ?>
@@ -75,19 +75,34 @@ $payments = $dashboard_data->get_customer_purchases($customer);
                 <?php endif; ?>
                 
                 <div class="eddcdp-order-actions">
-                    <a href="<?php echo esc_url($dashboard_data->get_receipt_url($payment)); ?>" class="eddcdp-btn eddcdp-btn-secondary">
+                    <!-- Enhanced Order Details Link to show receipt within dashboard -->
+                    <a href="<?php echo esc_url(add_query_arg('payment_key', $payment->key)); ?>" class="eddcdp-btn eddcdp-btn-secondary">
                         📋 <?php esc_html_e('Order Details', 'edd-customer-dashboard-pro'); ?>
                     </a>
+                    
+                    <!-- Traditional Receipt Link (if you want to keep it as fallback) -->
+                    <a href="<?php echo esc_url($dashboard_data->get_receipt_url($payment)); ?>" class="eddcdp-btn eddcdp-btn-secondary" target="_blank">
+                        📄 <?php esc_html_e('View Receipt', 'edd-customer-dashboard-pro'); ?>
+                    </a>
+                    
+                    <!-- Invoice Link (if EDD Invoices is available) -->
                     <?php if (function_exists('edd_get_receipt_page_uri')) : ?>
-                        <a href="<?php echo esc_url(edd_get_receipt_page_uri($payment->ID)); ?>" class="eddcdp-btn eddcdp-btn-secondary">
-                            📄 <?php esc_html_e('View Invoice', 'edd-customer-dashboard-pro'); ?>
+                        <a href="<?php echo esc_url(edd_get_receipt_page_uri($payment->ID)); ?>" class="eddcdp-btn eddcdp-btn-secondary" target="_blank">
+                            🧾 <?php esc_html_e('View Invoice', 'edd-customer-dashboard-pro'); ?>
                         </a>
                     <?php endif; ?>
+                    
+                    <!-- License Management Link -->
                     <?php if ($dashboard_data->is_licensing_active()) : ?>
                         <a href="#" class="eddcdp-btn eddcdp-btn-secondary" onclick="document.querySelector('[data-section=licenses]').click(); return false;">
                             🔑 <?php esc_html_e('Manage Licenses', 'edd-customer-dashboard-pro'); ?>
                         </a>
                     <?php endif; ?>
+                    
+                    <!-- Support Link for this specific order -->
+                    <a href="mailto:<?php echo esc_attr(get_option('admin_email')); ?>?subject=<?php echo esc_attr(sprintf(__('Question about Order #%s', 'edd-customer-dashboard-pro'), $payment->number)); ?>" class="eddcdp-btn eddcdp-btn-secondary">
+                        💬 <?php esc_html_e('Support', 'edd-customer-dashboard-pro'); ?>
+                    </a>
                 </div>
             </div>
         <?php endforeach; ?>

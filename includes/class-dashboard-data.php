@@ -328,9 +328,42 @@ class EDDCDP_Dashboard_Data {
     /**
      * Format currency amount
      */
+//    public function format_currency($amount) {
+//        return edd_currency_filter(edd_format_amount($amount));
+//    }
+    
+    
     public function format_currency($amount) {
+        // Debug logging if WP_DEBUG is enabled
+        if (defined('WP_DEBUG') && WP_DEBUG && !is_numeric($amount) && !is_null($amount)) {
+            error_log('EDDCDP: Invalid amount passed to format_currency: ' . print_r($amount, true));
+        }
+        
+        // Ensure we have a numeric value
+        if (is_array($amount)) {
+            // If it's an array, try to extract a numeric value
+            if (isset($amount['amount'])) {
+                $amount = $amount['amount'];
+            } elseif (isset($amount['price'])) {
+                $amount = $amount['price'];
+            } elseif (isset($amount['item_price'])) {
+                $amount = $amount['item_price'];
+            } else {
+                // If we can't find a numeric value, default to 0
+                $amount = 0;
+            }
+        }
+        
+        // Handle null or non-numeric values
+        if (is_null($amount) || $amount === '' || $amount === false) {
+            $amount = 0;
+        }
+        
+        // Convert to float and ensure it's numeric
+        $amount = is_numeric($amount) ? floatval($amount) : 0;
+        
         return edd_currency_filter(edd_format_amount($amount));
-    }
+    }    
     
     /**
      * Format date
@@ -543,4 +576,54 @@ class EDDCDP_Dashboard_Data {
             wp_send_json_error(__('Failed to remove item from wishlist.', 'edd-customer-dashboard-pro'));
         }
     }
+    
+    
+    
+/**
+     * Format currency amount - Enhanced with error checking
+     */
+
+
+    
+    /**
+     * Safely get download price from various sources
+     */
+    public function get_download_price_from_payment($download, $payment_id) {
+        $download_price = 0;
+        
+        // Method 1: Direct price from download array
+        if (isset($download['price']) && is_numeric($download['price'])) {
+            return floatval($download['price']);
+        }
+        
+        // Method 2: Item price from download array
+        if (isset($download['item_price']) && is_numeric($download['item_price'])) {
+            return floatval($download['item_price']);
+        }
+        
+        // Method 3: Get from payment cart details
+        $cart_details = edd_get_payment_meta_cart_details($payment_id);
+        if (!empty($cart_details) && is_array($cart_details)) {
+            foreach ($cart_details as $cart_item) {
+                if (isset($cart_item['id']) && $cart_item['id'] == $download['id']) {
+                    if (isset($cart_item['item_price']) && is_numeric($cart_item['item_price'])) {
+                        return floatval($cart_item['item_price']);
+                    } elseif (isset($cart_item['price']) && is_numeric($cart_item['price'])) {
+                        return floatval($cart_item['price']);
+                    }
+                }
+            }
+        }
+        
+        // Method 4: Current download price (fallback)
+        if (isset($download['options']['price_id'])) {
+            $fallback_price = edd_get_price_option_amount($download['id'], $download['options']['price_id']);
+        } else {
+            $fallback_price = edd_get_download_price($download['id']);
+        }
+        
+        return is_numeric($fallback_price) ? floatval($fallback_price) : 0;
+    }    
+    
+    
 }

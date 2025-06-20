@@ -15,12 +15,46 @@ jQuery(document).ready(function($) {
         const targetSection = $(this).data('section');
         $('#eddcdp-' + targetSection).addClass('active');
         
+        // Update URL without refreshing page (if not in receipt mode)
+        if (!window.location.search.includes('payment_key=')) {
+            const newUrl = window.location.pathname + '?section=' + targetSection;
+            window.history.pushState({}, '', newUrl);
+        }
+        
         // Smooth scroll on mobile
         if ($(window).width() <= 768) {
             $('html, body').animate({
                 scrollTop: $('.eddcdp-dashboard-content').offset().top - 20
             }, 300);
         }
+    });
+    
+    // Handle URL section parameter on page load
+    const urlParams = new URLSearchParams(window.location.search);
+    const sectionParam = urlParams.get('section');
+    if (sectionParam && !urlParams.get('payment_key')) {
+        // Only handle section switching if not in receipt mode
+        const targetTab = $('[data-section="' + sectionParam + '"]');
+        if (targetTab.length) {
+            targetTab.click();
+        }
+    }
+    
+    // Enhanced Back to Dashboard functionality
+    $('.eddcdp-btn').filter(function() {
+        return $(this).text().indexOf('Back to Dashboard') !== -1;
+    }).on('click', function(e) {
+        e.preventDefault();
+        
+        // Get the URL without payment_key parameter
+        const baseUrl = window.location.pathname;
+        
+        // Smooth transition back to dashboard
+        $('body').addClass('eddcdp-transitioning');
+        
+        setTimeout(function() {
+            window.location.href = baseUrl;
+        }, 200);
     });
     
     // Copy license key functionality
@@ -40,6 +74,22 @@ jQuery(document).ready(function($) {
         }
     });
     
+    // Copy payment key functionality for receipts
+    $('.eddcdp-payment-key').on('click', function() {
+        const $this = $(this);
+        const paymentKey = $this.text().trim();
+        
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(paymentKey).then(function() {
+                showCopyTooltip($this);
+            }).catch(function() {
+                fallbackCopyToClipboard(paymentKey, $this);
+            });
+        } else {
+            fallbackCopyToClipboard(paymentKey, $this);
+        }
+    });
+    
     // Fallback copy function for older browsers
     function fallbackCopyToClipboard(text, $element) {
         const $temp = $('<textarea>');
@@ -50,8 +100,8 @@ jQuery(document).ready(function($) {
             document.execCommand('copy');
             showCopyTooltip($element);
         } catch(err) {
-            console.error('Failed to copy license key:', err);
-            alert('License key: ' + text);
+            console.error('Failed to copy:', err);
+            alert('Copied: ' + text);
         }
         
         $temp.remove();
@@ -76,7 +126,7 @@ jQuery(document).ready(function($) {
         }, 1000);
     }
     
-    // Download button click handlers
+    // Enhanced download button click handlers with receipt support
     $('.eddcdp-btn-download').on('click', function(e) {
         const $btn = $(this);
         const originalHtml = $btn.html();
@@ -106,6 +156,35 @@ jQuery(document).ready(function($) {
             $(this).css('transform', 'translateY(0) scale(1)');
         }
     );
+    
+    // Enhanced order details links with smooth transitions
+    $('a[href*="payment_key="]').on('click', function(e) {
+        // Only handle if it's a same-page link (receipt view)
+        if ($(this).attr('href').indexOf(window.location.pathname) === 0 || 
+            $(this).attr('href').indexOf('?payment_key=') === 0) {
+            
+            $('body').addClass('eddcdp-transitioning');
+            
+            // Small delay for smooth transition
+            setTimeout(function() {
+                window.location.href = $(e.target).attr('href');
+            }, 200);
+        }
+    });
+    
+    // Print receipt functionality
+    $('button[onclick*="window.print"]').on('click', function(e) {
+        e.preventDefault();
+        
+        // Add print-specific class to body
+        $('body').addClass('eddcdp-printing');
+        
+        // Delay to allow CSS to apply
+        setTimeout(function() {
+            window.print();
+            $('body').removeClass('eddcdp-printing');
+        }, 100);
+    });
     
     // License activation functionality
     $('.eddcdp-activate-license').on('click', function(e) {
@@ -212,6 +291,7 @@ jQuery(document).ready(function($) {
         e.preventDefault();
         
         const $btn = $(this);
+        const downloadId = $btn.data('download-id');
         
         if (!confirm('Are you sure you want to remove this item from your wishlist?')) {
             return;
@@ -293,8 +373,8 @@ jQuery(document).ready(function($) {
     // Auto-hide success messages
     $('.notice-success').delay(5000).fadeOut(500);
     
-    // Initialize tooltips for license keys
-    $('.eddcdp-license-key').attr('title', 'Click to copy license key');
+    // Initialize tooltips for license keys and payment keys
+    $('.eddcdp-license-key, .eddcdp-payment-key').attr('title', 'Click to copy');
     
     // Keyboard accessibility for tabs
     $('.eddcdp-nav-tab').on('keydown', function(e) {
@@ -312,7 +392,7 @@ jQuery(document).ready(function($) {
         }
     });
     
-    // Lazy load images in wishlist
+    // Lazy load images in wishlist and receipts
     if ('IntersectionObserver' in window) {
         const imageObserver = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
@@ -367,12 +447,29 @@ jQuery(document).ready(function($) {
         });
     });
     
+    // Receipt-specific functionality
+    if ($('.eddcdp-receipt-section').length) {
+        // Auto-focus back to dashboard button for better UX
+        $('.eddcdp-receipt-actions a:first-child').focus();
+        
+        // Add smooth scrolling for receipt sections
+        $('.eddcdp-receipt-card-title').on('click', function() {
+            const $card = $(this).closest('.eddcdp-receipt-card');
+            $('html, body').animate({
+                scrollTop: $card.offset().top - 20
+            }, 300);
+        });
+    }
+    
+    // Add transition classes for smooth navigation
+    $('body').addClass('eddcdp-transitions-enabled');
+    
     // Initialize the dashboard
     initializeDashboard();
     
     function initializeDashboard() {
-        // Set the first enabled section as active if none is active
-        if ($('.eddcdp-content-section.active').length === 0) {
+        // Set the first enabled section as active if none is active (and not in receipt mode)
+        if ($('.eddcdp-content-section.active').length === 0 && !$('.eddcdp-receipt-section').length) {
             const $firstTab = $('.eddcdp-nav-tab').first();
             if ($firstTab.length) {
                 $firstTab.addClass('active');
@@ -388,3 +485,48 @@ jQuery(document).ready(function($) {
         $(document).trigger('eddcdp:dashboard:ready');
     }
 });
+
+// Add CSS for transitions
+$('<style>').prop('type', 'text/css').html(`
+    .eddcdp-transitions-enabled * {
+        transition: all 0.2s ease;
+    }
+    
+    .eddcdp-transitioning {
+        opacity: 0.8;
+        pointer-events: none;
+    }
+    
+    .eddcdp-printing .eddcdp-dashboard-header,
+    .eddcdp-printing .eddcdp-stats-grid,
+    .eddcdp-printing .eddcdp-dashboard-nav,
+    .eddcdp-printing .eddcdp-receipt-actions {
+        display: none !important;
+    }
+    
+    @media print {
+        .eddcdp-receipt-actions,
+        .eddcdp-dashboard-header,
+        .eddcdp-stats-grid,
+        .eddcdp-dashboard-nav {
+            display: none !important;
+        }
+        
+        .eddcdp-receipt-card {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+            margin-bottom: 20px !important;
+            page-break-inside: avoid;
+        }
+        
+        body {
+            background: white !important;
+        }
+        
+        .eddcdp-dashboard-container {
+            background: white !important;
+            padding: 0 !important;
+            max-width: none !important;
+        }
+    }
+`).appendTo('head');

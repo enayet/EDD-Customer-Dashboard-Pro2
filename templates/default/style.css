@@ -645,3 +645,260 @@
         gap: 10px;
     }
 }
+
+
+
+/* Receipt-specific styles */
+.eddcdp-receipt-section {
+    margin-top: 20px;
+}
+
+.eddcdp-receipt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.eddcdp-receipt-title-area h2 {
+    margin-bottom: 5px;
+}
+
+.eddcdp-receipt-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.eddcdp-receipt-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.eddcdp-receipt-content {
+    display: grid;
+    gap: 25px;
+}
+
+.eddcdp-receipt-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 25px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.eddcdp-receipt-card-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: 10px;
+}
+
+.eddcdp-receipt-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.eddcdp-receipt-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.eddcdp-receipt-item:last-child {
+    border-bottom: none;
+}
+
+.eddcdp-receipt-customer-info {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+.eddcdp-receipt-customer-section h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.eddcdp-receipt-address {
+    color: #666;
+    line-height: 1.6;
+}
+
+.eddcdp-receipt-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.eddcdp-receipt-email {
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.eddcdp-receipt-items {
+    display: grid;
+    gap: 15px;
+}
+
+.eddcdp-receipt-download-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 15px;
+    background: rgba(248, 250, 252, 0.8);
+    border-radius: 8px;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.eddcdp-receipt-download-info {
+    flex: 1;
+    min-width: 200px;
+}
+
+.eddcdp-receipt-download-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.eddcdp-receipt-download-option {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 3px;
+}
+
+.eddcdp-receipt-download-sku {
+    color: #999;
+    font-size: 0.85rem;
+}
+
+.eddcdp-receipt-download-price {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    min-width: 100px;
+    text-align: right;
+}
+
+.eddcdp-receipt-download-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.eddcdp-btn-small {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.eddcdp-receipt-payment-summary {
+    display: grid;
+    gap: 10px;
+}
+
+.eddcdp-receipt-payment-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.eddcdp-receipt-payment-total {
+    border-top: 2px solid rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+    padding-top: 15px;
+    font-size: 1.1rem;
+}
+
+.eddcdp-payment-key {
+    background: rgba(102, 126, 234, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    font-size: 0.85rem;
+}
+
+.eddcdp-receipt-help {
+    text-align: center;
+}
+
+.eddcdp-receipt-help p {
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.eddcdp-receipt-help-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Print styles */
+@media print {
+    .eddcdp-receipt-actions {
+        display: none;
+    }
+    
+    .eddcdp-dashboard-header,
+    .eddcdp-stats-grid,
+    .eddcdp-dashboard-nav {
+        display: none;
+    }
+    
+    .eddcdp-receipt-card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        margin-bottom: 20px;
+    }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .eddcdp-receipt-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .eddcdp-receipt-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .eddcdp-receipt-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .eddcdp-receipt-download-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .eddcdp-receipt-download-price {
+        text-align: left;
+    }
+    
+    .eddcdp-receipt-download-actions {
+        width: 100%;
+    }
+    
+    .eddcdp-receipt-help-actions {
+        flex-direction: column;
+    }
+}

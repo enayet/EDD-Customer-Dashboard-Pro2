@@ -3,7 +3,7 @@
  * Plugin Name: EDD Customer Dashboard Pro
  * Plugin URI: https://theweblab.xyz/
  * Description: Modern, template-based dashboard interface for Easy Digital Downloads customers
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: TheWebLab
  * Author URI: https://theweblab.xyz/
  * License: GPL v2 or later
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('EDDCDP_VERSION', '1.1.5');
+define('EDDCDP_VERSION', '1.0.1');
 define('EDDCDP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('EDDCDP_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('EDDCDP_PLUGIN_FILE', __FILE__);
@@ -135,7 +135,8 @@ class EDD_Customer_Dashboard_Pro {
         add_shortcode('edd_customer_dashboard_pro', array($this, 'render_dashboard'));
         
         // Replace EDD's default shortcodes with our custom one if enabled
-        $this->maybe_replace_edd_shortcodes();
+        // Use higher priority to ensure we override after EDD loads
+        add_action('wp', array($this, 'maybe_replace_edd_shortcodes'), 15);
     }
     
     /**
@@ -196,21 +197,36 @@ class EDD_Customer_Dashboard_Pro {
     }
     
     /**
-     * Maybe replace EDD shortcodes
+     * Maybe replace EDD shortcodes - ENHANCED with proper priority
      */
-    private function maybe_replace_edd_shortcodes() {
+    public function maybe_replace_edd_shortcodes() {
         $settings = get_option('eddcdp_settings', array());
         
         if (isset($settings['replace_edd_pages']) && $settings['replace_edd_pages']) {
-            // Remove EDD shortcodes
-            remove_shortcode('purchase_history');
-            remove_shortcode('edd_profile_editor');
-            remove_shortcode('download_history');
+            // Store original shortcode functions for fallback
+            global $shortcode_tags;
+            
+            // Remove EDD shortcodes and store originals
+            $original_shortcodes = array();
+            $edd_shortcodes = array('purchase_history', 'edd_profile_editor', 'download_history', 'edd_receipt');
+            
+            foreach ($edd_shortcodes as $shortcode) {
+                if (isset($shortcode_tags[$shortcode])) {
+                    $original_shortcodes[$shortcode] = $shortcode_tags[$shortcode];
+                    remove_shortcode($shortcode);
+                }
+            }
             
             // Add our replacement shortcodes
             add_shortcode('purchase_history', array($this, 'render_dashboard'));
             add_shortcode('edd_profile_editor', array($this, 'render_dashboard'));
             add_shortcode('download_history', array($this, 'render_dashboard'));
+            add_shortcode('edd_receipt', array($this, 'render_receipt'));
+            
+            // Store originals for potential fallback
+            if (!empty($original_shortcodes)) {
+                update_option('eddcdp_original_shortcodes', $original_shortcodes);
+            }
         }
     }
     
@@ -230,7 +246,7 @@ class EDD_Customer_Dashboard_Pro {
             return;
         }
 
-        // Enqueue active template assets (no need to specify template name)
+        // Enqueue active template assets
         $this->template_loader->enqueue_template_assets();
     }
     
@@ -260,7 +276,91 @@ class EDD_Customer_Dashboard_Pro {
     }
     
     /**
-     * Render dashboard shortcode
+     * ENHANCED: Render receipt within dashboard template
+     */
+    public function render_receipt($atts = array()) {
+        // Check if user is logged in
+        if (!is_user_logged_in()) {
+            if (function_exists('edd_login_form')) {
+                return edd_login_form();
+            }
+            return '<p>' . esc_html__('Please log in to view your receipt.', 'edd-customer-dashboard-pro') . '</p>';
+        }
+
+        // Get payment key from URL or shortcode attributes
+        $payment_key = '';
+        
+        // First try to get from shortcode attributes
+        if (isset($atts['payment_key'])) {
+            $payment_key = sanitize_text_field($atts['payment_key']);
+        }
+        
+        // Then try to get from URL parameters  
+        if (empty($payment_key)) {
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            $payment_key = isset($_GET['payment_key']) ? sanitize_text_field(wp_unslash($_GET['payment_key'])) : '';
+        }
+        
+        // Also check for purchase_key (EDD sometimes uses this)
+        if (empty($payment_key)) {
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            $payment_key = isset($_GET['purchase_key']) ? sanitize_text_field(wp_unslash($_GET['purchase_key'])) : '';
+        }
+        
+        if (empty($payment_key)) {
+            return '<p>' . esc_html__('Invalid payment key.', 'edd-customer-dashboard-pro') . '</p>';
+        }
+        
+        // Get payment details using EDD function
+        $payment = edd_get_payment_by('key', $payment_key);
+        
+        if (!$payment) {
+            return '<p>' . esc_html__('Payment not found.', 'edd-customer-dashboard-pro') . '</p>';
+        }
+        
+        // Verify user can view this receipt
+        if (!edd_can_view_receipt($payment_key)) {
+            return '<p>' . esc_html__('Access denied. You do not have permission to view this receipt.', 'edd-customer-dashboard-pro') . '</p>';
+        }
+
+        // Get current user and customer
+        $user = wp_get_current_user();
+        $customer = edd_get_customer_by('user_id', $user->ID);
+
+        if (!$customer) {
+            return '<p>' . esc_html__('No customer data found.', 'edd-customer-dashboard-pro') . '</p>';
+        }
+
+        // Get settings
+        $settings = get_option('eddcdp_settings', array());
+        $enabled_sections = isset($settings['enabled_sections']) && is_array($settings['enabled_sections']) ? $settings['enabled_sections'] : array();
+
+        // Prepare data for template
+        $template_data = array(
+            'user' => $user,
+            'customer' => $customer,
+            'payment' => $payment,
+            'payment_key' => $payment_key,
+            'settings' => $settings,
+            'enabled_sections' => $enabled_sections,
+            'dashboard_data' => $this->dashboard_data,
+            'view_mode' => 'receipt'
+        );
+
+        // Apply filters to template data
+        $template_data = apply_filters('eddcdp_receipt_template_data', $template_data);
+
+        // Load template with receipt view
+        if ($this->template_loader) {
+            do_action('eddcdp_receipt_loaded', $template_data);
+            return $this->template_loader->load_template(null, $template_data);
+        }
+
+        return '<p>' . esc_html__('Receipt template not available.', 'edd-customer-dashboard-pro') . '</p>';
+    }
+    
+    /**
+     * ENHANCED: Render dashboard shortcode with better receipt detection
      */
     public function render_dashboard($atts = array()) {
         // Check if user is logged in
@@ -279,7 +379,30 @@ class EDD_Customer_Dashboard_Pro {
             return '<p>' . esc_html__('No customer data found.', 'edd-customer-dashboard-pro') . '</p>';
         }
 
-        // Get settings with proper sanitization
+        // Check if this is a receipt view
+        $payment_key = '';
+        $payment = null;
+        $view_mode = 'dashboard';
+        
+        // Check URL parameters for payment key
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        if (isset($_GET['payment_key'])) {
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            $payment_key = sanitize_text_field(wp_unslash($_GET['payment_key']));
+        } elseif (isset($_GET['purchase_key'])) {
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            $payment_key = sanitize_text_field(wp_unslash($_GET['purchase_key']));
+        }
+        
+        if (!empty($payment_key)) {
+            $payment = edd_get_payment_by('key', $payment_key);
+            
+            if ($payment && edd_can_view_receipt($payment_key)) {
+                $view_mode = 'receipt';
+            }
+        }
+
+        // Get settings
         $settings = get_option('eddcdp_settings', array());
         $enabled_sections = isset($settings['enabled_sections']) && is_array($settings['enabled_sections']) ? $settings['enabled_sections'] : array();
 
@@ -287,15 +410,18 @@ class EDD_Customer_Dashboard_Pro {
         $template_data = array(
             'user' => $user,
             'customer' => $customer,
+            'payment' => $payment,
+            'payment_key' => $payment_key,
             'settings' => $settings,
             'enabled_sections' => $enabled_sections,
-            'dashboard_data' => $this->dashboard_data
+            'dashboard_data' => $this->dashboard_data,
+            'view_mode' => $view_mode
         );
 
         // Apply filters to template data
         $template_data = apply_filters('eddcdp_template_data', $template_data);
 
-        // Load template using active template (no need to specify template name)
+        // Load template
         if ($this->template_loader) {
             do_action('eddcdp_dashboard_loaded', $template_data);
             return $this->template_loader->load_template(null, $template_data);
@@ -346,7 +472,6 @@ class EDD_Customer_Dashboard_Pro {
     public function get_version() {
         return EDDCDP_VERSION;
     }
-    
 }
 
 /**

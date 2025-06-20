@@ -1,6 +1,6 @@
 <?php
 /**
- * Enhanced Purchases Section Template with Receipt Links
+ * Enhanced Purchases Section Template with Dashboard Pro Invoice Links
  */
 
 if (!defined('ABSPATH')) {
@@ -80,12 +80,10 @@ $payments = $dashboard_data->get_customer_purchases($customer);
                         📋 <?php esc_html_e('Order Details', 'edd-customer-dashboard-pro'); ?>
                     </a>
                     
-                    <!-- Invoice Link (if EDD Invoices is available) -->
-                    <?php if (function_exists('edd_get_receipt_page_uri')) : ?>
-                        <a href="<?php echo esc_url(edd_get_receipt_page_uri($payment->ID)); ?>" class="eddcdp-btn eddcdp-btn-secondary" target="_blank">
-                            🧾 <?php esc_html_e('View Invoice', 'edd-customer-dashboard-pro'); ?>
-                        </a>
-                    <?php endif; ?>
+                    <!-- UPDATED: Dashboard Pro Invoice Link with view parameter -->
+                    <a href="<?php echo esc_url(add_query_arg(array('payment_key' => $payment->key, 'view' => 'invoice'))); ?>" class="eddcdp-btn eddcdp-btn-secondary">
+                        🧾 <?php esc_html_e('View Invoice', 'edd-customer-dashboard-pro'); ?>
+                    </a>
                     
                     <!-- License Management Link -->
                     <?php if ($dashboard_data->is_licensing_active()) : ?>

@@ -902,3 +902,628 @@
         flex-direction: column;
     }
 }
+
+
+
+/* Enhanced Invoice Styles for EDD Customer Dashboard Pro */
+
+/* Invoice Header Styles */
+.eddcdp-receipt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 20px;
+}
+
+.eddcdp-receipt-title-area {
+    flex: 1;
+}
+
+.eddcdp-receipt-title-area h2 {
+    margin-bottom: 10px;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.eddcdp-invoice-status {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.eddcdp-invoice-date {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.eddcdp-receipt-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+/* Invoice Content Layout */
+.eddcdp-invoice-content {
+    display: grid;
+    gap: 30px;
+}
+
+/* Invoice Header Section (From/To) */
+.eddcdp-invoice-header-section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 25px;
+    border: 1px solid #e9ecef;
+}
+
+.eddcdp-invoice-from-to {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+.eddcdp-invoice-from h3,
+.eddcdp-invoice-to h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    padding: 8px 12px;
+    background: #e9ecef;
+    border-radius: 4px;
+}
+
+.eddcdp-company-info,
+.eddcdp-customer-info {
+    line-height: 1.6;
+    color: #333;
+}
+
+.eddcdp-update-info {
+    margin-top: 10px;
+}
+
+.eddcdp-btn-link {
+    background: none;
+    border: 1px solid #0073aa;
+    color: #0073aa;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.eddcdp-btn-link:hover {
+    background: #0073aa;
+    color: white;
+}
+
+/* Invoice Items Section */
+.eddcdp-invoice-items-section {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.eddcdp-invoice-items-section h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+    padding: 15px 20px;
+    background: #e9ecef;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.eddcdp-invoice-table {
+    background: white;
+}
+
+.eddcdp-invoice-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px;
+    border-bottom: 1px solid #f1f3f4;
+    gap: 20px;
+}
+
+.eddcdp-invoice-item:last-child {
+    border-bottom: none;
+}
+
+.eddcdp-item-description {
+    flex: 1;
+}
+
+.eddcdp-item-description strong {
+    font-size: 1.1rem;
+    color: #333;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.eddcdp-item-variant {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 3px;
+}
+
+.eddcdp-item-sku {
+    color: #999;
+    font-size: 0.85rem;
+}
+
+.eddcdp-item-price {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    text-align: right;
+    min-width: 120px;
+}
+
+/* Invoice Totals */
+.eddcdp-invoice-totals {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 25px;
+    border: 1px solid #e9ecef;
+}
+
+.eddcdp-totals-table {
+    max-width: 400px;
+    margin-left: auto;
+}
+
+.eddcdp-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.eddcdp-total-row:last-child {
+    border-bottom: none;
+}
+
+.eddcdp-discount-row {
+    color: #d63031;
+}
+
+.eddcdp-discount-amount {
+    color: #d63031;
+    font-weight: 600;
+}
+
+.eddcdp-grand-total {
+    border-top: 2px solid #333;
+    margin-top: 10px;
+    padding-top: 15px;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.eddcdp-payment-status-row {
+    border-top: 1px solid #e9ecef;
+    margin-top: 10px;
+    padding-top: 15px;
+}
+
+.eddcdp-payment-status {
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #00b894;
+}
+
+/* Invoice Actions */
+.eddcdp-invoice-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    padding: 20px;
+    border-top: 1px solid #e9ecef;
+    flex-wrap: wrap;
+}
+
+/* Update Form Modal */
+.eddcdp-update-form {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.eddcdp-update-overlay {
+    background: rgba(0, 0, 0, 0.5);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.eddcdp-update-modal {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.eddcdp-update-modal h3 {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    color: #333;
+    text-align: center;
+}
+
+.eddcdp-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.eddcdp-form-group {
+    margin-bottom: 15px;
+}
+
+.eddcdp-form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #333;
+}
+
+.eddcdp-form-group input,
+.eddcdp-form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: border-color 0.3s ease;
+}
+
+.eddcdp-form-group input:focus,
+.eddcdp-form-group select:focus {
+    border-color: #0073aa;
+    box-shadow: 0 0 0 3px rgba(0, 115, 170, 0.1);
+    outline: none;
+}
+
+.eddcdp-form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+/* Enhanced Button Styles */
+.eddcdp-btn-primary {
+    background: linear-gradient(135deg, #0073aa, #005a87);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.eddcdp-btn-primary:hover {
+    background: linear-gradient(135deg, #005a87, #004a73);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 115, 170, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.eddcdp-btn-outline {
+    background: transparent;
+    border: 2px solid #667eea;
+    color: #667eea;
+    border-radius: 6px;
+    padding: 8px 18px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.eddcdp-btn-outline:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+/* Status Badge Updates */
+.eddcdp-status-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 2px solid;
+}
+
+.eddcdp-status-badge.eddcdp-status-complete,
+.eddcdp-status-badge.eddcdp-status-completed {
+    background: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
+.eddcdp-status-badge.eddcdp-status-publish {
+    background: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
+.eddcdp-status-badge.eddcdp-status-pending {
+    background: #fff3cd;
+    color: #856404;
+    border-color: #ffeaa7;
+}
+
+.eddcdp-status-badge.eddcdp-status-failed {
+    background: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+
+/* Print Styles */
+@media print {
+    .eddcdp-receipt-actions,
+    .eddcdp-invoice-actions,
+    .eddcdp-update-info,
+    .eddcdp-dashboard-header,
+    .eddcdp-stats-grid,
+    .eddcdp-dashboard-nav {
+        display: none !important;
+    }
+    
+    .eddcdp-receipt-section {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .eddcdp-invoice-content {
+        gap: 20px;
+    }
+    
+    .eddcdp-invoice-header-section,
+    .eddcdp-invoice-items-section,
+    .eddcdp-invoice-totals {
+        break-inside: avoid;
+        border: 1px solid #000;
+        box-shadow: none;
+    }
+    
+    .eddcdp-invoice-from-to {
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+    
+    .eddcdp-invoice-from h3,
+    .eddcdp-invoice-to h3 {
+        background: #f0f0f0;
+        print-color-adjust: exact;
+    }
+    
+    body {
+        background: white !important;
+        font-size: 12pt;
+        line-height: 1.4;
+    }
+    
+    .eddcdp-dashboard-container {
+        background: white !important;
+        padding: 0 !important;
+        max-width: none !important;
+        margin: 0 !important;
+    }
+    
+    .eddcdp-receipt-title-area h2 {
+        font-size: 24pt;
+        margin-bottom: 10pt;
+    }
+    
+    .eddcdp-invoice-date {
+        font-size: 12pt;
+    }
+    
+    .eddcdp-invoice-item {
+        padding: 10pt;
+    }
+    
+    .eddcdp-item-price {
+        font-size: 12pt;
+    }
+    
+    .eddcdp-grand-total {
+        font-size: 14pt;
+    }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .eddcdp-receipt-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .eddcdp-receipt-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .eddcdp-invoice-from-to {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+    
+    .eddcdp-invoice-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .eddcdp-item-price {
+        align-self: flex-end;
+        font-size: 1.1rem;
+    }
+    
+    .eddcdp-totals-table {
+        max-width: none;
+    }
+    
+    .eddcdp-invoice-actions {
+        flex-direction: column;
+    }
+    
+    .eddcdp-form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+    
+    .eddcdp-form-actions {
+        flex-direction: column;
+    }
+    
+    .eddcdp-update-modal {
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    .eddcdp-receipt-title-area h2 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .eddcdp-invoice-status {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .eddcdp-invoice-header-section {
+        padding: 15px;
+    }
+    
+    .eddcdp-invoice-totals {
+        padding: 15px;
+    }
+    
+    .eddcdp-total-row {
+        padding: 8px 0;
+        font-size: 0.9rem;
+    }
+    
+    .eddcdp-grand-total {
+        font-size: 1.1rem;
+    }
+}
+
+/* PDF Generation Specific Styles */
+@media screen {
+    .eddcdp-pdf-only {
+        display: none;
+    }
+}
+
+@media print {
+    .eddcdp-pdf-only {
+        display: block;
+    }
+    
+    .eddcdp-screen-only {
+        display: none;
+    }
+}
+
+/* Animation for smooth transitions */
+.eddcdp-update-form {
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.eddcdp-update-form[style*="block"] {
+    opacity: 1;
+    visibility: visible;
+}
+
+.eddcdp-update-modal {
+    transform: translateY(-50px);
+    transition: transform 0.3s ease;
+}
+
+.eddcdp-update-form[style*="block"] .eddcdp-update-modal {
+    transform: translateY(0);
+}
+
+/* Loading states */
+.eddcdp-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.eddcdp-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #0073aa;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}

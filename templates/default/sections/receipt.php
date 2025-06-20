@@ -1,6 +1,7 @@
 <?php
 /**
- * Receipt Section Template
+ * Order Details Receipt Section Template (Original Functionality)
+ * File: templates/default/sections/receipt.php
  */
 
 if (!defined('ABSPATH')) {
@@ -31,6 +32,9 @@ $payment_date = date_i18n(get_option('date_format'), strtotime($payment->date));
         <div class="eddcdp-receipt-actions">
             <a href="<?php echo esc_url(remove_query_arg('payment_key')); ?>" class="eddcdp-btn eddcdp-btn-secondary">
                 ← <?php esc_html_e('Back to Dashboard', 'edd-customer-dashboard-pro'); ?>
+            </a>
+            <a href="<?php echo esc_url(add_query_arg('view', 'invoice')); ?>" class="eddcdp-btn eddcdp-btn-primary">
+                🧾 <?php esc_html_e('View Invoice', 'edd-customer-dashboard-pro'); ?>
             </a>
             <button onclick="window.print()" class="eddcdp-btn eddcdp-btn-outline">
                 🖨️ <?php esc_html_e('Print Receipt', 'edd-customer-dashboard-pro'); ?>
@@ -163,19 +167,7 @@ $payment_date = date_i18n(get_option('date_format'), strtotime($payment->date));
                             </div>
                             
                             <div class="eddcdp-receipt-download-price">
-                                <?php 
-                                // Get the download price safely
-                                $download_price = 0;
-                                if (isset($download['price'])) {
-                                    $download_price = $download['price'];
-                                } elseif (isset($download['item_price'])) {
-                                    $download_price = $download['item_price'];
-                                } else {
-                                    // Fallback: calculate from payment total and download count
-                                    $download_price = edd_get_download_final_price($download['id'], $user_info, $download['options'] ?? array());
-                                }
-                                echo esc_html($dashboard_data->format_currency($download_price)); 
-                                ?>
+                                <?php echo esc_html($dashboard_data->format_currency($dashboard_data->get_download_price_from_payment($download, $payment->ID))); ?>
                             </div>
                             
                             <div class="eddcdp-receipt-download-actions">
@@ -229,6 +221,29 @@ $payment_date = date_i18n(get_option('date_format'), strtotime($payment->date));
                         <?php echo esc_html($dashboard_data->format_currency(edd_get_payment_subtotal($payment->ID))); ?>
                     </span>
                 </div>
+                
+                <?php 
+                // Get discounts using the correct EDD method
+                $cart_discounts = edd_get_payment_meta($payment->ID, '_edd_payment_discount', true);
+                if (!empty($cart_discounts)) :
+                    $subtotal = edd_get_payment_subtotal($payment->ID);
+                    $total_before_tax = $payment->total - edd_get_payment_tax($payment->ID);
+                    $discount_amount = $subtotal - $total_before_tax;
+                    
+                    if ($discount_amount > 0) :
+                ?>
+                    <div class="eddcdp-receipt-payment-row">
+                        <span class="eddcdp-receipt-payment-label">
+                            <?php esc_html_e('Discount:', 'edd-customer-dashboard-pro'); ?> (<?php echo esc_html($cart_discounts); ?>)
+                        </span>
+                        <span class="eddcdp-receipt-payment-value">
+                            -<?php echo esc_html($dashboard_data->format_currency($discount_amount)); ?>
+                        </span>
+                    </div>
+                <?php 
+                    endif;
+                endif; 
+                ?>
                 
                 <?php $fees = edd_get_payment_fees($payment->ID); ?>
                 <?php if (!empty($fees)) : ?>

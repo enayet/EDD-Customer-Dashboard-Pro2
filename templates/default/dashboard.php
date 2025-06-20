@@ -1,6 +1,6 @@
 <?php
 /**
- * Enhanced Default Dashboard Template with Receipt Support - Keep Full Navigation
+ * Enhanced Default Dashboard Template with Receipt/Invoice Support
  */
 
 if (!defined('ABSPATH')) {
@@ -10,20 +10,46 @@ if (!defined('ABSPATH')) {
 $template_loader = eddcdp()->get_template_loader();
 $active_template = $template_loader->get_active_template();
 
-// Determine what to display based on view mode
+// Determine what to display based on view mode and parameters
 $view_mode = isset($view_mode) ? $view_mode : 'dashboard';
+
+// Check if we should show invoice instead of receipt
+$show_invoice = false;
+if ($view_mode === 'receipt' && isset($_GET['view']) && $_GET['view'] === 'invoice') {
+    $show_invoice = true;
+}
 
 ?>
 
 <div class="eddcdp-dashboard-container">
     <?php if ($view_mode === 'receipt' && isset($payment)) : ?>
         
-        <!-- Receipt View Mode -->
+        <!-- Receipt/Invoice View Mode -->
         <?php
         // Load header section with back to dashboard link
         echo $template_loader->load_section('header', null, compact('user', 'customer', 'dashboard_data', 'view_mode', 'payment'));
-
         ?>
+        
+        <!-- Dashboard Content -->
+        <div class="eddcdp-dashboard-content">
+            <?php if ($show_invoice) : ?>
+                <!-- Invoice View -->
+                <div class="eddcdp-content-section active" id="eddcdp-invoice">
+                    <?php
+                    // Load invoice section
+                    echo $template_loader->load_section('invoice', null, compact('payment', 'payment_key', 'dashboard_data', 'user'));
+                    ?>
+                </div>
+            <?php else : ?>
+                <!-- Receipt/Order Details View -->
+                <div class="eddcdp-content-section active" id="eddcdp-receipt">
+                    <?php
+                    // Load receipt section
+                    echo $template_loader->load_section('receipt', null, compact('payment', 'payment_key', 'dashboard_data', 'user'));
+                    ?>
+                </div>
+            <?php endif; ?>
+        </div>
         
     <?php else : ?>
         
@@ -38,22 +64,9 @@ $view_mode = isset($view_mode) ? $view_mode : 'dashboard';
         // Load navigation section using active template
         echo $template_loader->load_section('navigation', null, compact('enabled_sections'));
         ?>
-    <?php endif; ?>
-    <!-- Dashboard Content -->
-    <div class="eddcdp-dashboard-content">
-        <?php if ($view_mode === 'receipt' && isset($payment)) : ?>
-            
-            <!-- Receipt View Mode (but with navigation available) -->
-            <div class="eddcdp-content-section active" id="eddcdp-receipt">
-                <?php
-                // Load receipt section
-                echo $template_loader->load_section('receipt', null, compact('payment', 'payment_key', 'dashboard_data', 'user'));
-                ?>
-            </div>
-            
-        <?php else : ?>
-            
-            <!-- Normal Dashboard Mode -->
+        
+        <!-- Dashboard Content -->
+        <div class="eddcdp-dashboard-content">
             <?php 
             $first_section = true;
             

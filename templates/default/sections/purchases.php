@@ -80,11 +80,6 @@ $payments = $dashboard_data->get_customer_purchases($customer);
                         📋 <?php esc_html_e('Order Details', 'edd-customer-dashboard-pro'); ?>
                     </a>
                     
-                    <!-- Traditional Receipt Link (if you want to keep it as fallback) -->
-                    <a href="<?php echo esc_url($dashboard_data->get_receipt_url($payment)); ?>" class="eddcdp-btn eddcdp-btn-secondary" target="_blank">
-                        📄 <?php esc_html_e('View Receipt', 'edd-customer-dashboard-pro'); ?>
-                    </a>
-                    
                     <!-- Invoice Link (if EDD Invoices is available) -->
                     <?php if (function_exists('edd_get_receipt_page_uri')) : ?>
                         <a href="<?php echo esc_url(edd_get_receipt_page_uri($payment->ID)); ?>" class="eddcdp-btn eddcdp-btn-secondary" target="_blank">

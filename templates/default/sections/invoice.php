@@ -1,6 +1,6 @@
 <?php
 /**
- * Invoice Section Template (Professional Invoice Layout)
+ * Enhanced Invoice Section Template with Print Popup & Dashboard Navigation
  * File: templates/default/sections/invoice.php
  */
 
@@ -24,7 +24,7 @@ $has_pdf_invoices = class_exists('EDD_PDF_Invoices') || function_exists('eddpdfi
 ?>
 
 <div class="eddcdp-invoice-section">
-    <!-- Enhanced Invoice Header -->
+    <!-- Enhanced Invoice Header with Dashboard Navigation -->
     <div class="eddcdp-invoice-header">
         <div class="eddcdp-invoice-title-area">
             <h2 class="eddcdp-section-title">
@@ -40,11 +40,18 @@ $has_pdf_invoices = class_exists('EDD_PDF_Invoices') || function_exists('eddpdfi
             </div>
         </div>
         <div class="eddcdp-invoice-actions">
-            <a href="<?php echo esc_url(remove_query_arg('view')); ?>" class="eddcdp-btn eddcdp-btn-secondary">
-                ← <?php esc_html_e('Back', 'edd-customer-dashboard-pro'); ?>
+            <!-- ENHANCED: Added Back to Dashboard button -->
+            <a href="<?php echo esc_url(remove_query_arg(array('view', 'payment_key'))); ?>" class="eddcdp-btn eddcdp-btn-primary">
+                🏠 <?php esc_html_e('Back to Dashboard', 'edd-customer-dashboard-pro'); ?>
             </a>
-            <button onclick="window.print()" class="eddcdp-btn eddcdp-btn-outline">
-                🖨️ <?php esc_html_e('Print', 'edd-customer-dashboard-pro'); ?>
+            
+            <a href="<?php echo esc_url(remove_query_arg('view')); ?>" class="eddcdp-btn eddcdp-btn-secondary">
+                ← <?php esc_html_e('Back to Receipt', 'edd-customer-dashboard-pro'); ?>
+            </a>
+            
+            <!-- ENHANCED: Print popup button -->
+            <button onclick="eddcdpOpenPrintPopup()" class="eddcdp-btn eddcdp-btn-outline">
+                🖨️ <?php esc_html_e('Print Invoice', 'edd-customer-dashboard-pro'); ?>
             </button>
             
             <?php if ($has_pdf_invoices) : ?>
@@ -53,7 +60,7 @@ $has_pdf_invoices = class_exists('EDD_PDF_Invoices') || function_exists('eddpdfi
                     📄 <?php esc_html_e('Download PDF', 'edd-customer-dashboard-pro'); ?>
                 </a>
             <?php else : ?>
-                <button onclick="eddcdpGeneratePDF()" class="eddcdp-btn eddcdp-btn-primary">
+                <button onclick="eddcdpOpenPrintPopup()" class="eddcdp-btn eddcdp-btn-primary">
                     📄 <?php esc_html_e('Download PDF', 'edd-customer-dashboard-pro'); ?>
                 </button>
             <?php endif; ?>
@@ -61,7 +68,7 @@ $has_pdf_invoices = class_exists('EDD_PDF_Invoices') || function_exists('eddpdfi
     </div>
 
     <!-- Invoice Content -->
-    <div class="eddcdp-invoice-content">
+    <div class="eddcdp-invoice-content" id="eddcdp-invoice-print-content">
         
         <!-- Invoice Header with Company Info -->
         <div class="eddcdp-invoice-header-section">
@@ -91,7 +98,7 @@ $has_pdf_invoices = class_exists('EDD_PDF_Invoices') || function_exists('eddpdfi
                 
                 <div class="eddcdp-invoice-to">
                     <h3><?php esc_html_e('INVOICE TO:', 'edd-customer-dashboard-pro'); ?></h3>
-                    <div class="eddcdp-customer-info">
+                    <div class="eddcdp-customer-info" id="eddcdp-customer-display">
                         <?php if (!empty($user_info['first_name']) || !empty($user_info['last_name'])) : ?>
                             <strong><?php echo esc_html(trim($user_info['first_name'] . ' ' . $user_info['last_name'])); ?></strong><br>
                         <?php endif; ?>
@@ -134,7 +141,7 @@ $has_pdf_invoices = class_exists('EDD_PDF_Invoices') || function_exists('eddpdfi
                             ?>
                         <?php endif; ?>
                         
-                        <div class="eddcdp-update-info">
+                        <div class="eddcdp-update-info eddcdp-screen-only">
                             <button class="eddcdp-btn-link" onclick="eddcdpShowUpdateForm()">
                                 <?php esc_html_e('Update', 'edd-customer-dashboard-pro'); ?>
                             </button>
@@ -249,13 +256,18 @@ $has_pdf_invoices = class_exists('EDD_PDF_Invoices') || function_exists('eddpdfi
             </div>
         </div>
         
-        <!-- Action Buttons -->
-        <div class="eddcdp-invoice-footer-actions">
-            <a href="<?php echo esc_url(remove_query_arg('view')); ?>" class="eddcdp-btn eddcdp-btn-secondary">
-                <?php esc_html_e('Back', 'edd-customer-dashboard-pro'); ?>
+        <!-- Action Buttons (Screen Only) -->
+        <div class="eddcdp-invoice-footer-actions eddcdp-screen-only">
+            <a href="<?php echo esc_url(remove_query_arg(array('view', 'payment_key'))); ?>" class="eddcdp-btn eddcdp-btn-primary">
+                🏠 <?php esc_html_e('Back to Dashboard', 'edd-customer-dashboard-pro'); ?>
             </a>
-            <button onclick="window.print()" class="eddcdp-btn eddcdp-btn-outline">
-                <?php esc_html_e('Print', 'edd-customer-dashboard-pro'); ?>
+            
+            <a href="<?php echo esc_url(remove_query_arg('view')); ?>" class="eddcdp-btn eddcdp-btn-secondary">
+                <?php esc_html_e('Back to Receipt', 'edd-customer-dashboard-pro'); ?>
+            </a>
+            
+            <button onclick="eddcdpOpenPrintPopup()" class="eddcdp-btn eddcdp-btn-outline">
+                <?php esc_html_e('Print Invoice', 'edd-customer-dashboard-pro'); ?>
             </button>
             
             <?php if ($has_pdf_invoices) : ?>
@@ -264,7 +276,7 @@ $has_pdf_invoices = class_exists('EDD_PDF_Invoices') || function_exists('eddpdfi
                     <?php esc_html_e('Download PDF', 'edd-customer-dashboard-pro'); ?>
                 </a>
             <?php else : ?>
-                <button onclick="eddcdpGeneratePDF()" class="eddcdp-btn eddcdp-btn-primary">
+                <button onclick="eddcdpOpenPrintPopup()" class="eddcdp-btn eddcdp-btn-primary">
                     <?php esc_html_e('Download PDF', 'edd-customer-dashboard-pro'); ?>
                 </button>
             <?php endif; ?>
@@ -272,13 +284,14 @@ $has_pdf_invoices = class_exists('EDD_PDF_Invoices') || function_exists('eddpdfi
     </div>
 </div>
 
-<!-- Update Customer Info Form (Hidden by default) -->
+<!-- ENHANCED: Update Customer Info Form (Simplified without confirmation) -->
 <div id="eddcdp-update-form" class="eddcdp-update-form" style="display: none;">
     <div class="eddcdp-update-overlay">
         <div class="eddcdp-update-modal">
             <h3><?php esc_html_e('Update Billing Information', 'edd-customer-dashboard-pro'); ?></h3>
             <form id="eddcdp-billing-form">
                 <?php wp_nonce_field('eddcdp_update_billing', 'eddcdp_billing_nonce'); ?>
+                <input type="hidden" name="payment_id" value="<?php echo esc_attr($payment->ID); ?>">
                 
                 <div class="eddcdp-form-row">
                     <div class="eddcdp-form-group">
@@ -339,7 +352,7 @@ $has_pdf_invoices = class_exists('EDD_PDF_Invoices') || function_exists('eddpdfi
                         <?php esc_html_e('Cancel', 'edd-customer-dashboard-pro'); ?>
                     </button>
                     <button type="submit" class="eddcdp-btn eddcdp-btn-primary">
-                        <?php esc_html_e('Update', 'edd-customer-dashboard-pro'); ?>
+                        <?php esc_html_e('Update & Reload', 'edd-customer-dashboard-pro'); ?>
                     </button>
                 </div>
             </form>
@@ -348,7 +361,7 @@ $has_pdf_invoices = class_exists('EDD_PDF_Invoices') || function_exists('eddpdfi
 </div>
 
 <script>
-// JavaScript functions for invoice functionality
+// ENHANCED: JavaScript functions for invoice functionality
 function eddcdpShowUpdateForm() {
     document.getElementById('eddcdp-update-form').style.display = 'block';
     document.body.style.overflow = 'hidden';
@@ -359,15 +372,63 @@ function eddcdpHideUpdateForm() {
     document.body.style.overflow = '';
 }
 
-function eddcdpGeneratePDF() {
-    document.body.classList.add('eddcdp-printing');
-    setTimeout(function() {
-        window.print();
-        document.body.classList.remove('eddcdp-printing');
-    }, 100);
+// ENHANCED: Print popup functionality
+function eddcdpOpenPrintPopup() {
+    const invoiceContent = document.getElementById('eddcdp-invoice-print-content').innerHTML;
+    const printWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+    
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title><?php echo esc_js(__('Invoice', 'edd-customer-dashboard-pro') . ' ' . $payment->number); ?></title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+                .eddcdp-invoice-content { max-width: 800px; margin: 0 auto; }
+                .eddcdp-invoice-header-section { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+                .eddcdp-invoice-from-to { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+                .eddcdp-invoice-from h3, .eddcdp-invoice-to h3 { font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 10px; }
+                .eddcdp-invoice-items-section { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; }
+                .eddcdp-invoice-items-section h3 { background: #f0f0f0; padding: 15px; margin: 0; font-size: 12px; color: #666; text-transform: uppercase; }
+                .eddcdp-invoice-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #f0f0f0; }
+                .eddcdp-invoice-item:last-child { border-bottom: none; }
+                .eddcdp-item-description strong { font-size: 14px; }
+                .eddcdp-item-variant, .eddcdp-item-sku { color: #666; font-size: 12px; margin-top: 3px; }
+                .eddcdp-item-price { font-weight: bold; font-size: 14px; }
+                .eddcdp-invoice-totals { background: #f8f9fa; padding: 20px; border-radius: 8px; }
+                .eddcdp-totals-table { max-width: 300px; margin-left: auto; }
+                .eddcdp-total-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e0e0e0; }
+                .eddcdp-total-row:last-child { border-bottom: none; }
+                .eddcdp-grand-total { border-top: 2px solid #333; margin-top: 10px; padding-top: 15px; font-weight: bold; font-size: 16px; }
+                .eddcdp-discount-row { color: #d63031; }
+                .eddcdp-payment-status-row { border-top: 1px solid #e0e0e0; margin-top: 10px; padding-top: 15px; }
+                .eddcdp-screen-only { display: none; }
+                @media print {
+                    body { margin: 0; }
+                    .eddcdp-invoice-content { max-width: none; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class='eddcdp-invoice-content'>
+                ${invoiceContent}
+            </div>
+            <script>
+                window.onload = function() {
+                    window.print();
+                    window.onafterprint = function() {
+                        window.close();
+                    };
+                };
+             <\/script>
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
 }
 
-// Handle billing form submission
+// ENHANCED: Handle billing form submission without confirmation
 jQuery(document).ready(function($) {
     $('#eddcdp-billing-form').on('submit', function(e) {
         e.preventDefault();
@@ -378,28 +439,21 @@ jQuery(document).ready(function($) {
         
         $submitBtn.prop('disabled', true).text('<?php esc_html_e('Updating...', 'edd-customer-dashboard-pro'); ?>');
         
-        const formData = new FormData(this);
-        formData.append('action', 'eddcdp_update_billing');
-        formData.append('payment_id', <?php echo esc_js($payment->ID); ?>);
-        
         $.ajax({
             url: eddcdp_ajax.ajax_url,
             type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
+            data: $form.serialize() + '&action=eddcdp_update_billing',
             success: function(response) {
                 if (response.success) {
-                    alert('<?php esc_html_e('Information updated successfully!', 'edd-customer-dashboard-pro'); ?>');
-                    location.reload();
+                    // ENHANCED: Simply reload the page to show updated info
+                    window.location.reload();
                 } else {
                     alert('<?php esc_html_e('Update failed:', 'edd-customer-dashboard-pro'); ?> ' + (response.data || '<?php esc_html_e('Unknown error', 'edd-customer-dashboard-pro'); ?>'));
+                    $submitBtn.prop('disabled', false).text(originalText);
                 }
             },
             error: function() {
                 alert('<?php esc_html_e('Network error. Please try again.', 'edd-customer-dashboard-pro'); ?>');
-            },
-            complete: function() {
                 $submitBtn.prop('disabled', false).text(originalText);
             }
         });

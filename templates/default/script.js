@@ -1,5 +1,10 @@
 jQuery(document).ready(function($) {
     
+    // ENHANCED: Detect if we're in full screen mode
+    const isFullScreen = $('body').hasClass('eddcdp-fullscreen-mode') || 
+                         window.location.search.includes('eddcdp_fullscreen=1') || 
+                         window.location.search.includes('eddcdp_view=fullscreen');
+    
     // Tab Navigation
     $('.eddcdp-nav-tab').on('click', function(e) {
         e.preventDefault();
@@ -15,8 +20,8 @@ jQuery(document).ready(function($) {
         const targetSection = $(this).data('section');
         $('#eddcdp-' + targetSection).addClass('active');
         
-        // Update URL without refreshing page (if not in receipt mode)
-        if (!window.location.search.includes('payment_key=')) {
+        // Update URL without refreshing page (if not in receipt mode and not full screen)
+        if (!window.location.search.includes('payment_key=') && !isFullScreen) {
             const newUrl = window.location.pathname + '?section=' + targetSection;
             window.history.pushState({}, '', newUrl);
         }
@@ -40,22 +45,80 @@ jQuery(document).ready(function($) {
         }
     }
     
+    // ENHANCED: Full screen toggle functionality
+    $('.eddcdp-fullscreen-toggle a').on('click', function(e) {
+        // Add loading animation to button
+        const $btn = $(this);
+        const originalHtml = $btn.html();
+        
+        $btn.html('🔄 ' + (typeof eddcdp_ajax !== 'undefined' && eddcdp_ajax.loading_text ? 
+                  eddcdp_ajax.loading_text : 'Loading...'));
+        
+        // Let the navigation proceed naturally
+        setTimeout(function() {
+            // This will only run if navigation was prevented
+            $btn.html(originalHtml);
+        }, 3000);
+    });
+    
     // Enhanced Back to Dashboard functionality
     $('.eddcdp-btn').filter(function() {
-        return $(this).text().indexOf('Back to Dashboard') !== -1;
+        return $(this).text().indexOf('Back to Dashboard') !== -1 || 
+               $(this).text().indexOf('Back to Site') !== -1;
     }).on('click', function(e) {
         e.preventDefault();
         
-        // Get the URL without payment_key parameter
-        const baseUrl = window.location.pathname;
+        // Get the URL without full screen parameters
+        let targetUrl = $(this).attr('href');
         
-        // Smooth transition back to dashboard
+        // If it's a "Back to Site" button in full screen mode
+        if ($(this).text().indexOf('Back to Site') !== -1) {
+            // Remove full screen parameters from URL
+            targetUrl = removeFullScreenParams(targetUrl);
+        }
+        
+        // Smooth transition
         $('body').addClass('eddcdp-transitioning');
         
         setTimeout(function() {
-            window.location.href = baseUrl;
+            window.location.href = targetUrl;
         }, 200);
     });
+    
+    // ENHANCED: Function to remove full screen parameters
+    function removeFullScreenParams(url) {
+        const urlObj = new URL(url, window.location.origin);
+        urlObj.searchParams.delete('eddcdp_fullscreen');
+        urlObj.searchParams.delete('eddcdp_view');
+        return urlObj.toString();
+    }
+    
+    // ENHANCED: Handle ESC key in full screen mode
+    if (isFullScreen) {
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const backBtn = $('.eddcdp-close-fullscreen, .eddcdp-btn').filter(function() {
+                    return $(this).text().indexOf('Back to Site') !== -1 || 
+                           $(this).text().indexOf('Back to Dashboard') !== -1;
+                }).first();
+                
+                if (backBtn.length) {
+                    backBtn[0].click();
+                }
+            }
+        });
+        
+        // Add visual indicator for ESC functionality
+        if ($('.eddcdp-fullscreen-header').length) {
+            const escHint = $('<div class="eddcdp-esc-hint" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 15px; font-size: 11px; z-index: 1001; opacity: 0.8;">Press ESC to exit</div>');
+            $('.eddcdp-fullscreen-header').append(escHint);
+            
+            // Auto-hide the hint after 3 seconds
+            setTimeout(function() {
+                escHint.fadeOut(500);
+            }, 3000);
+        }
+    }
     
     // Copy license key functionality
     $('.eddcdp-license-key').on('click', function() {
@@ -157,11 +220,18 @@ jQuery(document).ready(function($) {
         }
     );
     
-    // Enhanced order details links with smooth transitions
-    $('a[href*="payment_key="]').on('click', function(e) {
-        // Only handle if it's a same-page link (receipt view)
-        if ($(this).attr('href').indexOf(window.location.pathname) === 0 || 
-            $(this).attr('href').indexOf('?payment_key=') === 0) {
+    // ENHANCED: Full screen aware link handling
+    $('a[href*="payment_key="], a[href*="view=invoice"]').on('click', function(e) {
+        // Only handle if it's a same-page link and we're in full screen mode
+        if (isFullScreen && ($(this).attr('href').indexOf(window.location.pathname) === 0 || 
+            $(this).attr('href').indexOf('?payment_key=') === 0)) {
+            
+            // Add full screen parameters to maintain full screen mode
+            const currentHref = $(this).attr('href');
+            if (!currentHref.includes('eddcdp_fullscreen') && !currentHref.includes('eddcdp_view=fullscreen')) {
+                const separator = currentHref.includes('?') ? '&' : '?';
+                $(this).attr('href', currentHref + separator + 'eddcdp_fullscreen=1');
+            }
             
             $('body').addClass('eddcdp-transitioning');
             
@@ -347,7 +417,7 @@ jQuery(document).ready(function($) {
         }
     });
     
-    // Handle responsive navigation
+    // ENHANCED: Responsive navigation for full screen mode
     if ($(window).width() <= 768) {
         $('.eddcdp-nav-tab').on('click', function() {
             // Collapse nav on mobile after selection
@@ -357,6 +427,20 @@ jQuery(document).ready(function($) {
                 }, 300);
             }, 100);
         });
+        
+        // ENHANCED: In full screen mode, ensure header is always visible
+        if (isFullScreen) {
+            $(window).on('scroll', function() {
+                const scrollTop = $(window).scrollTop();
+                const $header = $('.eddcdp-fullscreen-header');
+                
+                if (scrollTop > 50) {
+                    $header.addClass('eddcdp-header-compact');
+                } else {
+                    $header.removeClass('eddcdp-header-compact');
+                }
+            });
+        }
     }
     
     // Smooth scrolling for anchor links
@@ -364,8 +448,9 @@ jQuery(document).ready(function($) {
         e.preventDefault();
         const target = $(this.getAttribute('href'));
         if (target.length) {
+            const offset = isFullScreen ? 100 : 20; // Account for full screen header
             $('html, body').animate({
-                scrollTop: target.offset().top - 20
+                scrollTop: target.offset().top - offset
             }, 500);
         }
     });
@@ -390,7 +475,21 @@ jQuery(document).ready(function($) {
         if ($(window).width() > 768) {
             $('.eddcdp-dashboard-nav').css('height', 'auto');
         }
+        
+        // ENHANCED: Adjust full screen layout on resize
+        if (isFullScreen) {
+            adjustFullScreenLayout();
+        }
     });
+    
+    // ENHANCED: Full screen layout adjustments
+    function adjustFullScreenLayout() {
+        const windowHeight = $(window).height();
+        const headerHeight = $('.eddcdp-fullscreen-header').outerHeight();
+        const availableHeight = windowHeight - headerHeight;
+        
+        $('.eddcdp-fullscreen-content').css('min-height', availableHeight + 'px');
+    }
     
     // Lazy load images in wishlist and receipts
     if ('IntersectionObserver' in window) {
@@ -455,8 +554,9 @@ jQuery(document).ready(function($) {
         // Add smooth scrolling for receipt sections
         $('.eddcdp-receipt-card-title').on('click', function() {
             const $card = $(this).closest('.eddcdp-receipt-card');
+            const offset = isFullScreen ? 100 : 20;
             $('html, body').animate({
-                scrollTop: $card.offset().top - 20
+                scrollTop: $card.offset().top - offset
             }, 300);
         });
     }
@@ -464,7 +564,7 @@ jQuery(document).ready(function($) {
     // Add transition classes for smooth navigation
     $('body').addClass('eddcdp-transitions-enabled');
     
-    // Initialize the dashboard
+    // ENHANCED: Initialize the dashboard with full screen awareness
     initializeDashboard();
     
     function initializeDashboard() {
@@ -478,15 +578,55 @@ jQuery(document).ready(function($) {
             }
         }
         
+        // ENHANCED: Apply full screen layout adjustments
+        if (isFullScreen) {
+            adjustFullScreenLayout();
+            
+            // Set focus to close button for accessibility
+            setTimeout(function() {
+                $('.eddcdp-close-fullscreen').focus();
+            }, 500);
+        }
+        
         // Add loading class to body to prevent FOUC
         $('body').removeClass('eddcdp-loading');
         
         // Trigger custom event for other scripts
-        $(document).trigger('eddcdp:dashboard:ready');
+        $(document).trigger('eddcdp:dashboard:ready', { fullScreen: isFullScreen });
+    }
+    
+    // ENHANCED: Full screen mode specific enhancements
+    if (isFullScreen) {
+        // Prevent page zoom/scale gestures that might interfere with full screen
+        $(document).on('gesturestart', function(e) {
+            e.preventDefault();
+        });
+        
+        // Add focus trap for accessibility in full screen mode
+        const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+        const $modal = $('.eddcdp-fullscreen-wrapper');
+        const $firstFocusable = $modal.find(focusableElements).first();
+        const $lastFocusable = $modal.find(focusableElements).last();
+        
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Tab') {
+                if (e.shiftKey) {
+                    if (document.activeElement === $firstFocusable[0]) {
+                        $lastFocusable.focus();
+                        e.preventDefault();
+                    }
+                } else {
+                    if (document.activeElement === $lastFocusable[0]) {
+                        $firstFocusable.focus();
+                        e.preventDefault();
+                    }
+                }
+            }
+        });
     }
 });
 
-// Add CSS for transitions
+// ENHANCED: Add CSS for transitions and full screen mode
 $('<style>').prop('type', 'text/css').html(`
     .eddcdp-transitions-enabled * {
         transition: all 0.2s ease;
@@ -500,15 +640,38 @@ $('<style>').prop('type', 'text/css').html(`
     .eddcdp-printing .eddcdp-dashboard-header,
     .eddcdp-printing .eddcdp-stats-grid,
     .eddcdp-printing .eddcdp-dashboard-nav,
-    .eddcdp-printing .eddcdp-receipt-actions {
+    .eddcdp-printing .eddcdp-receipt-actions,
+    .eddcdp-printing .eddcdp-fullscreen-header {
         display: none !important;
+    }
+    
+    /* Full screen mode enhancements */
+    .eddcdp-fullscreen-mode .eddcdp-fullscreen-toggle {
+        display: none !important;
+    }
+    
+    .eddcdp-header-compact {
+        transform: translateY(-10px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    .eddcdp-esc-hint {
+        animation: eddcdpPulse 2s infinite;
+    }
+    
+    @keyframes eddcdpPulse {
+        0% { opacity: 0.8; }
+        50% { opacity: 1; }
+        100% { opacity: 0.8; }
     }
     
     @media print {
         .eddcdp-receipt-actions,
         .eddcdp-dashboard-header,
         .eddcdp-stats-grid,
-        .eddcdp-dashboard-nav {
+        .eddcdp-dashboard-nav,
+        .eddcdp-fullscreen-header,
+        .eddcdp-esc-hint {
             display: none !important;
         }
         
@@ -523,10 +686,27 @@ $('<style>').prop('type', 'text/css').html(`
             background: white !important;
         }
         
-        .eddcdp-dashboard-container {
+        .eddcdp-dashboard-container,
+        .eddcdp-fullscreen-content {
             background: white !important;
             padding: 0 !important;
             max-width: none !important;
+            min-height: auto !important;
+        }
+    }
+    
+    /* Mobile full screen optimizations */
+    @media (max-width: 768px) {
+        .eddcdp-fullscreen-mode .eddcdp-dashboard-container {
+            padding: 10px !important;
+        }
+        
+        .eddcdp-fullscreen-header {
+            padding: 10px 15px !important;
+        }
+        
+        .eddcdp-esc-hint {
+            display: none; /* Hide ESC hint on mobile */
         }
     }
 `).appendTo('head');

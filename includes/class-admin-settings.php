@@ -1,6 +1,6 @@
 <?php
 /**
- * Fixed Admin Settings Class - Improved layout and functionality
+ * Enhanced Admin Settings Class with Full Screen Mode Support
  */
 
 if (!defined('ABSPATH')) {
@@ -53,6 +53,10 @@ class EDDCDP_Admin_Settings {
         // Sanitize replace_edd_pages boolean
         $sanitized['replace_edd_pages'] = isset($settings['replace_edd_pages']) ? 
             (bool) $settings['replace_edd_pages'] : false;
+
+        // ENHANCED: Sanitize fullscreen_mode boolean
+        $sanitized['fullscreen_mode'] = isset($settings['fullscreen_mode']) ? 
+            (bool) $settings['fullscreen_mode'] : false;
 
         // Sanitize enabled sections
         if (isset($settings['enabled_sections']) && is_array($settings['enabled_sections'])) {
@@ -158,6 +162,9 @@ class EDDCDP_Admin_Settings {
         // Replace EDD Pages
         $settings['replace_edd_pages'] = isset($_POST['replace_edd_pages']) ? true : false;
         
+        // ENHANCED: Full Screen Mode
+        $settings['fullscreen_mode'] = isset($_POST['fullscreen_mode']) ? true : false;
+        
         // Enabled Sections
         $settings['enabled_sections'] = array();
         $available_sections = $this->get_available_sections();
@@ -220,6 +227,7 @@ class EDDCDP_Admin_Settings {
         $settings = get_option('eddcdp_settings', array());
         $active_template = isset($settings['active_template']) ? $settings['active_template'] : 'default';
         $replace_edd_pages = isset($settings['replace_edd_pages']) ? $settings['replace_edd_pages'] : false;
+        $fullscreen_mode = isset($settings['fullscreen_mode']) ? $settings['fullscreen_mode'] : false; // ENHANCED
         $enabled_sections = isset($settings['enabled_sections']) ? $settings['enabled_sections'] : array();
         
         // Show messages
@@ -275,6 +283,59 @@ class EDDCDP_Admin_Settings {
                                             <input type="checkbox" name="replace_edd_pages" value="1" <?php checked($replace_edd_pages, true); ?> />
                                             <?php esc_html_e('Replace default EDD customer pages with Dashboard Pro', 'edd-customer-dashboard-pro'); ?>
                                         </label>
+                                        <p class="description"><?php esc_html_e('When enabled, the default EDD shortcodes will be replaced with the modern dashboard interface.', 'edd-customer-dashboard-pro'); ?></p>
+                                    </td>
+                                </tr>
+                                
+                                <!-- ENHANCED: Full Screen Mode Setting -->
+                                <tr>
+                                    <th scope="row"><?php esc_html_e('Full Screen Mode', 'edd-customer-dashboard-pro'); ?></th>
+                                    <td>
+                                        <label class="eddcdp-toggle">
+                                            <input type="checkbox" name="fullscreen_mode" value="1" <?php checked($fullscreen_mode, true); ?> />
+                                            <span class="eddcdp-toggle-slider"></span>
+                                        </label>
+                                        <p class="description"><?php esc_html_e('When enabled, all EDD customer dashboard pages will automatically open in full screen mode by default. Provides a clean, distraction-free experience without WordPress header/footer.', 'edd-customer-dashboard-pro'); ?></p>
+
+                                        <?php if ($fullscreen_mode) : ?>
+                                            <div class="eddcdp-fullscreen-preview" style="margin-top: 15px; padding: 15px; background: #f0f8ff; border-left: 4px solid #667eea; border-radius: 4px;">
+                                                <h4 style="margin: 0 0 10px 0; color: #333;">🚀 <?php esc_html_e('Auto Full Screen Mode Active:', 'edd-customer-dashboard-pro'); ?></h4>
+                                                <ul style="margin: 0; padding-left: 20px;">
+                                                    <li><?php esc_html_e('All dashboard pages automatically open in full screen', 'edd-customer-dashboard-pro'); ?></li>
+                                                    <li><?php esc_html_e('Clean URLs - no parameters needed', 'edd-customer-dashboard-pro'); ?></li>
+                                                    <li><?php esc_html_e('"Back to Site" button returns to homepage or referrer', 'edd-customer-dashboard-pro'); ?></li>
+                                                    <li><?php esc_html_e('Works with order history, receipts, and invoices', 'edd-customer-dashboard-pro'); ?></li>
+                                                    <li><?php esc_html_e('ESC key exits to main site', 'edd-customer-dashboard-pro'); ?></li>
+                                                    <li><?php esc_html_e('Mobile responsive design', 'edd-customer-dashboard-pro'); ?></li>
+                                                </ul>
+
+                                                <?php 
+                                                // Show example URLs that will auto-open in full screen
+                                                $base_url = home_url();
+                                                ?>
+                                                <div style="margin-top: 15px; padding: 10px; background: #fff; border-radius: 4px;">
+                                                    <p style="margin: 0 0 8px 0;"><strong><?php esc_html_e('Pages that auto-open in full screen:', 'edd-customer-dashboard-pro'); ?></strong></p>
+                                                    <ul style="margin: 0; padding-left: 20px; font-family: monospace; font-size: 12px;">
+                                                        <li><code><?php echo esc_html($base_url); ?>/checkout-2/order-history/</code></li>
+                                                        <li><code><?php echo esc_html($base_url); ?>/order-history/?payment_key=abc123</code></li>
+                                                        <li><code><?php echo esc_html($base_url); ?>/my-account/orders/</code></li>
+                                                        <li><?php esc_html_e('+ Any page with EDD dashboard shortcodes', 'edd-customer-dashboard-pro'); ?></li>
+                                                    </ul>
+                                                </div>
+
+                                                <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 4px;">
+                                                    <p style="margin: 0; font-size: 13px;"><strong><?php esc_html_e('Override for testing:', 'edd-customer-dashboard-pro'); ?></strong><br>
+                                                    <?php esc_html_e('Add', 'edd-customer-dashboard-pro'); ?> <code>?eddcdp_exit_fullscreen=1</code> <?php esc_html_e('to any URL to view in normal mode.', 'edd-customer-dashboard-pro'); ?></p>
+                                                </div>
+                                            </div>
+                                        <?php else : ?>
+                                            <div style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-left: 4px solid #ccc; border-radius: 4px;">
+                                                <p style="margin: 0; color: #666; font-size: 13px;">
+                                                    <?php esc_html_e('When disabled, customers will see the normal WordPress page layout with theme header/footer. You can still test full screen mode by adding', 'edd-customer-dashboard-pro'); ?> 
+                                                    <code>?eddcdp_fullscreen=1</code> <?php esc_html_e('to any dashboard URL.', 'edd-customer-dashboard-pro'); ?>
+                                                </p>
+                                            </div>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             </table>
@@ -314,6 +375,16 @@ class EDDCDP_Admin_Settings {
                         <h4><?php esc_html_e('Plugin Info', 'edd-customer-dashboard-pro'); ?></h4>
                         <p><strong><?php esc_html_e('Version:', 'edd-customer-dashboard-pro'); ?></strong> <?php echo esc_html(EDDCDP_VERSION); ?></p>
                         <p><strong><?php esc_html_e('Active Template:', 'edd-customer-dashboard-pro'); ?></strong> <?php echo esc_html(ucfirst($active_template)); ?></p>
+                        
+                        <!-- ENHANCED: Full Screen Mode Info -->
+                        <?php if ($fullscreen_mode) : ?>
+                            <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 8px; border: 1px solid #4caf50;">
+                                <h4 style="margin: 0 0 10px 0; color: #2e7d32;">🔍 <?php esc_html_e('Full Screen Mode Active', 'edd-customer-dashboard-pro'); ?></h4>
+                                <p style="margin: 0; font-size: 13px; color: #333;">
+                                    <?php esc_html_e('Customers will see a "Full Screen" button on their dashboard for an immersive experience.', 'edd-customer-dashboard-pro'); ?>
+                                </p>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>  
                 

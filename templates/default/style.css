@@ -1,11 +1,13 @@
-/* EDD Customer Dashboard Pro - Default Template Styles */
+/* EDD Customer Dashboard Pro - Optimized Template Styles */
 
+/* Reset and Base Styles */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* Container and Layout */
 .eddcdp-dashboard-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -160,6 +162,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    font-size: 16px;
 }
 
 .eddcdp-nav-tab:hover {
@@ -207,14 +210,14 @@
     }
 }
 
-.eddcdp-section-title {
+.eddcdp-dashboard-container h2.eddcdp-section-title {
     font-size: 1.8rem;
     font-weight: 700;
-    margin-bottom: 20px;
+    margin-bottom: 20px!important;
     color: #333;
 }
 
-/* Purchase List */
+/* Purchase List and Items */
 .eddcdp-purchase-list {
     display: grid;
     gap: 15px;
@@ -393,6 +396,34 @@
     background: linear-gradient(135deg, #43e97b, #38f9d7);
 }
 
+.eddcdp-btn-outline {
+    background: transparent;
+    border: 2px solid #667eea;
+    color: #667eea;
+    border-radius: 6px;
+    padding: 8px 18px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.eddcdp-btn-outline:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+.eddcdp-btn-small {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
 /* License Management */
 .eddcdp-license-info {
     background: rgba(102, 126, 234, 0.05);
@@ -530,125 +561,7 @@
     margin-bottom: 20px;
 }
 
-/* Copy Tooltip */
-.eddcdp-copy-tooltip {
-    position: absolute;
-    top: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #333;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    white-space: nowrap;
-    animation: eddcdpFadeInOut 1.5s ease;
-    z-index: 1000;
-}
-
-.eddcdp-copy-tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-top-color: #333;
-}
-
-@keyframes eddcdpFadeInOut {
-    0% { 
-        opacity: 0; 
-        transform: translateX(-50%) translateY(-5px); 
-    }
-    50% { 
-        opacity: 1; 
-        transform: translateX(-50%) translateY(0); 
-    }
-    100% { 
-        opacity: 0; 
-        transform: translateX(-50%) translateY(-5px); 
-    }
-}
-
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-    .eddcdp-dashboard-container {
-        padding: 15px;
-    }
-
-    .eddcdp-welcome-section {
-        text-align: center;
-    }
-
-    .eddcdp-welcome-text h1 {
-        font-size: 2rem;
-    }
-
-    .eddcdp-stats-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 15px;
-    }
-
-    .eddcdp-nav-tabs {
-        justify-content: center;
-    }
-
-    .eddcdp-nav-tab {
-        padding: 10px 16px;
-        font-size: 0.9rem;
-    }
-
-    .eddcdp-purchase-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .eddcdp-wishlist-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .eddcdp-site-input-group {
-        flex-direction: column;
-    }
-
-    .eddcdp-order-actions {
-        flex-direction: column;
-    }
-
-    .eddcdp-product-actions {
-        flex-direction: column;
-    }
-}
-
-@media (max-width: 480px) {
-    .eddcdp-stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .eddcdp-nav-tabs {
-        flex-direction: column;
-    }
-
-    .eddcdp-nav-tab {
-        justify-content: center;
-    }
-
-    .eddcdp-order-meta {
-        flex-direction: column;
-        gap: 5px;
-    }
-
-    .eddcdp-product-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-}
-
-
-
-/* Receipt-specific styles */
+/* Receipt Styles */
 .eddcdp-receipt-section {
     margin-top: 20px;
 }
@@ -660,10 +573,15 @@
     margin-bottom: 30px;
     flex-wrap: wrap;
     gap: 20px;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 20px;
 }
 
 .eddcdp-receipt-title-area h2 {
     margin-bottom: 5px;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
 }
 
 .eddcdp-receipt-subtitle {
@@ -801,11 +719,6 @@
     flex-wrap: wrap;
 }
 
-.eddcdp-btn-small {
-    padding: 6px 12px;
-    font-size: 0.85rem;
-}
-
 .eddcdp-receipt-payment-summary {
     display: grid;
     gap: 10px;
@@ -849,66 +762,8 @@
     flex-wrap: wrap;
 }
 
-/* Print styles */
-@media print {
-    .eddcdp-receipt-actions {
-        display: none;
-    }
-    
-    .eddcdp-dashboard-header,
-    .eddcdp-stats-grid,
-    .eddcdp-dashboard-nav {
-        display: none;
-    }
-    
-    .eddcdp-receipt-card {
-        box-shadow: none;
-        border: 1px solid #ddd;
-        margin-bottom: 20px;
-    }
-}
-
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-    .eddcdp-receipt-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .eddcdp-receipt-actions {
-        width: 100%;
-        justify-content: flex-start;
-    }
-    
-    .eddcdp-receipt-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .eddcdp-receipt-download-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-    
-    .eddcdp-receipt-download-price {
-        text-align: left;
-    }
-    
-    .eddcdp-receipt-download-actions {
-        width: 100%;
-    }
-    
-    .eddcdp-receipt-help-actions {
-        flex-direction: column;
-    }
-}
-
-
-
-/* Enhanced Invoice Styles for EDD Customer Dashboard Pro */
-
-/* Invoice Header Styles */
-.eddcdp-receipt-header {
+/* Invoice Styles */
+.eddcdp-invoice-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -917,17 +772,6 @@
     gap: 20px;
     border-bottom: 2px solid #e9ecef;
     padding-bottom: 20px;
-}
-
-.eddcdp-receipt-title-area {
-    flex: 1;
-}
-
-.eddcdp-receipt-title-area h2 {
-    margin-bottom: 10px;
-    font-size: 2rem;
-    font-weight: 700;
-    color: #333;
 }
 
 .eddcdp-invoice-status {
@@ -942,20 +786,11 @@
     font-size: 1.1rem;
 }
 
-.eddcdp-receipt-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: flex-start;
-}
-
-/* Invoice Content Layout */
 .eddcdp-invoice-content {
     display: grid;
     gap: 30px;
 }
 
-/* Invoice Header Section (From/To) */
 .eddcdp-invoice-header-section {
     background: #f8f9fa;
     border-radius: 8px;
@@ -988,28 +823,6 @@
     color: #333;
 }
 
-.eddcdp-update-info {
-    margin-top: 10px;
-}
-
-.eddcdp-btn-link {
-    background: none;
-    border: 1px solid #0073aa;
-    color: #0073aa;
-    padding: 4px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-
-.eddcdp-btn-link:hover {
-    background: #0073aa;
-    color: white;
-}
-
-/* Invoice Items Section */
 .eddcdp-invoice-items-section {
     border: 1px solid #e9ecef;
     border-radius: 8px;
@@ -1075,7 +888,6 @@
     min-width: 120px;
 }
 
-/* Invoice Totals */
 .eddcdp-invoice-totals {
     background: #f8f9fa;
     border-radius: 8px;
@@ -1129,17 +941,315 @@
     color: #00b894;
 }
 
-/* Invoice Actions */
-.eddcdp-invoice-actions {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    padding: 20px;
-    border-top: 1px solid #e9ecef;
-    flex-wrap: wrap;
+/* Copy Tooltip */
+.eddcdp-copy-tooltip {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    animation: eddcdpFadeInOut 1.5s ease;
+    z-index: 1000;
 }
 
-/* Update Form Modal */
+.eddcdp-copy-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #333;
+}
+
+@keyframes eddcdpFadeInOut {
+    0% { 
+        opacity: 0; 
+        transform: translateX(-50%) translateY(-5px); 
+    }
+    50% { 
+        opacity: 1; 
+        transform: translateX(-50%) translateY(0); 
+    }
+    100% { 
+        opacity: 0; 
+        transform: translateX(-50%) translateY(-5px); 
+    }
+}
+
+/* Theme Override Protection - Ensure WordPress theme doesn't override our styles */
+.eddcdp-dashboard-container,
+.eddcdp-dashboard-container * {
+    box-sizing: border-box !important;
+}
+
+.eddcdp-dashboard-container h1,
+.eddcdp-dashboard-container h2,
+.eddcdp-dashboard-container h3,
+.eddcdp-dashboard-container h4 {
+    line-height: 1.2 !important;
+    margin: 0 !important;
+}
+
+.eddcdp-dashboard-container p {
+    margin: 0 !important;
+}
+
+.eddcdp-dashboard-container a {
+    text-decoration: none !important;
+}
+
+.eddcdp-dashboard-container a:hover {
+    text-decoration: none !important;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .eddcdp-dashboard-container {
+        padding: 15px;
+    }
+
+    .eddcdp-welcome-section {
+        text-align: center;
+    }
+
+    .eddcdp-welcome-text h1 {
+        font-size: 2rem;
+    }
+
+    .eddcdp-stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .eddcdp-nav-tabs {
+        justify-content: center;
+    }
+
+    .eddcdp-nav-tab {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+
+    .eddcdp-purchase-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .eddcdp-wishlist-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .eddcdp-site-input-group {
+        flex-direction: column;
+    }
+
+    .eddcdp-order-actions {
+        flex-direction: column;
+    }
+
+    .eddcdp-product-actions {
+        flex-direction: column;
+    }
+
+    .eddcdp-receipt-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .eddcdp-receipt-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .eddcdp-invoice-from-to {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .eddcdp-invoice-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .eddcdp-item-price {
+        align-self: flex-end;
+        font-size: 1.1rem;
+    }
+
+    .eddcdp-totals-table {
+        max-width: none;
+    }
+
+    .eddcdp-receipt-download-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .eddcdp-receipt-download-price {
+        text-align: left;
+    }
+
+    .eddcdp-receipt-download-actions {
+        width: 100%;
+    }
+
+    .eddcdp-receipt-help-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .eddcdp-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .eddcdp-nav-tabs {
+        flex-direction: column;
+    }
+
+    .eddcdp-nav-tab {
+        justify-content: center;
+    }
+
+    .eddcdp-order-meta {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .eddcdp-product-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .eddcdp-invoice-status {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .eddcdp-invoice-header-section {
+        padding: 15px;
+    }
+
+    .eddcdp-invoice-totals {
+        padding: 15px;
+    }
+
+    .eddcdp-total-row {
+        padding: 8px 0;
+        font-size: 0.9rem;
+    }
+
+    .eddcdp-grand-total {
+        font-size: 1.1rem;
+    }
+
+    .eddcdp-receipt-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .eddcdp-receipt-actions,
+    .eddcdp-dashboard-header,
+    .eddcdp-stats-grid,
+    .eddcdp-dashboard-nav {
+        display: none !important;
+    }
+    
+    .eddcdp-receipt-card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        margin-bottom: 20px !important;
+        page-break-inside: avoid;
+    }
+
+    .eddcdp-invoice-header-section,
+    .eddcdp-invoice-items-section,
+    .eddcdp-invoice-totals {
+        break-inside: avoid;
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+
+    .eddcdp-invoice-from h3,
+    .eddcdp-invoice-to h3 {
+        background: #f0f0f0 !important;
+        print-color-adjust: exact;
+    }
+
+    body {
+        background: white !important;
+        font-size: 12pt;
+        line-height: 1.4;
+    }
+
+    .eddcdp-dashboard-container {
+        background: white !important;
+        padding: 0 !important;
+        max-width: none !important;
+        margin: 0 !important;
+        min-height: auto !important;
+    }
+
+    .eddcdp-receipt-title-area h2 {
+        font-size: 24pt;
+        margin-bottom: 10pt;
+    }
+
+    .eddcdp-invoice-date {
+        font-size: 12pt;
+    }
+
+    .eddcdp-invoice-item {
+        padding: 10pt;
+    }
+
+    .eddcdp-item-price {
+        font-size: 12pt;
+    }
+
+    .eddcdp-grand-total {
+        font-size: 14pt;
+    }
+}
+
+/* Full Screen Mode Styles */
+.eddcdp-fullscreen-mode .eddcdp-fullscreen-toggle {
+    display: none !important;
+}
+
+/* Status Badge Enhanced Styles */
+.eddcdp-status-badge.eddcdp-status-publish {
+    background: #d4edda;
+    color: #155724;
+    border: 2px solid #c3e6cb;
+}
+
+.eddcdp-status-badge.eddcdp-status-pending {
+    background: #fff3cd;
+    color: #856404;
+    border: 2px solid #ffeaa7;
+}
+
+.eddcdp-status-badge.eddcdp-status-failed {
+    background: #f8d7da;
+    color: #721c24;
+    border: 2px solid #f5c6cb;
+}
+
+/* Form Elements for Invoice Updates */
 .eddcdp-update-form {
     position: fixed;
     top: 0;
@@ -1152,15 +1262,14 @@
     align-items: center;
     justify-content: center;
     padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
 }
 
-.eddcdp-update-overlay {
-    background: rgba(0, 0, 0, 0.5);
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.eddcdp-update-form[style*="block"] {
+    opacity: 1;
+    visibility: visible;
 }
 
 .eddcdp-update-modal {
@@ -1172,13 +1281,12 @@
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    transform: translateY(-50px);
+    transition: transform 0.3s ease;
 }
 
-.eddcdp-update-modal h3 {
-    margin-bottom: 20px;
-    font-size: 1.5rem;
-    color: #333;
-    text-align: center;
+.eddcdp-update-form[style*="block"] .eddcdp-update-modal {
+    transform: translateY(0);
 }
 
 .eddcdp-form-row {
@@ -1225,7 +1333,23 @@
     border-top: 1px solid #e9ecef;
 }
 
-/* Enhanced Button Styles */
+.eddcdp-btn-link {
+    background: none;
+    border: 1px solid #0073aa;
+    color: #0073aa;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.eddcdp-btn-link:hover {
+    background: #0073aa;
+    color: white;
+}
+
 .eddcdp-btn-primary {
     background: linear-gradient(135deg, #0073aa, #005a87);
     color: white;
@@ -1250,280 +1374,21 @@
     text-decoration: none;
 }
 
-.eddcdp-btn-outline {
-    background: transparent;
-    border: 2px solid #667eea;
-    color: #667eea;
-    border-radius: 6px;
-    padding: 8px 18px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+/* Screen-only and PDF-only content */
+.eddcdp-screen-only {
+    display: block;
 }
 
-.eddcdp-btn-outline:hover {
-    background: #667eea;
-    color: white;
-    transform: translateY(-2px);
-    text-decoration: none;
+.eddcdp-pdf-only {
+    display: none;
 }
 
-/* Status Badge Updates */
-.eddcdp-status-badge {
-    display: inline-block;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border: 2px solid;
-}
-
-.eddcdp-status-badge.eddcdp-status-complete,
-.eddcdp-status-badge.eddcdp-status-completed {
-    background: #d4edda;
-    color: #155724;
-    border-color: #c3e6cb;
-}
-
-.eddcdp-status-badge.eddcdp-status-publish {
-    background: #d4edda;
-    color: #155724;
-    border-color: #c3e6cb;
-}
-
-.eddcdp-status-badge.eddcdp-status-pending {
-    background: #fff3cd;
-    color: #856404;
-    border-color: #ffeaa7;
-}
-
-.eddcdp-status-badge.eddcdp-status-failed {
-    background: #f8d7da;
-    color: #721c24;
-    border-color: #f5c6cb;
-}
-
-/* Print Styles */
 @media print {
-    .eddcdp-receipt-actions,
-    .eddcdp-invoice-actions,
-    .eddcdp-update-info,
-    .eddcdp-dashboard-header,
-    .eddcdp-stats-grid,
-    .eddcdp-dashboard-nav {
+    .eddcdp-screen-only {
         display: none !important;
     }
     
-    .eddcdp-receipt-section {
-        margin: 0;
-        padding: 0;
-    }
-    
-    .eddcdp-invoice-content {
-        gap: 20px;
-    }
-    
-    .eddcdp-invoice-header-section,
-    .eddcdp-invoice-items-section,
-    .eddcdp-invoice-totals {
-        break-inside: avoid;
-        border: 1px solid #000;
-        box-shadow: none;
-    }
-    
-    .eddcdp-invoice-from-to {
-        grid-template-columns: 1fr 1fr;
-        gap: 30px;
-    }
-    
-    .eddcdp-invoice-from h3,
-    .eddcdp-invoice-to h3 {
-        background: #f0f0f0;
-        print-color-adjust: exact;
-    }
-    
-    body {
-        background: white !important;
-        font-size: 12pt;
-        line-height: 1.4;
-    }
-    
-    .eddcdp-dashboard-container {
-        background: white !important;
-        padding: 0 !important;
-        max-width: none !important;
-        margin: 0 !important;
-    }
-    
-    .eddcdp-receipt-title-area h2 {
-        font-size: 24pt;
-        margin-bottom: 10pt;
-    }
-    
-    .eddcdp-invoice-date {
-        font-size: 12pt;
-    }
-    
-    .eddcdp-invoice-item {
-        padding: 10pt;
-    }
-    
-    .eddcdp-item-price {
-        font-size: 12pt;
-    }
-    
-    .eddcdp-grand-total {
-        font-size: 14pt;
-    }
-}
-
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-    .eddcdp-receipt-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-    
-    .eddcdp-receipt-actions {
-        width: 100%;
-        justify-content: flex-start;
-    }
-    
-    .eddcdp-invoice-from-to {
-        grid-template-columns: 1fr;
-        gap: 25px;
-    }
-    
-    .eddcdp-invoice-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-    
-    .eddcdp-item-price {
-        align-self: flex-end;
-        font-size: 1.1rem;
-    }
-    
-    .eddcdp-totals-table {
-        max-width: none;
-    }
-    
-    .eddcdp-invoice-actions {
-        flex-direction: column;
-    }
-    
-    .eddcdp-form-row {
-        grid-template-columns: 1fr;
-        gap: 0;
-    }
-    
-    .eddcdp-form-actions {
-        flex-direction: column;
-    }
-    
-    .eddcdp-update-modal {
-        padding: 20px;
-        margin: 10px;
-    }
-    
-    .eddcdp-receipt-title-area h2 {
-        font-size: 1.5rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .eddcdp-invoice-status {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-    
-    .eddcdp-invoice-header-section {
-        padding: 15px;
-    }
-    
-    .eddcdp-invoice-totals {
-        padding: 15px;
-    }
-    
-    .eddcdp-total-row {
-        padding: 8px 0;
-        font-size: 0.9rem;
-    }
-    
-    .eddcdp-grand-total {
-        font-size: 1.1rem;
-    }
-}
-
-/* PDF Generation Specific Styles */
-@media screen {
     .eddcdp-pdf-only {
-        display: none;
+        display: block !important;
     }
-}
-
-@media print {
-    .eddcdp-pdf-only {
-        display: block;
-    }
-    
-    .eddcdp-screen-only {
-        display: none;
-    }
-}
-
-/* Animation for smooth transitions */
-.eddcdp-update-form {
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.eddcdp-update-form[style*="block"] {
-    opacity: 1;
-    visibility: visible;
-}
-
-.eddcdp-update-modal {
-    transform: translateY(-50px);
-    transition: transform 0.3s ease;
-}
-
-.eddcdp-update-form[style*="block"] .eddcdp-update-modal {
-    transform: translateY(0);
-}
-
-/* Loading states */
-.eddcdp-loading {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-.eddcdp-loading::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    border: 2px solid #f3f3f3;
-    border-top: 2px solid #0073aa;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    transform: translate(-50%, -50%);
-}
-
-@keyframes spin {
-    0% { transform: translate(-50%, -50%) rotate(0deg); }
-    100% { transform: translate(-50%, -50%) rotate(360deg); }
 }

@@ -222,42 +222,53 @@ class EDDCDP_Dashboard_Data {
     /**
      * Get customer licenses using proper EDD Software Licensing methods - ORIGINAL WORKING VERSION
      */
-    public function get_customer_licenses($user_id) {
-        if (!class_exists('EDD_Software_Licensing')) {
-            return array();
-        }
-        
-        $licensing = edd_software_licensing();
-        if (!$licensing) {
-            return array();
-        }
-        
-        // Try the standard method first
-        if (method_exists($licensing, 'get_license_keys_of_user')) {
-            $licenses = $licensing->get_license_keys_of_user($user_id);
-        } else {
-            // Fallback for older versions - get licenses via database query
-            global $wpdb;
+public function get_customer_licenses($user_id) {
+    if (!$this->is_licensing_active()) {
+        return array();
+    }
+    
+    $licenses = array();
+    
+    // Method 1: Use the modern licenses database
+    if (class_exists('EDD_SL_License_DB') && isset(edd_software_licensing()->licenses_db)) {
+        try {
+            $licenses_db = edd_software_licensing()->licenses_db;
             
+            if (method_exists($licenses_db, 'get_licenses')) {
+                $licenses = $licenses_db->get_licenses(array(
+                    'user_id' => $user_id,
+                    'number' => 9999 // Get all licenses
+                ));
+            }
+        } catch (Exception $e) {
+            error_log('EDDCDP: Failed to get licenses via modern method: ' . $e->getMessage());
+        }
+    }
+    
+    // Method 2: Fallback to direct database query
+    if (empty($licenses)) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'edd_licenses';
+        
+        // Check if the table exists
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        $table_exists = $wpdb->get_var($wpdb->prepare(
+            "SHOW TABLES LIKE %s",
+            $wpdb->esc_like($table_name)
+        ));
+        
+        if ($table_exists === $table_name) {
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-            $license_ids = $wpdb->get_col($wpdb->prepare(
-                "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'edd_license' AND post_author = %d AND post_status = 'publish'",
+            $licenses = $wpdb->get_results($wpdb->prepare(
+                "SELECT * FROM {$table_name} WHERE user_id = %d ORDER BY date_created DESC",
                 $user_id
             ));
-            
-            $licenses = array();
-            if ($license_ids) {
-                foreach ($license_ids as $license_id) {
-                    $license = edd_software_licensing()->get_license($license_id);
-                    if ($license) {
-                        $licenses[] = $license;
-                    }
-                }
-            }
         }
-        
-        return $licenses ? $licenses : array();
     }
+    
+    return $licenses ? $licenses : array();
+}
     
     /**
      * Get customer wishlist items
@@ -427,125 +438,291 @@ class EDDCDP_Dashboard_Data {
     /**
      * FIXED: Get license sites with simple fallback methods
      */
-    public function get_license_sites($license_key) {
-        if (!$this->is_licensing_active()) {
-            return array();
-        }
-        
-        // Get the license object using the key
-        $license = edd_software_licensing()->get_license($license_key);
-        if (!$license) {
-            return array();
-        }
-        
-        $sites = array();
-        $license_id = is_object($license) && isset($license->ID) ? $license->ID : $license;
-        
-        // Method 1: Try the native get_activations method first
-        if (is_object($license) && method_exists($license, 'get_activations')) {
-            $activations = $license->get_activations();
-            if ($activations && is_array($activations)) {
-                foreach ($activations as $activation) {
-                    if (is_object($activation) && isset($activation->site_name)) {
-                        $sites[] = $activation;
-                    } elseif (is_array($activation) && isset($activation['site_name'])) {
-                        $sites[] = (object) $activation;
-                    }
-                }
-            }
-        }
-        
-        // Method 2: Simple database fallback
-        if (empty($sites)) {
-            // Get sites from _edd_sl_sites meta
-            $site_data = get_post_meta($license_id, '_edd_sl_sites', true);
-            if (is_array($site_data) && !empty($site_data)) {
-                foreach ($site_data as $site_url) {
-                    if (!empty($site_url)) {
-                        $sites[] = (object) array('site_name' => $site_url);
-                    }
-                }
-            }
-        }
-        
-        // Method 3: Check individual site meta keys
-        if (empty($sites)) {
-            global $wpdb;
+public function get_license_sites($license_key) {
+    if (!$this->is_licensing_active()) {
+        return array();
+    }
+    
+    // Get the license ID first - this is the modern approach
+    $license_id = $this->get_license_id_by_key($license_key);
+    if (!$license_id) {
+        return array();
+    }
+    
+    $sites = array();
+    
+    // Method 1: Use the modern activations database directly (EDD SL 3.6+)
+    if (class_exists('EDD_SL_Activations_DB') && isset(edd_software_licensing()->activations_db)) {
+        try {
+            $activations_db = edd_software_licensing()->activations_db;
             
+            if (method_exists($activations_db, 'get_activations')) {
+                $activations = $activations_db->get_activations(array(
+                    'license_id' => $license_id,
+                    'activated' => 1
+                ));
+                
+                if ($activations && is_array($activations)) {
+                    foreach ($activations as $activation) {
+                        if (is_object($activation) && isset($activation->site_name) && !empty($activation->site_name)) {
+                            $sites[] = $activation;
+                        }
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            error_log('EDDCDP: Modern activations method failed: ' . $e->getMessage());
+        }
+    }
+    
+    // Method 2: Direct database query as fallback (avoids deprecated meta)
+    if (empty($sites)) {
+        global $wpdb;
+        
+        // Query the activations table directly
+        $table_name = $wpdb->prefix . 'edd_license_activations';
+        
+        // Check if the table exists
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        $table_exists = $wpdb->get_var($wpdb->prepare(
+            "SHOW TABLES LIKE %s",
+            $wpdb->esc_like($table_name)
+        ));
+        
+        if ($table_exists === $table_name) {
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-            $site_metas = $wpdb->get_results($wpdb->prepare(
-                "SELECT meta_value FROM {$wpdb->postmeta} 
-                WHERE post_id = %d 
-                AND meta_key LIKE '_edd_sl_site_%%' 
-                AND meta_value != ''",
+            $activations = $wpdb->get_results($wpdb->prepare(
+                "SELECT site_name FROM {$table_name} WHERE license_id = %d AND activated = 1",
                 $license_id
             ));
             
-            if ($site_metas) {
-                foreach ($site_metas as $site_meta) {
-                    $sites[] = (object) array('site_name' => $site_meta->meta_value);
+            if ($activations) {
+                foreach ($activations as $activation) {
+                    if (!empty($activation->site_name)) {
+                        $sites[] = $activation;
+                    }
                 }
             }
         }
-        
-        return $sites;
     }
     
-    /**
-     * SIMPLE: Manual license site activation
-     */
-    private function manual_activate_license_site($license_id, $site_url) {
-        // Get current sites
-        $current_sites = get_post_meta($license_id, '_edd_sl_sites', true);
-        if (!is_array($current_sites)) {
-            $current_sites = array();
-        }
-        
-        // Add new site if not already present
-        if (!in_array($site_url, $current_sites)) {
-            $current_sites[] = $site_url;
-            
-            // Update the sites meta
-            $result = update_post_meta($license_id, '_edd_sl_sites', $current_sites);
-            
-            // Also add individual site meta for compatibility
-            $site_key = '_edd_sl_site_' . md5($site_url);
-            add_post_meta($license_id, $site_key, $site_url);
-            
-            return $result !== false;
-        }
-        
+    return $sites;
+}
+    
+    
+private function get_license_id_by_key($license_key) {
+    if (!$this->is_licensing_active()) {
         return false;
     }
     
-    /**
-     * SIMPLE: Manual license site deactivation
-     */
-    private function manual_deactivate_license_site($license_id, $site_url) {
-        // Get current sites
-        $current_sites = get_post_meta($license_id, '_edd_sl_sites', true);
-        if (!is_array($current_sites)) {
-            $current_sites = array();
+    // Try the modern licenses database first
+    if (class_exists('EDD_SL_License_DB') && isset(edd_software_licensing()->licenses_db)) {
+        try {
+            $licenses_db = edd_software_licensing()->licenses_db;
+            
+            if (method_exists($licenses_db, 'get_licenses')) {
+                $licenses = $licenses_db->get_licenses(array(
+                    'license_key' => $license_key,
+                    'number' => 1
+                ));
+                
+                if ($licenses && is_array($licenses) && !empty($licenses[0])) {
+                    return $licenses[0]->id;
+                }
+            }
+        } catch (Exception $e) {
+            error_log('EDDCDP: Failed to get license ID via modern method: ' . $e->getMessage());
         }
+    }
+    
+    // Fallback: Direct database query
+    global $wpdb;
+    
+    $table_name = $wpdb->prefix . 'edd_licenses';
+    
+    // Check if the table exists
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+    $table_exists = $wpdb->get_var($wpdb->prepare(
+        "SHOW TABLES LIKE %s",
+        $wpdb->esc_like($table_name)
+    ));
+    
+    if ($table_exists === $table_name) {
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        $license_id = $wpdb->get_var($wpdb->prepare(
+            "SELECT id FROM {$table_name} WHERE license_key = %s LIMIT 1",
+            $license_key
+        ));
         
-        // Remove site if present
-        $site_index = array_search($site_url, $current_sites);
-        if ($site_index !== false) {
-            unset($current_sites[$site_index]);
-            $current_sites = array_values($current_sites); // Re-index array
-            
-            // Update the sites meta
-            $result = update_post_meta($license_id, '_edd_sl_sites', $current_sites);
-            
-            // Also remove individual site meta
-            $site_key = '_edd_sl_site_' . md5($site_url);
-            delete_post_meta($license_id, $site_key);
-            
-            return $result !== false;
-        }
-        
+        return $license_id ? intval($license_id) : false;
+    }
+    
+    return false;
+}    
+    
+/**
+ * IMPROVED: License site activation compatible with EDD SL 3.6+
+ */
+private function manual_activate_license_site($license_id, $site_url) {
+    if (!$this->is_licensing_active()) {
         return false;
     }
+    
+    // Use the modern activations database
+    if (class_exists('EDD_SL_Activations_DB') && isset(edd_software_licensing()->activations_db)) {
+        try {
+            $activations_db = edd_software_licensing()->activations_db;
+            
+            if (method_exists($activations_db, 'insert')) {
+                $activation_data = array(
+                    'license_id' => $license_id,
+                    'site_name' => $site_url,
+                    'activated' => 1,
+                    'date_created' => current_time('mysql'),
+                    'date_activated' => current_time('mysql')
+                );
+                
+                $result = $activations_db->insert($activation_data);
+                
+                if ($result) {
+                    // Update activation count using modern method
+                    $this->update_license_activation_count($license_id, 1);
+                    return true;
+                }
+            }
+        } catch (Exception $e) {
+            error_log('EDDCDP: Modern activation failed: ' . $e->getMessage());
+        }
+    }
+    
+    // Fallback: Direct database insertion
+    global $wpdb;
+    
+    $table_name = $wpdb->prefix . 'edd_license_activations';
+    
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+    $result = $wpdb->insert(
+        $table_name,
+        array(
+            'license_id' => $license_id,
+            'site_name' => $site_url,
+            'activated' => 1,
+            'date_created' => current_time('mysql'),
+            'date_activated' => current_time('mysql')
+        ),
+        array('%d', '%s', '%d', '%s', '%s')
+    );
+    
+    if ($result !== false) {
+        $this->update_license_activation_count($license_id, 1);
+        return true;
+    }
+    
+    return false;
+}
+    
+/**
+ * IMPROVED: License site deactivation compatible with EDD SL 3.6+
+ */
+private function manual_deactivate_license_site($license_id, $site_url) {
+    if (!$this->is_licensing_active()) {
+        return false;
+    }
+    
+    // Use the modern activations database
+    if (class_exists('EDD_SL_Activations_DB') && isset(edd_software_licensing()->activations_db)) {
+        try {
+            $activations_db = edd_software_licensing()->activations_db;
+            
+            if (method_exists($activations_db, 'delete')) {
+                $where = array(
+                    'license_id' => $license_id,
+                    'site_name' => $site_url
+                );
+                
+                $result = $activations_db->delete($where);
+                
+                if ($result) {
+                    // Update activation count using modern method
+                    $this->update_license_activation_count($license_id, -1);
+                    return true;
+                }
+            }
+        } catch (Exception $e) {
+            error_log('EDDCDP: Modern deactivation failed: ' . $e->getMessage());
+        }
+    }
+    
+    // Fallback: Direct database deletion
+    global $wpdb;
+    
+    $table_name = $wpdb->prefix . 'edd_license_activations';
+    
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+    $result = $wpdb->delete(
+        $table_name,
+        array(
+            'license_id' => $license_id,
+            'site_name' => $site_url
+        ),
+        array('%d', '%s')
+    );
+    
+    if ($result !== false) {
+        $this->update_license_activation_count($license_id, -1);
+        return true;
+    }
+    
+    return false;
+}
+    
+/**
+ * Helper method to update activation count (avoiding deprecated meta)
+ */
+private function update_license_activation_count($license_id, $change) {
+    // Use the modern licenses database if available
+    if (class_exists('EDD_SL_License_DB') && isset(edd_software_licensing()->licenses_db)) {
+        try {
+            $licenses_db = edd_software_licensing()->licenses_db;
+            
+            if (method_exists($licenses_db, 'get_license')) {
+                $license = $licenses_db->get_license($license_id);
+                
+                if ($license && isset($license->activation_count)) {
+                    $new_count = max(0, intval($license->activation_count) + $change);
+                    
+                    if (method_exists($licenses_db, 'update')) {
+                        return $licenses_db->update($license_id, array('activation_count' => $new_count));
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            error_log('EDDCDP: Failed to update activation count via modern method: ' . $e->getMessage());
+        }
+    }
+    
+    // Fallback: Direct database update
+    global $wpdb;
+    
+    $table_name = $wpdb->prefix . 'edd_licenses';
+    
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+    $current_count = $wpdb->get_var($wpdb->prepare(
+        "SELECT activation_count FROM {$table_name} WHERE id = %d",
+        $license_id
+    ));
+    
+    $new_count = max(0, intval($current_count) + $change);
+    
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+    return $wpdb->update(
+        $table_name,
+        array('activation_count' => $new_count),
+        array('id' => $license_id),
+        array('%d'),
+        array('%d')
+    );
+}    
     
     /**
      * Safely get download price from various sources

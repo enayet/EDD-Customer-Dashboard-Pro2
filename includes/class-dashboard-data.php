@@ -1,8 +1,8 @@
 <?php
 /**
- * Enhanced Dashboard Data Class with Invoice Support and License Management
+ * Enhanced Dashboard Data Class - Form-based License Management
  * 
- * Handles data retrieval and processing for dashboard sections including invoice functionality
+ * Handles data retrieval and processing for dashboard sections with form-based license management
  */
 
 if (!defined('ABSPATH')) {
@@ -12,12 +12,11 @@ if (!defined('ABSPATH')) {
 class EDDCDP_Dashboard_Data {
     
     public function __construct() {
-        // Add AJAX handlers (keeping for other features that might need them)
-        add_action('wp_ajax_eddcdp_remove_wishlist', array($this, 'ajax_remove_wishlist'));
+        // Keep only essential AJAX handlers for features that actually need them
         add_action('wp_ajax_eddcdp_update_billing', array($this, 'ajax_update_billing'));
         add_action('wp_ajax_eddcdp_generate_pdf', array($this, 'ajax_generate_pdf'));
         
-        // Add form processing for license management - hook early to catch POST requests
+        // Form processing for license management - hook early to catch POST requests
         add_action('init', array($this, 'process_license_actions'));
     }
     
@@ -900,6 +899,10 @@ class EDDCDP_Dashboard_Data {
             wp_die(__('Failed to deactivate license. Please try again or contact support.', 'edd-customer-dashboard-pro'));
         }
     }
+    
+    /**
+     * AJAX: Update billing information (kept for invoice updates)
+     */
     public function ajax_update_billing() {
         // FIXED: Check if nonce exists before accessing it
         if (!isset($_POST['eddcdp_billing_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['eddcdp_billing_nonce'])), 'eddcdp_update_billing')) {
@@ -1045,228 +1048,6 @@ class EDDCDP_Dashboard_Data {
             'message' => __('Please use the print function in your browser to generate a PDF.', 'edd-customer-dashboard-pro'),
             'print_url' => add_query_arg('print', '1')
         ));
-    }
-    
-    /**
-     * Enhanced license activation with better error handling
-     */
-    public function ajax_activate_license() {
-        // FIXED: Check if nonce exists before accessing it
-        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'eddcdp_nonce')) {
-            wp_send_json_error(__('Security verification failed.', 'edd-customer-dashboard-pro'));
-        }
-        
-        if (!is_user_logged_in()) {
-            wp_send_json_error(__('Please log in first.', 'edd-customer-dashboard-pro'));
-        }
-        
-        // FIXED: Check if required POST data exists before accessing
-        if (!isset($_POST['license_key']) || !isset($_POST['site_url'])) {
-            wp_send_json_error(__('Required parameters missing.', 'edd-customer-dashboard-pro'));
-        }
-        
-        $license_key = sanitize_text_field(wp_unslash($_POST['license_key']));
-        $site_url = esc_url_raw(wp_unslash($_POST['site_url']));
-        
-        if (empty($license_key) || empty($site_url)) {
-            wp_send_json_error(__('License key and site URL are required.', 'edd-customer-dashboard-pro'));
-        }
-        
-        // Enhanced URL validation
-        if (!filter_var($site_url, FILTER_VALIDATE_URL)) {
-            wp_send_json_error(__('Please enter a valid URL.', 'edd-customer-dashboard-pro'));
-        }
-        
-        // Check URL format
-        $parsed_url = parse_url($site_url);
-        if (!isset($parsed_url['scheme']) || !in_array($parsed_url['scheme'], array('http', 'https'))) {
-            wp_send_json_error(__('URL must start with http:// or https://', 'edd-customer-dashboard-pro'));
-        }
-        
-        if (!$this->is_licensing_active()) {
-            wp_send_json_error(__('Software Licensing is not active.', 'edd-customer-dashboard-pro'));
-        }
-        
-        // Get license
-        $license = edd_software_licensing()->get_license($license_key);
-        if (!$license) {
-            wp_send_json_error(__('Invalid license key.', 'edd-customer-dashboard-pro'));
-        }
-        
-        // Check if user owns this license
-        if ($license->user_id != get_current_user_id()) {
-            wp_send_json_error(__('You do not own this license.', 'edd-customer-dashboard-pro'));
-        }
-        
-        // Check if license is expired
-        if (method_exists($license, 'is_expired') && $license->is_expired()) {
-            wp_send_json_error(__('This license has expired. Please renew it first.', 'edd-customer-dashboard-pro'));
-        }
-        
-        // Check activation limit
-        if ($license->activation_limit > 0 && $license->activation_count >= $license->activation_limit) {
-            wp_send_json_error(sprintf(
-                __('License activation limit reached (%d/%d). Please deactivate a site first.', 'edd-customer-dashboard-pro'),
-                $license->activation_count,
-                $license->activation_limit
-            ));
-        }
-        
-        // Check if site is already activated
-        $existing_sites = $this->get_license_sites($license_key);
-        foreach ($existing_sites as $site) {
-            if (isset($site->site_name) && $site->site_name === $site_url) {
-                wp_send_json_error(__('This site is already activated for this license.', 'edd-customer-dashboard-pro'));
-            }
-        }
-        
-        // Activate license using proper EDD Software Licensing methods
-        if (method_exists($license, 'add_site')) {
-            $result = $license->add_site($site_url);
-        } else {
-            // Fallback method for older versions
-            $result = edd_software_licensing()->insert_site($license->ID, $site_url);
-        }
-        
-        if ($result) {
-            // Log the activation
-            $this->log_license_activity($license, 'activated', $site_url);
-            
-            wp_send_json_success(array(
-                'message' => __('License activated successfully!', 'edd-customer-dashboard-pro'),
-                'site_url' => $site_url,
-                'activations_remaining' => max(0, $license->activation_limit - ($license->activation_count + 1))
-            ));
-        } else {
-            wp_send_json_error(__('Failed to activate license. The site may already be activated or there was a server error.', 'edd-customer-dashboard-pro'));
-        }
-    }
-    
-    /**
-     * Enhanced license deactivation with better error handling
-     */
-    public function ajax_deactivate_license() {
-        // FIXED: Check if nonce exists before accessing it
-        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'eddcdp_nonce')) {
-            wp_send_json_error(__('Security verification failed.', 'edd-customer-dashboard-pro'));
-        }
-        
-        if (!is_user_logged_in()) {
-            wp_send_json_error(__('Please log in first.', 'edd-customer-dashboard-pro'));
-        }
-        
-        // FIXED: Check if required POST data exists before accessing
-        if (!isset($_POST['license_key']) || !isset($_POST['site_url'])) {
-            wp_send_json_error(__('Required parameters missing.', 'edd-customer-dashboard-pro'));
-        }
-        
-        $license_key = sanitize_text_field(wp_unslash($_POST['license_key']));
-        $site_url = esc_url_raw(wp_unslash($_POST['site_url']));
-        
-        if (empty($license_key) || empty($site_url)) {
-            wp_send_json_error(__('License key and site URL are required.', 'edd-customer-dashboard-pro'));
-        }
-        
-        if (!$this->is_licensing_active()) {
-            wp_send_json_error(__('Software Licensing is not active.', 'edd-customer-dashboard-pro'));
-        }
-        
-        // Get license
-        $license = edd_software_licensing()->get_license($license_key);
-        if (!$license) {
-            wp_send_json_error(__('Invalid license key.', 'edd-customer-dashboard-pro'));
-        }
-        
-        // Check if user owns this license
-        if ($license->user_id != get_current_user_id()) {
-            wp_send_json_error(__('You do not own this license.', 'edd-customer-dashboard-pro'));
-        }
-        
-        // Verify the site is actually activated
-        $existing_sites = $this->get_license_sites($license_key);
-        $site_found = false;
-        foreach ($existing_sites as $site) {
-            if (isset($site->site_name) && $site->site_name === $site_url) {
-                $site_found = true;
-                break;
-            }
-        }
-        
-        if (!$site_found) {
-            wp_send_json_error(__('This site is not currently activated for this license.', 'edd-customer-dashboard-pro'));
-        }
-        
-        // Deactivate license using proper EDD Software Licensing methods
-        if (method_exists($license, 'remove_site')) {
-            $result = $license->remove_site($site_url);
-        } else {
-            // Fallback method for older versions
-            $result = edd_software_licensing()->delete_site($license->ID, $site_url);
-        }
-        
-        if ($result) {
-            // Log the deactivation
-            $this->log_license_activity($license, 'deactivated', $site_url);
-            
-            wp_send_json_success(array(
-                'message' => __('License deactivated successfully!', 'edd-customer-dashboard-pro'),
-                'site_url' => $site_url,
-                'activations_remaining' => max(0, $license->activation_limit - ($license->activation_count - 1))
-            ));
-        } else {
-            wp_send_json_error(__('Failed to deactivate license. Please try again or contact support.', 'edd-customer-dashboard-pro'));
-        }
-    }
-    
-    /**
-     * AJAX: Remove wishlist item - FIXED superglobal array access
-     */
-    public function ajax_remove_wishlist() {
-        // FIXED: Check if nonce exists before accessing it
-        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'eddcdp_nonce')) {
-            wp_send_json_error(__('Security verification failed.', 'edd-customer-dashboard-pro'));
-        }
-        
-        if (!is_user_logged_in()) {
-            wp_send_json_error(__('Please log in first.', 'edd-customer-dashboard-pro'));
-        }
-        
-        // FIXED: Check if download_id exists before accessing
-        if (!isset($_POST['download_id'])) {
-            wp_send_json_error(__('Download ID parameter missing.', 'edd-customer-dashboard-pro'));
-        }
-        
-        $download_id = absint($_POST['download_id']);
-        
-        if (empty($download_id)) {
-            wp_send_json_error(__('Download ID is required.', 'edd-customer-dashboard-pro'));
-        }
-        
-        if (!$this->is_wishlist_active()) {
-            wp_send_json_error(__('Wish Lists is not active.', 'edd-customer-dashboard-pro'));
-        }
-        
-        // Get user's wishlist
-        $wish_lists = edd_wl_get_wish_lists(array('user_id' => get_current_user_id()));
-        
-        if (!$wish_lists) {
-            wp_send_json_error(__('No wishlist found.', 'edd-customer-dashboard-pro'));
-        }
-        
-        $removed = false;
-        foreach ($wish_lists as $list) {
-            $result = edd_wl_remove_from_list($download_id, $list->ID);
-            if ($result) {
-                $removed = true;
-                break;
-            }
-        }
-        
-        if ($removed) {
-            wp_send_json_success(__('Item removed from wishlist!', 'edd-customer-dashboard-pro'));
-        } else {
-            wp_send_json_error(__('Failed to remove item from wishlist.', 'edd-customer-dashboard-pro'));
-        }
     }
     
     /**

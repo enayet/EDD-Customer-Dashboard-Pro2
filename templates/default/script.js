@@ -256,153 +256,6 @@ jQuery(document).ready(function($) {
         }, 100);
     });
     
-    // License activation functionality
-    $('.eddcdp-activate-license').on('click', function(e) {
-        e.preventDefault();
-        
-        const $btn = $(this);
-        const $input = $btn.siblings('.eddcdp-site-url');
-        const siteUrl = $input.val().trim();
-        const licenseKey = $input.data('license');
-        
-        if (!siteUrl) {
-            alert('Please enter a valid site URL');
-            $input.focus();
-            return;
-        }
-        
-        // Basic URL validation
-        const urlPattern = /^https?:\/\/.+/i;
-        if (!urlPattern.test(siteUrl)) {
-            alert('Please enter a valid URL starting with http:// or https://');
-            $input.focus();
-            return;
-        }
-        
-        // Show loading state
-        const originalHtml = $btn.html();
-        $btn.html('⏳ Activating...').prop('disabled', true);
-        
-        // AJAX call for license activation
-        $.ajax({
-            url: eddcdp_ajax.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'eddcdp_activate_license',
-                license_key: licenseKey,
-                site_url: siteUrl,
-                nonce: eddcdp_ajax.nonce
-            },
-            success: function(response) {
-                if (response.success) {
-                    alert('License activated successfully!');
-                    $input.val('');
-                    // Reload the section or update the UI
-                    location.reload();
-                } else {
-                    alert('Activation failed: ' + (response.data || 'Unknown error'));
-                }
-            },
-            error: function() {
-                alert('Network error. Please try again.');
-            },
-            complete: function() {
-                $btn.html(originalHtml).prop('disabled', false);
-            }
-        });
-    });
-    
-    // License deactivation functionality
-    $(document).on('click', '[data-license][data-site]', function(e) {
-        e.preventDefault();
-        
-        const $btn = $(this);
-        const licenseKey = $btn.data('license');
-        const siteUrl = $btn.data('site');
-        
-        if (!confirm('Are you sure you want to deactivate this license from ' + siteUrl + '?')) {
-            return;
-        }
-        
-        // Show loading state
-        const originalHtml = $btn.html();
-        $btn.html('⏳ Deactivating...').prop('disabled', true);
-        
-        // AJAX call for license deactivation
-        $.ajax({
-            url: eddcdp_ajax.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'eddcdp_deactivate_license',
-                license_key: licenseKey,
-                site_url: siteUrl,
-                nonce: eddcdp_ajax.nonce
-            },
-            success: function(response) {
-                if (response.success) {
-                    alert('License deactivated successfully!');
-                    // Reload the section or update the UI
-                    location.reload();
-                } else {
-                    alert('Deactivation failed: ' + (response.data || 'Unknown error'));
-                }
-            },
-            error: function() {
-                alert('Network error. Please try again.');
-            },
-            complete: function() {
-                $btn.html(originalHtml).prop('disabled', false);
-            }
-        });
-    });
-    
-    // Wishlist removal functionality
-    $('.eddcdp-remove-wishlist').on('click', function(e) {
-        e.preventDefault();
-        
-        const $btn = $(this);
-        const downloadId = $btn.data('download-id');
-        
-        if (!confirm('Are you sure you want to remove this item from your wishlist?')) {
-            return;
-        }
-        
-        // Show loading state
-        const originalHtml = $btn.html();
-        $btn.html('⏳ Removing...').prop('disabled', true);
-        
-        // AJAX call for wishlist removal
-        $.ajax({
-            url: eddcdp_ajax.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'eddcdp_remove_wishlist',
-                download_id: downloadId,
-                nonce: eddcdp_ajax.nonce
-            },
-            success: function(response) {
-                if (response.success) {
-                    // Remove the wishlist item with animation
-                    $btn.closest('.eddcdp-wishlist-item').fadeOut(300, function() {
-                        $(this).remove();
-                        
-                        // Check if wishlist is empty
-                        if ($('.eddcdp-wishlist-item').length === 0) {
-                            location.reload();
-                        }
-                    });
-                } else {
-                    alert('Failed to remove item: ' + (response.data || 'Unknown error'));
-                    $btn.html(originalHtml).prop('disabled', false);
-                }
-            },
-            error: function() {
-                alert('Network error. Please try again.');
-                $btn.html(originalHtml).prop('disabled', false);
-            }
-        });
-    });
-    
     // FAQ toggle functionality
     $('.eddcdp-faq-question').on('click', function() {
         const $answer = $(this).next('.eddcdp-faq-answer');
@@ -416,6 +269,86 @@ jQuery(document).ready(function($) {
             $icon.text('▲');
         }
     });
+    
+    // ENHANCED: License Form Enhancement (Form-based, no AJAX)
+    $('.eddcdp-activation-form-inner').on('submit', function() {
+        const $form = $(this);
+        const $submitBtn = $form.find('button[type="submit"]');
+        const $input = $form.find('input[name="site_url"]');
+        
+        // Basic client-side validation
+        const siteUrl = $input.val().trim();
+        if (!siteUrl) {
+            alert('Please enter a site URL');
+            $input.focus();
+            return false;
+        }
+        
+        // Basic URL validation
+        const urlPattern = /^https?:\/\/.+\..+/i;
+        if (!urlPattern.test(siteUrl)) {
+            alert('Please enter a valid URL starting with http:// or https://');
+            $input.focus();
+            return false;
+        }
+        
+        // Show loading state but let form submit normally
+        const originalText = $submitBtn.html();
+        $submitBtn.html('⏳ Activating...').prop('disabled', true);
+        $input.prop('disabled', true);
+        
+        // Add a small delay for visual feedback
+        setTimeout(function() {
+            // Form will submit naturally after this
+        }, 100);
+        
+        // Allow the form to submit normally (no preventDefault)
+        return true;
+    });
+    
+    // License Deactivation Form Enhancement
+    $('.eddcdp-deactivation-form').on('submit', function() {
+        const $form = $(this);
+        const $submitBtn = $form.find('button[type="submit"]');
+        
+        // Show loading state but let form submit normally
+        const originalText = $submitBtn.html();
+        $submitBtn.html('⏳ Deactivating...').prop('disabled', true);
+        
+        // Add a small delay for visual feedback
+        setTimeout(function() {
+            // Form will submit naturally after this
+        }, 100);
+        
+        // Allow the form to submit normally (no preventDefault)
+        return true;
+    });
+    
+    // Enhanced URL input validation with visual feedback
+    $('input[name="site_url"]').on('input', function() {
+        const $input = $(this);
+        const url = $input.val().trim();
+        const $btn = $input.closest('form').find('button[type="submit"]');
+        
+        if (url === '') {
+            $btn.prop('disabled', false);
+            $input.removeClass('eddcdp-input-error eddcdp-input-valid');
+            return;
+        }
+        
+        // Real-time URL validation
+        const urlPattern = /^https?:\/\/.+\..+/i;
+        if (urlPattern.test(url)) {
+            $input.removeClass('eddcdp-input-error').addClass('eddcdp-input-valid');
+            $btn.prop('disabled', false);
+        } else {
+            $input.removeClass('eddcdp-input-valid').addClass('eddcdp-input-error');
+            $btn.prop('disabled', true);
+        }
+    });
+    
+    // Auto-hide success messages after 5 seconds
+    $('.eddcdp-success-message').delay(5000).fadeOut(500);
     
     // ENHANCED: Responsive navigation for full screen mode
     if ($(window).width() <= 768) {
@@ -514,7 +447,9 @@ jQuery(document).ready(function($) {
         const $form = $(this);
         const $submitBtn = $form.find('input[type="submit"], button[type="submit"]');
         
-        if ($submitBtn.length) {
+        if ($submitBtn.length && !$submitBtn.hasClass('eddcdp-form-processed')) {
+            $submitBtn.addClass('eddcdp-form-processed');
+            
             const originalText = $submitBtn.val() || $submitBtn.text();
             $submitBtn.prop('disabled', true);
             
@@ -532,11 +467,12 @@ jQuery(document).ready(function($) {
                 } else {
                     $submitBtn.text(originalText);
                 }
+                $submitBtn.removeClass('eddcdp-form-processed');
             }, 10000);
         }
     });
     
-    // Enhanced error handling for AJAX requests
+    // Enhanced error handling
     $(document).ajaxError(function(event, xhr, settings, thrownError) {
         console.error('AJAX Error:', {
             url: settings.url,
@@ -626,7 +562,7 @@ jQuery(document).ready(function($) {
     }
 });
 
-// ENHANCED: Add CSS for transitions and full screen mode
+// ENHANCED: Add CSS for transitions and form enhancements
 $('<style>').prop('type', 'text/css').html(`
     .eddcdp-transitions-enabled * {
         transition: all 0.2s ease;
@@ -643,6 +579,17 @@ $('<style>').prop('type', 'text/css').html(`
     .eddcdp-printing .eddcdp-receipt-actions,
     .eddcdp-printing .eddcdp-fullscreen-header {
         display: none !important;
+    }
+    
+    /* Enhanced form input validation styles */
+    .eddcdp-input-valid {
+        border-color: #43e97b !important;
+        box-shadow: 0 0 0 3px rgba(67, 233, 123, 0.1) !important;
+    }
+    
+    .eddcdp-input-error {
+        border-color: #f5576c !important;
+        box-shadow: 0 0 0 3px rgba(245, 87, 108, 0.1) !important;
     }
     
     /* Full screen mode enhancements */
@@ -663,6 +610,27 @@ $('<style>').prop('type', 'text/css').html(`
         0% { opacity: 0.8; }
         50% { opacity: 1; }
         100% { opacity: 0.8; }
+    }
+    
+    /* License form enhancements */
+    .eddcdp-activation-form.disabled {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+    
+    .eddcdp-success-message {
+        animation: eddcdpSlideInFromTop 0.5s ease-out;
+    }
+    
+    @keyframes eddcdpSlideInFromTop {
+        0% {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
     
     @media print {
@@ -708,69 +676,15 @@ $('<style>').prop('type', 'text/css').html(`
         .eddcdp-esc-hint {
             display: none; /* Hide ESC hint on mobile */
         }
+        
+        .eddcdp-site-input-group {
+            flex-direction: column !important;
+            gap: 8px !important;
+        }
+        
+        .eddcdp-license-actions-grid {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+        }
     }
 `).appendTo('head');
-
-
-
-
-    // Simple form enhancement for better UX (no AJAX)
-    $('.eddcdp-activation-form').on('submit', function() {
-        const $form = $(this);
-        const $submitBtn = $form.find('button[type="submit"]');
-        const $input = $form.find('input[name="site_url"]');
-        
-        // Basic client-side validation
-        const siteUrl = $input.val().trim();
-        if (!siteUrl) {
-            alert('Please enter a site URL');
-            $input.focus();
-            return false;
-        }
-        
-        // Basic URL validation
-        const urlPattern = /^https?:\/\/.+/i;
-        if (!urlPattern.test(siteUrl)) {
-            alert('Please enter a valid URL starting with http:// or https://');
-            $input.focus();
-            return false;
-        }
-        
-        // Show loading state but let form submit normally
-        const originalText = $submitBtn.html();
-        $submitBtn.html('⏳ Activating...').prop('disabled', true);
-        $input.prop('disabled', true);
-        
-        // Allow the form to submit normally (no preventDefault)
-        return true;
-    });
-    
-    // Auto-hide success messages after 5 seconds
-    $('.eddcdp-success-message').delay(5000).fadeOut(500);
-    
-    // Enhanced URL input validation with visual feedback
-    $('input[name="site_url"]').on('input', function() {
-        const $input = $(this);
-        const url = $input.val().trim();
-        const $btn = $input.closest('form').find('button[type="submit"]');
-        
-        if (url === '') {
-            $btn.prop('disabled', false);
-            $input.removeClass('eddcdp-input-error eddcdp-input-valid');
-            return;
-        }
-        
-        // Real-time URL validation
-        const urlPattern = /^https?:\/\/.+\..+/i;
-        if (urlPattern.test(url)) {
-            $input.removeClass('eddcdp-input-error').addClass('eddcdp-input-valid');
-            $btn.prop('disabled', false);
-        } else {
-            $input.removeClass('eddcdp-input-valid').addClass('eddcdp-input-error');
-            $btn.prop('disabled', true);
-        }
-    });
-    
-    // Remove any old AJAX handlers that might still be attached
-    $(document).off('click', '.eddcdp-activate-license');
-    $(document).off('click', '[data-license][data-site]');

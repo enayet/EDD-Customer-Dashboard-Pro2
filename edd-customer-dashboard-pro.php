@@ -7,6 +7,7 @@
  * Author: TheWebLab
  * Author URI: https://theweblab.xyz/
  * License: GPL v2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: edd-customer-dashboard-pro
  * Domain Path: /languages
  * Requires at least: 6.0
@@ -20,7 +21,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('EDDCDP_VERSION', '1.3.2');
+define('EDDCDP_VERSION', '1.3.3');
 define('EDDCDP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('EDDCDP_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('EDDCDP_PLUGIN_FILE', __FILE__);
@@ -68,10 +69,10 @@ class EDD_Customer_Dashboard_Pro {
         // ENHANCED: Full screen mode detection
         add_action('template_redirect', array($this, 'maybe_load_fullscreen'));
         
-        // Security nonce verification for form processing
-        add_action('wp_ajax_eddcdp_activate_license', array($this, 'verify_nonce_and_process'));
-        add_action('wp_ajax_eddcdp_deactivate_license', array($this, 'verify_nonce_and_process'));
-        add_action('wp_ajax_eddcdp_remove_wishlist', array($this, 'verify_nonce_and_process'));
+        // REMOVED: AJAX license handlers - now using form processing only
+        // Only keep essential AJAX handlers for invoice/billing updates
+        add_action('wp_ajax_eddcdp_update_billing', array($this, 'verify_nonce_and_process'));
+        add_action('wp_ajax_eddcdp_generate_pdf', array($this, 'verify_nonce_and_process'));
     }
     
     /**
@@ -662,7 +663,7 @@ private function render_fullscreen_template($template_data) {
     }
     
     /**
-     * Global nonce verification function
+     * SIMPLIFIED: Global nonce verification function (only for billing/PDF)
      */
     public function verify_nonce_and_process() {
         // phpcs:ignore WordPress.Security.NonceVerification.Missing
@@ -676,7 +677,7 @@ private function render_fullscreen_template($template_data) {
             return;
         }
         
-        // Process the actual AJAX action
+        // Process the actual AJAX action (only billing/PDF now)
         $action = isset($_POST['action']) ? sanitize_text_field(wp_unslash($_POST['action'])) : '';
         
         if ($this->dashboard_data && method_exists($this->dashboard_data, $action)) {

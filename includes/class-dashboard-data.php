@@ -1,8 +1,8 @@
 <?php
 /**
- * Enhanced Dashboard Data Class - Form-based License Management
+ * Enhanced Dashboard Data Class - Simple Working Version
  * 
- * Handles data retrieval and processing for dashboard sections with form-based license management
+ * Handles data retrieval and processing for dashboard sections with simple license management
  */
 
 if (!defined('ABSPATH')) {
@@ -220,7 +220,7 @@ class EDDCDP_Dashboard_Data {
     }
     
     /**
-     * Get customer licenses using proper EDD Software Licensing methods
+     * Get customer licenses using proper EDD Software Licensing methods - ORIGINAL WORKING VERSION
      */
     public function get_customer_licenses($user_id) {
         if (!class_exists('EDD_Software_Licensing')) {
@@ -425,21 +425,24 @@ class EDDCDP_Dashboard_Data {
     }
     
     /**
-     * Get license sites using proper EDD Software Licensing methods
+     * FIXED: Get license sites with simple fallback methods
      */
     public function get_license_sites($license_key) {
         if (!$this->is_licensing_active()) {
             return array();
         }
         
+        // Get the license object using the key
         $license = edd_software_licensing()->get_license($license_key);
         if (!$license) {
             return array();
         }
         
-        // Use the proper public method to get activations
         $sites = array();
-        if (method_exists($license, 'get_activations')) {
+        $license_id = is_object($license) && isset($license->ID) ? $license->ID : $license;
+        
+        // Method 1: Try the native get_activations method first
+        if (is_object($license) && method_exists($license, 'get_activations')) {
             $activations = $license->get_activations();
             if ($activations && is_array($activations)) {
                 foreach ($activations as $activation) {
@@ -452,7 +455,96 @@ class EDDCDP_Dashboard_Data {
             }
         }
         
+        // Method 2: Simple database fallback
+        if (empty($sites)) {
+            // Get sites from _edd_sl_sites meta
+            $site_data = get_post_meta($license_id, '_edd_sl_sites', true);
+            if (is_array($site_data) && !empty($site_data)) {
+                foreach ($site_data as $site_url) {
+                    if (!empty($site_url)) {
+                        $sites[] = (object) array('site_name' => $site_url);
+                    }
+                }
+            }
+        }
+        
+        // Method 3: Check individual site meta keys
+        if (empty($sites)) {
+            global $wpdb;
+            
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            $site_metas = $wpdb->get_results($wpdb->prepare(
+                "SELECT meta_value FROM {$wpdb->postmeta} 
+                WHERE post_id = %d 
+                AND meta_key LIKE '_edd_sl_site_%%' 
+                AND meta_value != ''",
+                $license_id
+            ));
+            
+            if ($site_metas) {
+                foreach ($site_metas as $site_meta) {
+                    $sites[] = (object) array('site_name' => $site_meta->meta_value);
+                }
+            }
+        }
+        
         return $sites;
+    }
+    
+    /**
+     * SIMPLE: Manual license site activation
+     */
+    private function manual_activate_license_site($license_id, $site_url) {
+        // Get current sites
+        $current_sites = get_post_meta($license_id, '_edd_sl_sites', true);
+        if (!is_array($current_sites)) {
+            $current_sites = array();
+        }
+        
+        // Add new site if not already present
+        if (!in_array($site_url, $current_sites)) {
+            $current_sites[] = $site_url;
+            
+            // Update the sites meta
+            $result = update_post_meta($license_id, '_edd_sl_sites', $current_sites);
+            
+            // Also add individual site meta for compatibility
+            $site_key = '_edd_sl_site_' . md5($site_url);
+            add_post_meta($license_id, $site_key, $site_url);
+            
+            return $result !== false;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * SIMPLE: Manual license site deactivation
+     */
+    private function manual_deactivate_license_site($license_id, $site_url) {
+        // Get current sites
+        $current_sites = get_post_meta($license_id, '_edd_sl_sites', true);
+        if (!is_array($current_sites)) {
+            $current_sites = array();
+        }
+        
+        // Remove site if present
+        $site_index = array_search($site_url, $current_sites);
+        if ($site_index !== false) {
+            unset($current_sites[$site_index]);
+            $current_sites = array_values($current_sites); // Re-index array
+            
+            // Update the sites meta
+            $result = update_post_meta($license_id, '_edd_sl_sites', $current_sites);
+            
+            // Also remove individual site meta
+            $site_key = '_edd_sl_site_' . md5($site_url);
+            delete_post_meta($license_id, $site_key);
+            
+            return $result !== false;
+        }
+        
+        return false;
     }
     
     /**
@@ -721,11 +813,6 @@ class EDDCDP_Dashboard_Data {
             return;
         }
         
-        // Debug logging
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('EDDCDP: Processing license action: ' . sanitize_text_field(wp_unslash($_POST['eddcdp_action'])));
-        }
-        
         $action = sanitize_text_field(wp_unslash($_POST['eddcdp_action']));
         
         if ($action === 'activate_license') {
@@ -736,7 +823,7 @@ class EDDCDP_Dashboard_Data {
     }
     
     /**
-     * Process license activation form submission
+     * SIMPLIFIED: License activation process
      */
     private function process_license_activation() {
         // Verify nonce
@@ -748,7 +835,7 @@ class EDDCDP_Dashboard_Data {
             wp_die(__('Please log in first.', 'edd-customer-dashboard-pro'));
         }
         
-        // Get and validate form data
+        // Get form data
         $license_key = isset($_POST['license_key']) ? sanitize_text_field(wp_unslash($_POST['license_key'])) : '';
         $site_url = isset($_POST['site_url']) ? esc_url_raw(wp_unslash($_POST['site_url'])) : '';
         
@@ -756,41 +843,23 @@ class EDDCDP_Dashboard_Data {
             wp_die(__('License key and site URL are required.', 'edd-customer-dashboard-pro'));
         }
         
-        // Validate URL
-        if (!filter_var($site_url, FILTER_VALIDATE_URL)) {
-            wp_die(__('Please enter a valid URL.', 'edd-customer-dashboard-pro'));
-        }
+        // Clean up URL
+        $site_url = untrailingslashit($site_url);
         
-        if (!$this->is_licensing_active()) {
-            wp_die(__('Software Licensing is not active.', 'edd-customer-dashboard-pro'));
-        }
-        
-        // Get license using EDD's native function
+        // Get license
         $license = edd_software_licensing()->get_license($license_key);
         if (!$license) {
             wp_die(__('Invalid license key.', 'edd-customer-dashboard-pro'));
         }
         
-        // Check if user owns this license
-        if ($license->user_id != get_current_user_id()) {
+        $license_id = is_object($license) && isset($license->ID) ? $license->ID : $license;
+        
+        // Check ownership
+        if (get_post_field('post_author', $license_id) != get_current_user_id()) {
             wp_die(__('You do not own this license.', 'edd-customer-dashboard-pro'));
         }
         
-        // Check if license is expired using EDD's native method
-        if (method_exists($license, 'is_expired') && $license->is_expired()) {
-            wp_die(__('This license has expired. Please renew it first.', 'edd-customer-dashboard-pro'));
-        }
-        
-        // Check activation limit using EDD's native properties
-        if ($license->activation_limit > 0 && $license->activation_count >= $license->activation_limit) {
-            wp_die(sprintf(
-                __('License activation limit reached (%d/%d). Please deactivate a site first.', 'edd-customer-dashboard-pro'),
-                $license->activation_count,
-                $license->activation_limit
-            ));
-        }
-        
-        // Check if site is already activated using EDD's native method
+        // Check if site already activated
         $existing_sites = $this->get_license_sites($license_key);
         foreach ($existing_sites as $site) {
             if (isset($site->site_name) && $site->site_name === $site_url) {
@@ -798,20 +867,26 @@ class EDDCDP_Dashboard_Data {
             }
         }
         
-        // Activate license using EDD's native method
+        // Try to activate
         $result = false;
-        if (method_exists($license, 'add_site')) {
-            $result = $license->add_site($site_url);
-        } else {
-            // Fallback for older versions
-            $result = edd_software_licensing()->insert_site($license->ID, $site_url);
+        
+        // Try EDD method first
+        if (function_exists('edd_software_licensing') && method_exists(edd_software_licensing(), 'insert_site')) {
+            $result = edd_software_licensing()->insert_site($license_id, $site_url);
+        }
+        
+        // Fallback to manual method
+        if (!$result) {
+            $result = $this->manual_activate_license_site($license_id, $site_url);
         }
         
         if ($result) {
-            // Log the activation using EDD's native logging
-            $this->log_license_activity($license, 'activated', $site_url);
+            // Update activation count
+            $activation_count = get_post_meta($license_id, '_edd_sl_activation_count', true);
+            $new_count = intval($activation_count) + 1;
+            update_post_meta($license_id, '_edd_sl_activation_count', $new_count);
             
-            // Redirect back with success message
+            // Redirect with success
             $redirect_url = add_query_arg(array(
                 'eddcdp_message' => 'license_activated',
                 'eddcdp_site' => urlencode($site_url)
@@ -820,12 +895,12 @@ class EDDCDP_Dashboard_Data {
             wp_redirect($redirect_url);
             exit;
         } else {
-            wp_die(__('Failed to activate license. The site may already be activated or there was a server error.', 'edd-customer-dashboard-pro'));
+            wp_die(__('Failed to activate license.', 'edd-customer-dashboard-pro'));
         }
     }
     
     /**
-     * Process license deactivation form submission
+     * SIMPLIFIED: License deactivation process
      */
     private function process_license_deactivation() {
         // Verify nonce
@@ -837,7 +912,7 @@ class EDDCDP_Dashboard_Data {
             wp_die(__('Please log in first.', 'edd-customer-dashboard-pro'));
         }
         
-        // Get and validate form data
+        // Get form data
         $license_key = isset($_POST['license_key']) ? sanitize_text_field(wp_unslash($_POST['license_key'])) : '';
         $site_url = isset($_POST['site_url']) ? esc_url_raw(wp_unslash($_POST['site_url'])) : '';
         
@@ -845,49 +920,42 @@ class EDDCDP_Dashboard_Data {
             wp_die(__('License key and site URL are required.', 'edd-customer-dashboard-pro'));
         }
         
-        if (!$this->is_licensing_active()) {
-            wp_die(__('Software Licensing is not active.', 'edd-customer-dashboard-pro'));
-        }
+        // Clean up URL
+        $site_url = untrailingslashit($site_url);
         
-        // Get license using EDD's native function
+        // Get license
         $license = edd_software_licensing()->get_license($license_key);
         if (!$license) {
             wp_die(__('Invalid license key.', 'edd-customer-dashboard-pro'));
         }
         
-        // Check if user owns this license
-        if ($license->user_id != get_current_user_id()) {
+        $license_id = is_object($license) && isset($license->ID) ? $license->ID : $license;
+        
+        // Check ownership
+        if (get_post_field('post_author', $license_id) != get_current_user_id()) {
             wp_die(__('You do not own this license.', 'edd-customer-dashboard-pro'));
         }
         
-        // Verify the site is actually activated
-        $existing_sites = $this->get_license_sites($license_key);
-        $site_found = false;
-        foreach ($existing_sites as $site) {
-            if (isset($site->site_name) && $site->site_name === $site_url) {
-                $site_found = true;
-                break;
-            }
-        }
-        
-        if (!$site_found) {
-            wp_die(__('This site is not currently activated for this license.', 'edd-customer-dashboard-pro'));
-        }
-        
-        // Deactivate license using EDD's native method
+        // Try to deactivate
         $result = false;
-        if (method_exists($license, 'remove_site')) {
-            $result = $license->remove_site($site_url);
-        } else {
-            // Fallback for older versions
-            $result = edd_software_licensing()->delete_site($license->ID, $site_url);
+        
+        // Try EDD method first
+        if (function_exists('edd_software_licensing') && method_exists(edd_software_licensing(), 'delete_site')) {
+            $result = edd_software_licensing()->delete_site($license_id, $site_url);
+        }
+        
+        // Fallback to manual method
+        if (!$result) {
+            $result = $this->manual_deactivate_license_site($license_id, $site_url);
         }
         
         if ($result) {
-            // Log the deactivation using EDD's native logging
-            $this->log_license_activity($license, 'deactivated', $site_url);
+            // Update activation count
+            $activation_count = get_post_meta($license_id, '_edd_sl_activation_count', true);
+            $new_count = max(0, intval($activation_count) - 1);
+            update_post_meta($license_id, '_edd_sl_activation_count', $new_count);
             
-            // Redirect back with success message
+            // Redirect with success
             $redirect_url = add_query_arg(array(
                 'eddcdp_message' => 'license_deactivated',
                 'eddcdp_site' => urlencode($site_url)
@@ -896,7 +964,7 @@ class EDDCDP_Dashboard_Data {
             wp_redirect($redirect_url);
             exit;
         } else {
-            wp_die(__('Failed to deactivate license. Please try again or contact support.', 'edd-customer-dashboard-pro'));
+            wp_die(__('Failed to deactivate license.', 'edd-customer-dashboard-pro'));
         }
     }
     
@@ -1048,35 +1116,5 @@ class EDDCDP_Dashboard_Data {
             'message' => __('Please use the print function in your browser to generate a PDF.', 'edd-customer-dashboard-pro'),
             'print_url' => add_query_arg('print', '1')
         ));
-    }
-    
-    /**
-     * Log license activity for debugging and tracking
-     */
-    private function log_license_activity($license, $action, $site_url) {
-        if (!$license) {
-            return;
-        }
-        
-        $log_entry = sprintf(
-            'License %s %s for site: %s (User: %d)',
-            $license->key,
-            $action,
-            $site_url,
-            get_current_user_id()
-        );
-        
-        // Use EDD's logging if available
-        if (function_exists('edd_record_log')) {
-            edd_record_log(array(
-                'type' => 'license_' . $action,
-                'message' => $log_entry,
-                'post_id' => $license->download_id,
-                'user_id' => get_current_user_id()
-            ));
-        } else {
-            // Fallback to WordPress error log
-            error_log('EDD Customer Dashboard Pro: ' . $log_entry);
-        }
     }
 }

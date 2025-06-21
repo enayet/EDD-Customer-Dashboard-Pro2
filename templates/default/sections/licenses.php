@@ -45,9 +45,10 @@ $licenses = $dashboard_data->get_customer_licenses($user->ID);
                         <?php echo $license->activation_limit ? esc_html($license->activation_limit) : esc_html__('Unlimited', 'edd-customer-dashboard-pro'); ?><br>
                     </div>
                     
-                    <?php if (method_exists($license, 'get_sites')) : ?>
-                        <?php $sites = $license->get_sites(); ?>
-                        <?php if ($sites) : ?>
+                        <?php
+                            $sites = $dashboard_data->get_license_sites($license->key);
+                        ?>
+                        <?php if (!empty($sites)) : ?>
                             <div class="eddcdp-site-management" style="margin-top: 20px;">
                                 <h4 style="margin-bottom: 10px;"><?php esc_html_e('Activated Sites', 'edd-customer-dashboard-pro'); ?></h4>
                                 <div class="eddcdp-activated-sites">
@@ -75,7 +76,7 @@ $licenses = $dashboard_data->get_customer_licenses($user->ID);
                                 <?php esc_html_e('License limit reached. Deactivate a site to activate on a new one.', 'edd-customer-dashboard-pro'); ?>
                             </p>
                         <?php endif; ?>
-                    <?php endif; ?>
+                    
                     
                     <div style="margin-top: 20px;">
                         <?php if ($license->is_expired()) : ?>

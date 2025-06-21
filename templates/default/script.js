@@ -710,3 +710,67 @@ $('<style>').prop('type', 'text/css').html(`
         }
     }
 `).appendTo('head');
+
+
+
+
+    // Simple form enhancement for better UX (no AJAX)
+    $('.eddcdp-activation-form').on('submit', function() {
+        const $form = $(this);
+        const $submitBtn = $form.find('button[type="submit"]');
+        const $input = $form.find('input[name="site_url"]');
+        
+        // Basic client-side validation
+        const siteUrl = $input.val().trim();
+        if (!siteUrl) {
+            alert('Please enter a site URL');
+            $input.focus();
+            return false;
+        }
+        
+        // Basic URL validation
+        const urlPattern = /^https?:\/\/.+/i;
+        if (!urlPattern.test(siteUrl)) {
+            alert('Please enter a valid URL starting with http:// or https://');
+            $input.focus();
+            return false;
+        }
+        
+        // Show loading state but let form submit normally
+        const originalText = $submitBtn.html();
+        $submitBtn.html('⏳ Activating...').prop('disabled', true);
+        $input.prop('disabled', true);
+        
+        // Allow the form to submit normally (no preventDefault)
+        return true;
+    });
+    
+    // Auto-hide success messages after 5 seconds
+    $('.eddcdp-success-message').delay(5000).fadeOut(500);
+    
+    // Enhanced URL input validation with visual feedback
+    $('input[name="site_url"]').on('input', function() {
+        const $input = $(this);
+        const url = $input.val().trim();
+        const $btn = $input.closest('form').find('button[type="submit"]');
+        
+        if (url === '') {
+            $btn.prop('disabled', false);
+            $input.removeClass('eddcdp-input-error eddcdp-input-valid');
+            return;
+        }
+        
+        // Real-time URL validation
+        const urlPattern = /^https?:\/\/.+\..+/i;
+        if (urlPattern.test(url)) {
+            $input.removeClass('eddcdp-input-error').addClass('eddcdp-input-valid');
+            $btn.prop('disabled', false);
+        } else {
+            $input.removeClass('eddcdp-input-valid').addClass('eddcdp-input-error');
+            $btn.prop('disabled', true);
+        }
+    });
+    
+    // Remove any old AJAX handlers that might still be attached
+    $(document).off('click', '.eddcdp-activate-license');
+    $(document).off('click', '[data-license][data-site]');

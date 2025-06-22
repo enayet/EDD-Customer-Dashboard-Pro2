@@ -40,9 +40,16 @@ include 'header.php';
         <!-- Stats Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <?php 
-            // Get user purchase stats
-            $purchase_count = edd_count_purchases_of_customer($current_user->ID);
-            $download_count = edd_get_download_count();
+            // Get user purchase stats - using correct EDD functions
+            $customer = new EDD_Customer($current_user->user_email);
+            $purchase_count = $customer->purchase_count;
+            
+            // Get user's download history count
+            $download_logs = edd_get_file_download_logs(array(
+                'user_id' => $current_user->ID,
+                'number' => -1
+            ));
+            $download_count = is_array($download_logs) ? count($download_logs) : 0;
             ?>
             
             <div class="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
@@ -76,7 +83,14 @@ include 'header.php';
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-3xl font-bold text-gray-800 mb-1">
-                            <?php echo function_exists('edd_software_licensing') ? count(edd_software_licensing()->get_license_keys_of_user($current_user->ID)) : '0'; ?>
+                            <?php 
+                            $license_count = 0;
+                            if (function_exists('edd_software_licensing') && class_exists('EDD_SL_License')) {
+                                $licenses = edd_software_licensing()->licenses_db->get_licenses(array('user_id' => $current_user->ID));
+                                $license_count = is_array($licenses) ? count($licenses) : 0;
+                            }
+                            echo $license_count;
+                            ?>
                         </p>
                         <p class="text-sm font-medium text-gray-500 uppercase tracking-wide"><?php _e('Active Licenses', 'eddcdp'); ?></p>
                     </div>
@@ -92,7 +106,17 @@ include 'header.php';
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-3xl font-bold text-gray-800 mb-1">
-                            <?php echo function_exists('edd_wl_get_wish_list') ? count(edd_wl_get_wish_list($current_user->ID)) : '0'; ?>
+                            <?php 
+                            $wishlist_count = 0;
+                            if (function_exists('edd_wl_get_wish_list')) {
+                                $wishlist = edd_wl_get_wish_list($current_user->ID);
+                                if ($wishlist) {
+                                    $wishlist_items = edd_wl_get_wish_list_downloads($wishlist->ID);
+                                    $wishlist_count = is_array($wishlist_items) ? count($wishlist_items) : 0;
+                                }
+                            }
+                            echo $wishlist_count;
+                            ?>
                         </p>
                         <p class="text-sm font-medium text-gray-500 uppercase tracking-wide"><?php _e('Wishlist Items', 'eddcdp'); ?></p>
                     </div>
@@ -149,56 +173,38 @@ include 'header.php';
         <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 min-h-[600px]">
             
             <?php if (!empty($enabled_sections['purchases'])): ?>
-            <div x-show="activeTab === 'purchases'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0">
-                <?php 
-                $templates = new EDDCDP_Templates();
-                $templates->include_section('purchases'); 
-                ?>
+            <div x-show="activeTab === 'purchases'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" class="p-8">
+                <?php include 'sections/purchases.php'; ?>
             </div>
             <?php endif; ?>
             
             <?php if (!empty($enabled_sections['downloads'])): ?>
-            <div x-show="activeTab === 'downloads'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0">
-                <?php 
-                $templates = new EDDCDP_Templates();
-                $templates->include_section('downloads'); 
-                ?>
+            <div x-show="activeTab === 'downloads'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" class="p-8">
+                <?php include 'sections/downloads.php'; ?>
             </div>
             <?php endif; ?>
             
             <?php if (!empty($enabled_sections['licenses'])): ?>
-            <div x-show="activeTab === 'licenses'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0">
-                <?php 
-                $templates = new EDDCDP_Templates();
-                $templates->include_section('licenses'); 
-                ?>
+            <div x-show="activeTab === 'licenses'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" class="p-8">
+                <?php include 'sections/licenses.php'; ?>
             </div>
             <?php endif; ?>
             
             <?php if (!empty($enabled_sections['wishlist'])): ?>
-            <div x-show="activeTab === 'wishlist'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0">
-                <?php 
-                $templates = new EDDCDP_Templates();
-                $templates->include_section('wishlist'); 
-                ?>
+            <div x-show="activeTab === 'wishlist'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" class="p-8">
+                <?php include 'sections/wishlist.php'; ?>
             </div>
             <?php endif; ?>
             
             <?php if (!empty($enabled_sections['analytics'])): ?>
-            <div x-show="activeTab === 'analytics'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0">
-                <?php 
-                $templates = new EDDCDP_Templates();
-                $templates->include_section('analytics'); 
-                ?>
+            <div x-show="activeTab === 'analytics'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" class="p-8">
+                <?php include 'sections/analytics.php'; ?>
             </div>
             <?php endif; ?>
             
             <?php if (!empty($enabled_sections['support'])): ?>
-            <div x-show="activeTab === 'support'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0">
-                <?php 
-                $templates = new EDDCDP_Templates();
-                $templates->include_section('support'); 
-                ?>
+            <div x-show="activeTab === 'support'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0" class="p-8">
+                <?php include 'sections/support.php'; ?>
             </div>
             <?php endif; ?>
         </div>

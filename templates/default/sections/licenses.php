@@ -31,14 +31,26 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
 <?php if ($licenses) : ?>
 <div class="space-y-6">
     <?php foreach ($licenses as $license) : 
-        $license_obj = edd_software_licensing()->get_license($license->ID);
         $download_id = $license->download_id;
         $download_name = get_the_title($download_id);
-        $is_active = $license_obj->is_active();
-        $is_expired = $license_obj->is_expired();
-        $sites = $license_obj->get_sites();
-        $activation_limit = $license_obj->activation_limit;
-        $activation_count = $license_obj->activation_count;
+        
+        // Check license status using proper methods
+        $is_active = ($license->status === 'active');
+        $is_expired = false;
+        
+        if (!empty($license->expiration)) {
+            $expiration_date = strtotime($license->expiration);
+            $is_expired = ($expiration_date < time());
+        }
+        
+        // Get license sites and limits
+        $sites = maybe_unserialize($license->sites);
+        if (!is_array($sites)) {
+            $sites = array();
+        }
+        
+        $activation_limit = $license->activation_limit;
+        $activation_count = $license->activation_count;
     ?>
     
     <!-- License Item -->
@@ -60,9 +72,9 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2"><?php _e('License Key:', 'eddcdp'); ?></label>
                 <div 
-                    onclick="copyToClipboard('<?php echo $license_obj->key; ?>')"
+                    onclick="copyToClipboard('<?php echo esc_js($license->license_key); ?>')"
                     class="bg-gray-100 p-3 rounded-lg font-mono text-sm cursor-pointer hover:bg-gray-200 transition-colors border">
-                    <?php echo $license_obj->key; ?>
+                    <?php echo esc_html($license->license_key); ?>
                 </div>
                 <p class="text-xs text-gray-500 mt-1"><?php _e('Click to copy', 'eddcdp'); ?></p>
             </div>
@@ -71,13 +83,13 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
                 <div>
                     <p class="text-sm text-gray-600">
                         <strong><?php _e('Purchase Date:', 'eddcdp'); ?></strong> 
-                        <?php echo date_i18n(get_option('date_format'), strtotime($license_obj->date_created)); ?>
+                        <?php echo date_i18n(get_option('date_format'), strtotime($license->date_created)); ?>
                     </p>
                     <p class="text-sm text-gray-600">
                         <strong><?php _e('Expires:', 'eddcdp'); ?></strong> 
                         <?php 
-                        if ($license_obj->expiration) {
-                            echo date_i18n(get_option('date_format'), strtotime($license_obj->expiration));
+                        if (!empty($license->expiration)) {
+                            echo date_i18n(get_option('date_format'), strtotime($license->expiration));
                         } else {
                             _e('Never', 'eddcdp');
                         }
@@ -97,7 +109,7 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
                     </p>
                     <p class="text-sm text-gray-600">
                         <strong><?php _e('License Type:', 'eddcdp'); ?></strong> 
-                        <?php echo ucfirst($license_obj->license_type); ?>
+                        <?php echo !empty($license->price_id) ? edd_get_price_option_name($download_id, $license->price_id) : __('Standard', 'eddcdp'); ?>
                     </p>
                 </div>
             </div>
@@ -112,22 +124,22 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
                         type="url" 
                         placeholder="<?php _e('Enter your site URL (e.g., https://example.com)', 'eddcdp'); ?>"
                         class="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        x-model="newSiteUrl">
+                        id="new-site-url-<?php echo $license->ID; ?>">
                     <button 
-                        @click="activateSite()"
+                        onclick="activateLicenseSite(<?php echo $license->ID; ?>)"
                         class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
                         ✅ <?php _e('Activate', 'eddcdp'); ?>
                     </button>
                 </div>
                 <?php endif; ?>
                 
-                <?php if ($sites) : ?>
+                <?php if (!empty($sites)) : ?>
                 <div class="space-y-2 mb-4">
                     <h5 class="font-medium text-gray-800"><?php _e('Active Sites', 'eddcdp'); ?></h5>
                     <?php foreach ($sites as $site) : ?>
                     <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
                         <span class="text-sm"><?php echo esc_url($site); ?></span>
-                        <button onclick="deactivateSite('<?php echo $license_obj->ID; ?>', '<?php echo esc_url($site); ?>')" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                        <button onclick="deactivateLicenseSite(<?php echo $license->ID; ?>, '<?php echo esc_js($site); ?>')" class="text-red-600 hover:text-red-800 text-sm font-medium">
                             🔓 <?php _e('Deactivate', 'eddcdp'); ?>
                         </button>
                     </div>
@@ -140,9 +152,9 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
             
             <div class="flex flex-wrap gap-3 mt-6 pt-4 border-t">
                 <?php if ($is_expired) : ?>
-                <button class="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded-xl hover:shadow-lg transition-all duration-300">
+                <a href="<?php echo edd_get_checkout_uri(array('edd_license_key' => $license->license_key, 'download_id' => $download_id)); ?>" class="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded-xl hover:shadow-lg transition-all duration-300 text-decoration-none">
                     🔄 <?php _e('Renew License', 'eddcdp'); ?>
-                </button>
+                </a>
                 <?php else : ?>
                 <button class="bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors">
                     🔄 <?php _e('Renew', 'eddcdp'); ?>
@@ -177,34 +189,76 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
 <script>
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
-        // You could add a toast notification here
-        console.log('License key copied to clipboard');
+        alert('<?php _e('License key copied to clipboard!', 'eddcdp'); ?>');
+    }).catch(() => {
+        alert('<?php _e('Failed to copy license key.', 'eddcdp'); ?>');
     });
 }
 
-function deactivateSite(licenseId, siteUrl) {
-    if (confirm('<?php _e('Are you sure you want to deactivate this site?', 'eddcdp'); ?>')) {
-        // AJAX call to deactivate site
-        fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                action: 'edd_deactivate_license_site',
-                license_id: licenseId,
-                site_url: siteUrl,
-                nonce: '<?php echo wp_create_nonce('edd_deactivate_license_site'); ?>'
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('<?php _e('Error deactivating site. Please try again.', 'eddcdp'); ?>');
-            }
-        });
+function activateLicenseSite(licenseId) {
+    const siteUrl = document.getElementById('new-site-url-' + licenseId).value;
+    if (!siteUrl.trim()) {
+        alert('<?php _e('Please enter a site URL.', 'eddcdp'); ?>');
+        return;
     }
+    
+    // AJAX call to activate site
+    fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            action: 'eddcdp_activate_license_site',
+            license_id: licenseId,
+            site_url: siteUrl,
+            nonce: '<?php echo wp_create_nonce('eddcdp_ajax_nonce'); ?>'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('<?php _e('Site activated successfully!', 'eddcdp'); ?>');
+            location.reload();
+        } else {
+            alert(data.data || '<?php _e('Error activating site. Please try again.', 'eddcdp'); ?>');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('<?php _e('Error activating site. Please try again.', 'eddcdp'); ?>');
+    });
+}
+
+function deactivateLicenseSite(licenseId, siteUrl) {
+    if (!confirm('<?php _e('Are you sure you want to deactivate this site?', 'eddcdp'); ?>')) {
+        return;
+    }
+    
+    // AJAX call to deactivate site
+    fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            action: 'eddcdp_deactivate_license_site',
+            license_id: licenseId,
+            site_url: siteUrl,
+            nonce: '<?php echo wp_create_nonce('eddcdp_ajax_nonce'); ?>'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.data || '<?php _e('Error deactivating site. Please try again.', 'eddcdp'); ?>');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('<?php _e('Error deactivating site. Please try again.', 'eddcdp'); ?>');
+    });
 }
 </script>

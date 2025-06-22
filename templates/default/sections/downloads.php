@@ -8,24 +8,33 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Get current user and download history
+// Get current user and download history using correct EDD functions
 $current_user = wp_get_current_user();
-$downloads = edd_get_users_downloaded_files($current_user->ID, 20);
+
+// Get download logs using the correct EDD function
+$download_logs = edd_get_file_download_logs(array(
+    'user_id' => $current_user->ID,
+    'number' => 20,
+    'orderby' => 'date_created',
+    'order' => 'DESC'
+));
 ?>
 
 <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
     ⬇️ <?php _e('Download History', 'eddcdp'); ?>
 </h2>
 
-<?php if ($downloads) : ?>
+<?php if ($download_logs) : ?>
 <div class="space-y-4">
-    <?php foreach ($downloads as $download) : 
-        $download_id = $download->download_id;
-        $payment = new EDD_Payment($download->payment_id);
+    <?php foreach ($download_logs as $log) : 
+        $download_id = $log->product_id;
         $download_name = get_the_title($download_id);
-        $download_date = $download->date_created;
-        $remaining_downloads = edd_get_file_download_limit_override($download_id, $payment->ID);
-        $total_downloads = edd_get_download_sales_stats($download_id);
+        $download_date = $log->date_created;
+        $file_id = $log->file_id;
+        
+        // Get payment info if available
+        $payment_id = !empty($log->payment_id) ? $log->payment_id : 0;
+        $payment = $payment_id ? new EDD_Payment($payment_id) : null;
     ?>
     
     <div class="bg-gray-50/80 rounded-2xl p-6 border border-gray-200/50">
@@ -35,13 +44,22 @@ $downloads = edd_get_users_downloaded_files($current_user->ID, 20);
                 <p class="text-gray-600 mt-1">
                     <?php printf(__('Downloaded: %s', 'eddcdp'), date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($download_date))); ?>
                 </p>
+                
+                <?php if ($payment) : ?>
+                <p class="text-sm text-gray-500 mt-1">
+                    <?php printf(__('Order #%s', 'eddcdp'), $payment->number); ?>
+                </p>
+                <?php endif; ?>
+                
                 <p class="text-sm text-gray-500 mt-2">
                     <strong><?php _e('Downloads remaining:', 'eddcdp'); ?></strong> 
                     <?php 
+                    // Check download limits
                     $limit = edd_get_file_download_limit($download_id);
-                    if ($limit) {
-                        $used = edd_count_file_downloads($download_id, $payment->ID, $current_user->ID);
-                        echo ($limit - $used) . ' ' . __('of', 'eddcdp') . ' ' . $limit;
+                    if ($limit && $payment_id) {
+                        $downloads_used = edd_count_file_downloads($download_id, $payment_id, $current_user->ID);
+                        $remaining = max(0, $limit - $downloads_used);
+                        echo $remaining . ' ' . __('of', 'eddcdp') . ' ' . $limit;
                     } else {
                         _e('Unlimited', 'eddcdp');
                     }

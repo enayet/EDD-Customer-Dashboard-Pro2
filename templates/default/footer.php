@@ -11,14 +11,13 @@ if (!defined('ABSPATH')) {
 // Check if we're in fullscreen mode
 $settings = get_option('eddcdp_settings', array());
 $fullscreen = !empty($settings['fullscreen_mode']);
-?>
 
-</div> <!-- .eddcdp-wrapper -->
-
-<?php if ($fullscreen) : ?>
+if ($fullscreen) {
+    // Fullscreen mode - close HTML
+    ?>
     <?php wp_footer(); ?>
-</body>
-</html>
-<?php else : ?>
-    <?php get_footer(); ?>
-<?php endif; ?>
+    </body>
+    </html>
+    <?php
+}
+// If not fullscreen, we don't need to output anything as we're within WordPress content area

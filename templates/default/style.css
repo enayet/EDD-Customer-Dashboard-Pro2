@@ -1,0 +1,85 @@
+/* EDD Customer Dashboard Pro - Default Template Styles */
+
+/* Override WordPress layout constraints */
+.eddcdp-dashboard-wrapper,
+.eddcdp-dashboard-wrapper *,
+.eddcdp-dashboard-wrapper .is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Fullscreen mode overrides */
+.eddcdp-fullscreen-mode,
+.eddcdp-fullscreen-wrapper {
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    position: relative;
+}
+
+.eddcdp-fullscreen-mode .wp-site-blocks,
+.eddcdp-fullscreen-mode .wp-block-group,
+.eddcdp-fullscreen-mode .entry-content,
+.eddcdp-fullscreen-mode main,
+.eddcdp-fullscreen-mode article {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Embedded mode - ensure proper display within WordPress content area */
+.eddcdp-embedded-wrapper {
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* Login form styling */
+.eddcdp-login-required {
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+.eddcdp-login-required #eddcdp-loginform {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.eddcdp-login-required #eddcdp-loginform p {
+    margin-bottom: 15px;
+}
+
+.eddcdp-login-required #eddcdp-loginform label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.eddcdp-login-required #eddcdp-loginform input[type="text"],
+.eddcdp-login-required #eddcdp-loginform input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.eddcdp-login-required #eddcdp-loginform input[type="submit"] {
+    background: linear-gradient(to right, #6366f1, #8b5cf6);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+}
+
+.eddcdp-login-required #eddcdp-loginform input[type="submit"]:hover {
+    background: linear-gradient(to right, #4f46e5, #7c3aed);
+}

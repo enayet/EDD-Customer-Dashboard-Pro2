@@ -1,18 +1,17 @@
 <?php
 /**
  * Plugin Name: EDD Customer Dashboard Pro
- * Plugin URI: https://theweblab.xyz/
- * Description: Modern, template-based dashboard interface for Easy Digital Downloads customers
- * Version: 1.0.3
- * Author: TheWebLab
- * Author URI: https://theweblab.xyz/
- * License: GPL v2 or later
- * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: edd-customer-dashboard-pro
+ * Plugin URI: https://yoursite.com/edd-dashboard-pro
+ * Description: Custom dashboard templates for Easy Digital Downloads customer area
+ * Version: 1.0.0
+ * Author: Your Name
+ * Author URI: https://yoursite.com
+ * Text Domain: eddcdp
  * Domain Path: /languages
- * Requires at least: 6.0
- * Tested up to: 6.8
+ * Requires at least: 5.0
+ * Tested up to: 6.3
  * Requires PHP: 7.4
+ * License: GPL v2 or later
  */
 
 // Prevent direct access
@@ -21,23 +20,23 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('EDDCDP_VERSION', '1.0.3');
+define('EDDCDP_VERSION', '1.0.0');
 define('EDDCDP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('EDDCDP_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('EDDCDP_PLUGIN_FILE', __FILE__);
-define('EDDCDP_TEXT_DOMAIN', 'edd-customer-dashboard-pro');
 
 /**
- * Main Plugin Class - Clean Architecture
+ * Main EDD Dashboard Pro Class
  */
-class EDD_Customer_Dashboard_Pro {
-    
-    private static $instance = null;
-    private $component_manager;
-    private $components = array();
+class EDDCDP_Dashboard_Pro {
     
     /**
-     * Get singleton instance
+     * Single instance of the class
+     */
+    private static $instance = null;
+    
+    /**
+     * Get instance
      */
     public static function get_instance() {
         if (null === self::$instance) {
@@ -50,156 +49,22 @@ class EDD_Customer_Dashboard_Pro {
      * Constructor
      */
     private function __construct() {
-        $this->define_hooks();
+        add_action('plugins_loaded', array($this, 'init'));
     }
     
     /**
-     * Define WordPress hooks
-     */
-    private function define_hooks() {
-        register_activation_hook(__FILE__, array($this, 'activation'));
-        register_deactivation_hook(__FILE__, array($this, 'deactivation'));
-        
-        add_action('plugins_loaded', array($this, 'load_textdomain'));
-        add_action('init', array($this, 'init'), 5);
-    }
-    
-    /**
-     * Initialize plugin
+     * Initialize the plugin
      */
     public function init() {
+        // Check if EDD is active
         if (!$this->is_edd_active()) {
-            add_action('admin_notices', array($this, 'show_edd_missing_notice'));
+            add_action('admin_notices', array($this, 'edd_missing_notice'));
             return;
         }
         
-        $this->load_core_files();
-        $this->load_components();
-        $this->setup_cache();
-    }
-    
-    /**
-     * Load core files
-     */
-    private function load_core_files() {
-        // Load interfaces first
-        require_once EDDCDP_PLUGIN_DIR . 'includes/core/interfaces/interface-component.php';
-        require_once EDDCDP_PLUGIN_DIR . 'includes/core/interfaces/interface-data-provider.php';
-        
-        // Load component manager
-        require_once EDDCDP_PLUGIN_DIR . 'includes/core/class-component-manager.php';
-        $this->component_manager = new EDDCDP_Component_Manager();
-        
-        // Load utilities
-        require_once EDDCDP_PLUGIN_DIR . 'includes/utils/class-formatter.php';
-        require_once EDDCDP_PLUGIN_DIR . 'includes/utils/class-validator.php';
-        require_once EDDCDP_PLUGIN_DIR . 'includes/utils/class-cache-helper.php';
-        require_once EDDCDP_PLUGIN_DIR . 'includes/utils/class-template-data-helper.php';
-    }
-    
-    /**
-     * Load and register components
-     */
-    private function load_components() {
-        // Load component files
-        $this->load_component_files();
-        
-        // Register components with manager
-        $this->register_components();
-        
-        // Load all registered components
-        $this->component_manager->load_components();
-    }
-    
-    /**
-     * Load component files
-     */
-    private function load_component_files() {
-        $component_directories = array(
-            'integrations' => array(
-                'includes/integrations/class-edd-integration.php',
-                'includes/integrations/class-licensing-integration.php',
-                'includes/integrations/class-wishlist-integration.php'
-            ),
-            'data' => array(
-                'includes/data/class-customer-data.php',
-                'includes/data/class-payment-data.php',
-                'includes/data/class-license-data.php',
-                'includes/data/class-analytics-data.php'
-            ),
-            'frontend' => array(
-                'includes/frontend/class-asset-manager.php',
-                'includes/frontend/class-template-manager.php',
-                'includes/frontend/class-shortcode-handler.php'
-            ),
-            'admin' => array(
-                'includes/admin/class-admin-menu.php',
-                'includes/admin/class-admin-ajax.php'
-            )
-        );
-        
-        foreach ($component_directories as $directory => $files) {
-            foreach ($files as $file) {
-                $this->safe_require($file);
-            }
-        }
-    }
-    
-    /**
-     * Register components with the component manager
-     */
-    private function register_components() {
-        $components_to_register = array(
-            'EDDCDP_Edd_Integration',
-            'EDDCDP_Customer_Data',
-            'EDDCDP_Payment_Data',
-            'EDDCDP_License_Data',
-            'EDDCDP_Analytics_Data',
-            'EDDCDP_Asset_Manager',
-            'EDDCDP_Template_Manager',
-            'EDDCDP_Shortcode_Handler',
-            'EDDCDP_Admin_Menu',
-            'EDDCDP_Admin_Ajax'
-        );
-        
-        foreach ($components_to_register as $component_class) {
-            $this->component_manager->register($component_class);
-        }
-    }
-    
-    /**
-     * Setup caching
-     */
-    private function setup_cache() {
-        EDDCDP_Cache_Helper::setup_auto_invalidation();
-        EDDCDP_Cache_Helper::schedule_cleanup();
-    }
-    
-    /**
-     * Safely require a file
-     */
-    private function safe_require($file) {
-        $file_path = EDDCDP_PLUGIN_DIR . $file;
-        if (file_exists($file_path)) {
-            try {
-                require_once $file_path;
-                return true;
-            } catch (Exception $e) {
-                error_log('EDDCDP: Error requiring file ' . $file . ': ' . $e->getMessage());
-            }
-        }
-        return false;
-    }
-    
-    /**
-     * Load plugin textdomain
-     */
-    public function load_textdomain() {
-        load_plugin_textdomain(
-            EDDCDP_TEXT_DOMAIN,
-            false,
-            dirname(plugin_basename(__FILE__)) . '/languages/'
-        );
+        $this->load_textdomain();
+        $this->includes();
+        $this->hooks();
     }
     
     /**
@@ -210,18 +75,53 @@ class EDD_Customer_Dashboard_Pro {
     }
     
     /**
-     * Show EDD missing notice
+     * Load plugin textdomain
      */
-    public function show_edd_missing_notice() {
-        $message = __('EDD Customer Dashboard Pro requires Easy Digital Downloads to be installed and activated.', 'edd-customer-dashboard-pro');
-        echo '<div class="notice notice-error"><p>' . esc_html($message) . '</p></div>';
+    public function load_textdomain() {
+        load_plugin_textdomain(
+            'eddcdp',
+            false,
+            dirname(plugin_basename(__FILE__)) . '/languages/'
+        );
+    }
+    
+    /**
+     * Include required files
+     */
+    public function includes() {
+        require_once EDDCDP_PLUGIN_DIR . 'includes/class-admin.php';
+        require_once EDDCDP_PLUGIN_DIR . 'includes/class-templates.php';
+        require_once EDDCDP_PLUGIN_DIR . 'includes/class-shortcodes.php';
+    }
+    
+    /**
+     * Setup hooks
+     */
+    public function hooks() {
+        // Initialize admin
+        if (is_admin()) {
+            new EDDCDP_Admin();
+        }
+        
+        // Initialize templates
+        new EDDCDP_Templates();
+        
+        // Initialize shortcodes
+        new EDDCDP_Shortcodes();
+        
+        // Plugin activation/deactivation
+        register_activation_hook(__FILE__, array($this, 'activate'));
+        register_deactivation_hook(__FILE__, array($this, 'deactivate'));
     }
     
     /**
      * Plugin activation
      */
-    public function activation() {
+    public function activate() {
+        // Set default options
         $default_options = array(
+            'replace_edd_pages' => true,
+            'fullscreen_mode' => false,
             'active_template' => 'default',
             'enabled_sections' => array(
                 'purchases' => true,
@@ -230,123 +130,32 @@ class EDD_Customer_Dashboard_Pro {
                 'wishlist' => true,
                 'analytics' => true,
                 'support' => true
-            ),
-            'replace_edd_pages' => true,
-            'fullscreen_mode' => false
+            )
         );
         
         add_option('eddcdp_settings', $default_options);
-        add_option('eddcdp_activated', true);
-        
-        // Schedule cache cleanup
-        EDDCDP_Cache_Helper::schedule_cleanup();
-        
-        wp_cache_flush();
     }
     
     /**
      * Plugin deactivation
      */
-    public function deactivation() {
-        // Unschedule cache cleanup
-        EDDCDP_Cache_Helper::unschedule_cleanup();
-        
-        wp_cache_flush();
-        delete_option('eddcdp_activated');
-    }
-    
-    // ==================== PUBLIC ACCESS METHODS ====================
-    
-    /**
-     * Get component manager (PUBLIC ACCESS)
-     */
-    public function get_component_manager() {
-        return $this->component_manager;
+    public function deactivate() {
+        // Cleanup if needed
     }
     
     /**
-     * Get component (for backward compatibility and easier access)
+     * EDD missing notice
      */
-    public function get_component($component_name) {
-        if ($this->component_manager) {
-            return $this->component_manager->get_component($component_name);
-        }
-        return null;
-    }
-    
-    /**
-     * Get template manager (helper method)
-     */
-    public function get_template_manager() {
-        return $this->get_component('EDDCDP_Template_Manager');
-    }
-    
-    /**
-     * Get customer data manager (helper method)
-     */
-    public function get_customer_data() {
-        return $this->get_component('EDDCDP_Customer_Data');
-    }
-    
-    /**
-     * Get all loaded components
-     */
-    public function get_loaded_components() {
-        if ($this->component_manager) {
-            return $this->component_manager->get_loaded_components();
-        }
-        return array();
-    }
-    
-    /**
-     * Check if component is loaded
-     */
-    public function is_component_loaded($component_name) {
-        if ($this->component_manager) {
-            return $this->component_manager->is_loaded($component_name);
-        }
-        return false;
-    }
-    
-    /**
-     * Get plugin version
-     */
-    public function get_version() {
-        return EDDCDP_VERSION;
+    public function edd_missing_notice() {
+        echo '<div class="notice notice-error"><p>';
+        echo __('EDD Customer Dashboard Pro requires Easy Digital Downloads to be installed and active.', 'eddcdp');
+        echo '</p></div>';
     }
 }
 
-/**
- * Initialize the plugin
- */
-function eddcdp_init() {
-    return EDD_Customer_Dashboard_Pro::get_instance();
+// Initialize the plugin
+function eddcdp_dashboard_pro() {
+    return EDDCDP_Dashboard_Pro::get_instance();
 }
 
-/**
- * Global access function
- */
-function eddcdp() {
-    return eddcdp_init();
-}
-
-/**
- * Helper functions
- */
-function eddcdp_is_active() {
-    return get_option('eddcdp_activated', false);
-}
-
-function eddcdp_get_settings() {
-    return get_option('eddcdp_settings', array());
-}
-
-function eddcdp_get_enabled_sections() {
-    $settings = eddcdp_get_settings();
-    return isset($settings['enabled_sections']) && is_array($settings['enabled_sections']) 
-        ? $settings['enabled_sections'] 
-        : array();
-}
-
-// Start the plugin
-eddcdp_init();
+eddcdp_dashboard_pro();

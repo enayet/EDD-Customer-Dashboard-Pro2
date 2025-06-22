@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: EDD Customer Dashboard Pro
+ * Plugin Name: EDD Customer Dashboard Pro MVP 4
  * Plugin URI: https://yoursite.com/edd-dashboard-pro
  * Description: Custom dashboard templates for Easy Digital Downloads customer area
  * Version: 1.0.0

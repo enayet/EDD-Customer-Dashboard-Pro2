@@ -26,55 +26,35 @@ if (!$fullscreen) {
     <title><?php _e('Customer Dashboard', 'eddcdp'); ?> - <?php bloginfo('name'); ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    animation: {
-                        'fade-in': 'fadeIn 0.5s ease-in-out',
-                        'slide-up': 'slideUp 0.4s ease-out',
-                        'pulse-slow': 'pulse 3s infinite',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(10px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' }
-                        },
-                        slideUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' }
-                        }
-                    }
-                }
-            }
-        }
-    </script>
     <?php wp_head(); ?>
 </head>
+<body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen">
 <?php else : ?>
 <script src="https://cdn.tailwindcss.com"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<?php endif; ?>
+
 <script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                animation: {
-                    'fade-in': 'fadeIn 0.5s ease-in-out',
-                    'slide-up': 'slideUp 0.4s ease-out',
-                    'pulse-slow': 'pulse 3s infinite',
+tailwind.config = {
+    theme: {
+        extend: {
+            animation: {
+                'fade-in': 'fadeIn 0.5s ease-in-out',
+                'slide-up': 'slideUp 0.4s ease-out',
+            },
+            keyframes: {
+                fadeIn: {
+                    '0%': { opacity: '0', transform: 'translateY(10px)' },
+                    '100%': { opacity: '1', transform: 'translateY(0)' }
                 },
-                keyframes: {
-                    fadeIn: {
-                        '0%': { opacity: '0', transform: 'translateY(10px)' },
-                        '100%': { opacity: '1', transform: 'translateY(0)' }
-                    },
-                    slideUp: {
-                        '0%': { opacity: '0', transform: 'translateY(20px)' },
-                        '100%': { opacity: '1', transform: 'translateY(0)' }
-                    }
+                slideUp: {
+                    '0%': { opacity: '0', transform: 'translateY(20px)' },
+                    '100%': { opacity: '1', transform: 'translateY(0)' }
                 }
             }
         }
     }
+}
 </script>
-<?php endif; ?>
+
+<div class="eddcdp-wrapper"><?php // This div is closed in footer.php ?>

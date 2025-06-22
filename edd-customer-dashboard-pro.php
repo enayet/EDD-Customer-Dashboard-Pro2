@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: EDD Customer Dashboard Pro MVP 4
+ * Plugin Name: EDD Customer Dashboard Pro
  * Plugin URI: https://yoursite.com/edd-dashboard-pro
  * Description: Custom dashboard templates for Easy Digital Downloads customer area
  * Version: 1.0.0
@@ -71,7 +71,7 @@ class EDDCDP_Dashboard_Pro {
      * Check if EDD is active
      */
     private function is_edd_active() {
-        return class_exists('Easy_Digital_Downloads');
+        return class_exists('Easy_Digital_Downloads') || function_exists('EDD');
     }
     
     /**
@@ -92,6 +92,7 @@ class EDDCDP_Dashboard_Pro {
         require_once EDDCDP_PLUGIN_DIR . 'includes/class-admin.php';
         require_once EDDCDP_PLUGIN_DIR . 'includes/class-templates.php';
         require_once EDDCDP_PLUGIN_DIR . 'includes/class-shortcodes.php';
+        require_once EDDCDP_PLUGIN_DIR . 'includes/class-ajax.php';
     }
     
     /**
@@ -109,6 +110,9 @@ class EDDCDP_Dashboard_Pro {
         // Initialize shortcodes
         new EDDCDP_Shortcodes();
         
+        // Initialize AJAX
+        new EDDCDP_Ajax();
+        
         // Plugin activation/deactivation
         register_activation_hook(__FILE__, array($this, 'activate'));
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
@@ -120,14 +124,14 @@ class EDDCDP_Dashboard_Pro {
     public function activate() {
         // Set default options
         $default_options = array(
-            'replace_edd_pages' => true,
+            'replace_edd_pages' => false,
             'fullscreen_mode' => false,
             'active_template' => 'default',
             'enabled_sections' => array(
                 'purchases' => true,
                 'downloads' => true,
                 'licenses' => true,
-                'wishlist' => true,
+                'wishlist' => false,
                 'analytics' => true,
                 'support' => true
             )

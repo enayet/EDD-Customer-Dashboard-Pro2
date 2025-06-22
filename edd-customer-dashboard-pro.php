@@ -110,8 +110,6 @@ class EDD_Customer_Dashboard_Pro {
         // Load all registered components
         $this->component_manager->load_components();
         
-        // Store component instances for legacy compatibility
-        $this->store_component_instances();
     }
     
     /**
@@ -133,15 +131,10 @@ class EDD_Customer_Dashboard_Pro {
             'frontend' => array(
                 'includes/frontend/class-asset-manager.php',
                 'includes/frontend/class-template-manager.php',
-                'includes/frontend/class-shortcode-handler.php',
-                'includes/frontend/class-fullscreen-manager.php'
+                'includes/frontend/class-shortcode-handler.php'
             ),
             'admin' => array(
                 'includes/admin/class-admin-ajax.php'
-            ),
-            'legacy' => array(
-                'includes/class-template-loader.php',
-                'includes/class-admin-settings.php'
             )
         );
         
@@ -172,70 +165,13 @@ class EDD_Customer_Dashboard_Pro {
             $this->component_manager->register($component_class);
         }
         
-        // Register legacy components
-        $this->register_legacy_components();
     }
     
-    /**
-     * Register legacy components for backward compatibility
-     */
-    private function register_legacy_components() {
-        // Template loader (legacy)
-        if (class_exists('EDDCDP_Template_Loader')) {
-            $this->components['template_loader'] = new EDDCDP_Template_Loader();
-        }
-        
-        // Admin settings (legacy)
-        if (class_exists('EDDCDP_Admin_Settings')) {
-            $this->components['admin_settings'] = new EDDCDP_Admin_Settings();
-        }
-        
-        // Fullscreen manager (initialize with dependencies)
-        if (class_exists('EDDCDP_Fullscreen_Manager')) {
-            $template_loader = isset($this->components['template_loader']) ? $this->components['template_loader'] : null;
-            $dashboard_data = isset($this->components['customer_data']) ? $this->components['customer_data'] : null;
-            $this->components['fullscreen_manager'] = new EDDCDP_Fullscreen_Manager($template_loader, $dashboard_data);
-            
-            // Handle fullscreen mode
-            add_action('template_redirect', array($this, 'handle_fullscreen_mode'));
-        }
-    }
-    
-    /**
-     * Store component instances for legacy compatibility
-     */
-    private function store_component_instances() {
-        $component_map = array(
-            'edd_integration' => 'EDDCDP_Edd_Integration',
-            'customer_data' => 'EDDCDP_Customer_Data',
-            'payment_data' => 'EDDCDP_Payment_Data',
-            'license_data' => 'EDDCDP_License_Data',
-            'analytics_data' => 'EDDCDP_Analytics_Data',
-            'asset_manager' => 'EDDCDP_Asset_Manager',
-            'template_manager' => 'EDDCDP_Template_Manager',
-            'shortcode_handler' => 'EDDCDP_Shortcode_Handler',
-            'admin_ajax' => 'EDDCDP_Admin_Ajax'
-        );
-        
-        foreach ($component_map as $key => $class_name) {
-            $instance = $this->component_manager->get_component($class_name);
-            if ($instance) {
-                $this->components[$key] = $instance;
-            }
-        }
-        
-        // Setup component dependencies
-        $this->setup_component_dependencies();
-    }
     
     /**
      * Setup dependencies between components
      */
     private function setup_component_dependencies() {
-        // Template manager needs template loader
-        if (isset($this->components['template_manager']) && isset($this->components['template_loader'])) {
-            $this->components['template_manager']->set_template_loader($this->components['template_loader']);
-        }
         
         // Shortcode handler needs dependencies
         if (isset($this->components['shortcode_handler'])) {
@@ -277,17 +213,7 @@ class EDD_Customer_Dashboard_Pro {
         EDDCDP_Cache_Helper::schedule_cleanup();
     }
     
-    /**
-     * Handle fullscreen mode
-     */
-    public function handle_fullscreen_mode() {
-        if (isset($this->components['fullscreen_manager'])) {
-            if (method_exists($this->components['fullscreen_manager'], 'should_load_fullscreen') &&
-                $this->components['fullscreen_manager']->should_load_fullscreen()) {
-                $this->components['fullscreen_manager']->load_fullscreen();
-            }
-        }
-    }
+
     
     /**
      * Safely require a file
@@ -374,21 +300,6 @@ class EDD_Customer_Dashboard_Pro {
      */
     public function get_component($component_name) {
         return isset($this->components[$component_name]) ? $this->components[$component_name] : null;
-    }
-    
-    /**
-     * Legacy method compatibility
-     */
-    public function get_template_loader() {
-        return $this->get_component('template_loader');
-    }
-    
-    public function get_admin_settings() {
-        return $this->get_component('admin_settings');
-    }
-    
-    public function get_dashboard_data() {
-        return $this->get_component('customer_data'); // Updated to use new component
     }
     
     /**

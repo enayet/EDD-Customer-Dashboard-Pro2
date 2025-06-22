@@ -17,8 +17,8 @@ $fullscreen_mode = isset($settings['fullscreen_mode']) ? $settings['fullscreen_m
 $enabled_sections = isset($settings['enabled_sections']) ? $settings['enabled_sections'] : array();
 
 // Get available templates
-$template_loader = eddcdp()->get_template_loader();
-$available_templates = $template_loader ? $template_loader->get_available_templates() : array();
+$template_manager = eddcdp()->component_manager->get_component('EDDCDP_Template_Manager');
+$available_templates = $template_manager ? $template_manager->get_available_templates() : array();
 
 // Fallback if no templates found
 if (empty($available_templates)) {

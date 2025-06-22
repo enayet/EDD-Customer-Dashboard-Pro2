@@ -9,11 +9,18 @@ if (!defined('ABSPATH')) {
 
 class EDDCDP_Shortcodes {
     
+    private $templates;
+    
     public function __construct() {
         add_action('init', array($this, 'init'));
+        add_action('template_redirect', array($this, 'handle_fullscreen'));
     }
     
     public function init() {
+        // Get templates instance
+        $this->templates = new EDDCDP_Templates();
+        
+        // Register our main shortcode
         add_shortcode('edd_customer_dashboard_pro', array($this, 'dashboard_shortcode'));
         
         // Hook to override EDD shortcodes if setting is enabled
@@ -44,6 +51,49 @@ class EDDCDP_Shortcodes {
     }
     
     /**
+     * Handle fullscreen mode
+     */
+    public function handle_fullscreen() {
+        // Only proceed if user is logged in
+        if (!is_user_logged_in()) {
+            return;
+        }
+        
+        // Get settings
+        $settings = get_option('eddcdp_settings', array());
+        
+        // Only proceed if fullscreen mode is enabled
+        if (empty($settings['fullscreen_mode'])) {
+            return;
+        }
+        
+        // Check if current page contains our shortcode
+        global $post;
+        if (!is_a($post, 'WP_Post')) {
+            return;
+        }
+        
+        // Check for our shortcode or EDD shortcodes (if replace is enabled)
+        $has_dashboard_shortcode = has_shortcode($post->post_content, 'edd_customer_dashboard_pro');
+        
+        $has_edd_shortcode = false;
+        if (!empty($settings['replace_edd_pages'])) {
+            $has_edd_shortcode = (
+                has_shortcode($post->post_content, 'purchase_history') ||
+                has_shortcode($post->post_content, 'download_history') ||
+                has_shortcode($post->post_content, 'edd_purchase_history') ||
+                has_shortcode($post->post_content, 'edd_download_history')
+            );
+        }
+        
+        // If this page has dashboard shortcode, render fullscreen
+        if ($has_dashboard_shortcode || $has_edd_shortcode) {
+            $this->render_fullscreen_dashboard();
+            exit;
+        }
+    }
+    
+    /**
      * Main dashboard shortcode
      */
     public function dashboard_shortcode($atts) {
@@ -61,32 +111,21 @@ class EDDCDP_Shortcodes {
         ob_start();
         
         // Load the dashboard template
-        $this->load_dashboard_template($atts);
+        $this->templates->load_dashboard_template();
         
         // Return the output
         return ob_get_clean();
     }
     
     /**
-     * Load dashboard template
+     * Render fullscreen dashboard
      */
-    private function load_dashboard_template($atts) {
-        $settings = get_option('eddcdp_settings', array());
-        
-        // Determine active template
-        $active_template = !empty($atts['template']) ? $atts['template'] : 
-                          (isset($settings['active_template']) ? $settings['active_template'] : 'default');
+    private function render_fullscreen_dashboard() {
+        // Set fullscreen flag for template to use
+        define('EDDCDP_IS_FULLSCREEN', true);
         
         // Load template
-        $template_path = EDDCDP_PLUGIN_DIR . 'templates/' . $active_template . '/dashboard.php';
-        
-        if (file_exists($template_path)) {
-            include $template_path;
-        } else {
-            echo '<div class="eddcdp-error">';
-            echo '<p>' . __('Dashboard template not found.', 'eddcdp') . '</p>';
-            echo '</div>';
-        }
+        $this->templates->load_dashboard_template();
     }
     
     /**

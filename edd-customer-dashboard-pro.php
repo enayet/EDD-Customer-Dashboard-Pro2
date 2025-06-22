@@ -71,7 +71,7 @@ class EDDCDP_Dashboard_Pro {
         require_once EDDCDP_PLUGIN_DIR . 'includes/class-admin.php';
         require_once EDDCDP_PLUGIN_DIR . 'includes/class-templates.php';
         require_once EDDCDP_PLUGIN_DIR . 'includes/class-shortcodes.php';
-        require_once EDDCDP_PLUGIN_DIR . 'includes/class-fullscreen.php';
+        require_once EDDCDP_PLUGIN_DIR . 'includes/class-ajax.php';
     }
     
     public function hooks() {
@@ -82,27 +82,11 @@ class EDDCDP_Dashboard_Pro {
         
         new EDDCDP_Templates();
         new EDDCDP_Shortcodes();
-        new EDDCDP_Fullscreen(); // Add fullscreen handler
+        new EDDCDP_Ajax();
         
         // Plugin hooks
         register_activation_hook(__FILE__, array($this, 'activate'));
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
-        
-        // Add body class for styling
-        add_filter('body_class', array($this, 'add_body_class'));
-    }
-    
-    /**
-     * Add body class when dashboard is active
-     */
-    public function add_body_class($classes) {
-        global $post;
-        
-        if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'edd_customer_dashboard_pro')) {
-            $classes[] = 'eddcdp-dashboard-page';
-        }
-        
-        return $classes;
     }
     
     public function activate() {

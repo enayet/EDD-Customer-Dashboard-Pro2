@@ -10,51 +10,7 @@ if (!defined('ABSPATH')) {
 class EDDCDP_Templates {
     
     public function __construct() {
-        add_action('init', array($this, 'init'));
-    }
-    
-    public function init() {
-        // Override EDD shortcodes if enabled
-        add_action('wp_loaded', array($this, 'override_edd_shortcodes'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
-    }
-    
-    /**
-     * Override EDD shortcodes with our dashboard
-     */
-    public function override_edd_shortcodes() {
-        $settings = get_option('eddcdp_settings', array());
-        
-        // Only override if replacement is enabled
-        if (empty($settings['replace_edd_pages'])) {
-            return;
-        }
-        
-        // Remove default EDD shortcodes
-        remove_shortcode('purchase_history');
-        remove_shortcode('download_history');
-        remove_shortcode('edd_purchase_history');
-        remove_shortcode('edd_download_history');
-        
-        // Add our dashboard shortcodes
-        add_shortcode('purchase_history', array($this, 'dashboard_shortcode'));
-        add_shortcode('download_history', array($this, 'dashboard_shortcode'));
-        add_shortcode('edd_purchase_history', array($this, 'dashboard_shortcode'));
-        add_shortcode('edd_download_history', array($this, 'dashboard_shortcode'));
-    }
-    
-    /**
-     * Dashboard shortcode handler
-     */
-    public function dashboard_shortcode($atts) {
-        // Check if user is logged in
-        if (!is_user_logged_in()) {
-            return $this->login_form();
-        }
-        
-        ob_start();
-        $this->load_dashboard_template();
-        return ob_get_clean();
     }
     
     /**
@@ -66,14 +22,12 @@ class EDDCDP_Templates {
         
         $template_path = $this->get_template_path($active_template);
         
-        exit ($template_path);
-        
         if ($template_path && file_exists($template_path . '/dashboard.php')) {
             include $template_path . '/dashboard.php';
             return true;
         }
         
-        echo '<div class="notice notice-error"><p>Dashboard template not found.</p></div>';
+        echo '<div class="notice notice-error"><p>Dashboard template not found: ' . $active_template . '</p></div>';
         return false;
     }
     
@@ -91,6 +45,43 @@ class EDDCDP_Templates {
     }
     
     /**
+     * Get available templates
+     */
+    public function get_available_templates() {
+        $templates = array();
+        $templates_dir = EDDCDP_PLUGIN_DIR . 'templates/';
+        
+        if (!is_dir($templates_dir)) {
+            return $templates;
+        }
+        
+        $dirs = scandir($templates_dir);
+        foreach ($dirs as $dir) {
+            if ($dir === '.' || $dir === '..' || !is_dir($templates_dir . $dir)) {
+                continue;
+            }
+            
+            $config_file = $templates_dir . $dir . '/template.json';
+            if (file_exists($config_file)) {
+                $config = json_decode(file_get_contents($config_file), true);
+                if ($config) {
+                    $templates[$dir] = $config;
+                }
+            } else {
+                // Default config if no JSON file
+                $templates[$dir] = array(
+                    'name' => ucfirst($dir) . ' Template',
+                    'description' => 'Custom dashboard template',
+                    'version' => '1.0.0',
+                    'author' => 'EDD Customer Dashboard Pro'
+                );
+            }
+        }
+        
+        return $templates;
+    }
+    
+    /**
      * Enqueue template assets
      */
     public function enqueue_assets() {
@@ -105,7 +96,7 @@ class EDDCDP_Templates {
         $template_path = $this->get_template_path($active_template);
         $template_url = EDDCDP_PLUGIN_URL . 'templates/' . $active_template . '/';
         
-        // Always enqueue the template CSS to handle layout overrides
+        // Enqueue CSS
         $css_file = $template_path . '/style.css';
         if (file_exists($css_file)) {
             wp_enqueue_style(
@@ -116,7 +107,7 @@ class EDDCDP_Templates {
             );
         }
         
-        // Enqueue JS if exists
+        // Enqueue JS
         $js_file = $template_path . '/script.js';
         if (file_exists($js_file)) {
             wp_enqueue_script(
@@ -127,52 +118,6 @@ class EDDCDP_Templates {
                 true
             );
         }
-        
-        // Add inline CSS for critical layout fixes
-        $this->add_critical_css();
-    }
-    
-    /**
-     * Include template section
-     */
-    public function include_section($section, $template_name = null) {
-        if (!$template_name) {
-            $settings = get_option('eddcdp_settings', array());
-            $template_name = isset($settings['active_template']) ? $settings['active_template'] : 'default';
-        }
-        
-        $template_path = $this->get_template_path($template_name);
-        $section_file = $template_path . '/sections/' . $section . '.php';
-        
-        if (file_exists($section_file)) {
-            include $section_file;
-            return true;
-        }
-        
-        // Fallback content if section doesn't exist
-        echo '<div class="text-center py-12">';
-        echo '<h3 class="text-2xl font-bold text-gray-800 mb-3">' . ucfirst($section) . ' ' . __('section coming soon', 'eddcdp') . '</h3>';
-        echo '<p class="text-gray-600">' . __('This section is under development.', 'eddcdp') . '</p>';
-        echo '</div>';
-        
-        return false;
-    }
-    
-    /**
-     * Add critical CSS to override WordPress layout constraints
-     */
-    private function add_critical_css() {
-        $css = "
-        .eddcdp-dashboard-wrapper,
-        .eddcdp-dashboard-wrapper *,
-        .eddcdp-dashboard-wrapper .is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
-            max-width: none !important;
-            margin-left: 0 !important;
-            margin-right: 0 !important;
-        }
-        ";
-        
-        wp_add_inline_style('eddcdp-template-default', $css);
     }
     
     /**
@@ -181,10 +126,10 @@ class EDDCDP_Templates {
     private function should_enqueue_assets() {
         global $post;
         
-        // Check if post contains our shortcode or EDD shortcodes
         if (is_a($post, 'WP_Post')) {
             $content = $post->post_content;
             
+            // Check for our shortcode or EDD shortcodes
             if (has_shortcode($content, 'edd_customer_dashboard_pro') ||
                 has_shortcode($content, 'purchase_history') ||
                 has_shortcode($content, 'download_history') ||
@@ -194,30 +139,6 @@ class EDDCDP_Templates {
             }
         }
         
-        // Also check if we're on EDD pages
-        if (function_exists('edd_is_checkout') && (edd_is_checkout() || edd_is_purchase_history_page())) {
-            return true;
-        }
-        
         return false;
-    }
-    
-    /**
-     * Login form for non-logged-in users
-     */
-    private function login_form() {
-        ob_start();
-        ?>
-        <div class="eddcdp-login-required" style="text-align: center; padding: 40px; background: #f9f9f9; border-radius: 8px; margin: 20px 0;">
-            <h3><?php _e('Login Required', 'eddcdp'); ?></h3>
-            <p><?php _e('Please log in to access your customer dashboard.', 'eddcdp'); ?></p>
-            <p>
-                <a href="<?php echo wp_login_url(get_permalink()); ?>" class="button">
-                    <?php _e('Log In', 'eddcdp'); ?>
-                </a>
-            </p>
-        </div>
-        <?php
-        return ob_get_clean();
     }
 }

@@ -77,20 +77,15 @@ class EDDCDP_Admin {
         $settings = get_option('eddcdp_settings', $defaults);
         return wp_parse_args($settings, $defaults);
     }
+
     
     /**
      * Get available templates
      */
     private function get_available_templates() {
-        return array(
-            'default' => array(
-                'name' => 'Default Dashboard',
-                'description' => 'Modern, clean dashboard interface',
-                'version' => '1.0.0',
-                'active' => true
-            )
-        );
-    }
+        $templates_class = new EDDCDP_Templates();
+        return $templates_class->get_available_templates();
+    }    
     
     /**
      * Admin page

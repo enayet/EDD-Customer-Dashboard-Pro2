@@ -133,6 +133,11 @@ class EDDCDP_Template_Loader {
             return '<p>' . __('Template not found.', 'edd-customer-dashboard-pro') . '</p>';
         }
         
+        // Ensure complete data using helper
+        if (class_exists('EDDCDP_Template_Data_Helper')) {
+            $data = EDDCDP_Template_Data_Helper::ensure_complete_data($data);
+        }
+        
         // Extract data for template
         extract($data);
         

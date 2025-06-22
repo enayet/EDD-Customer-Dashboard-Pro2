@@ -71,6 +71,7 @@ class EDDCDP_Dashboard_Pro {
         require_once EDDCDP_PLUGIN_DIR . 'includes/class-admin.php';
         require_once EDDCDP_PLUGIN_DIR . 'includes/class-templates.php';
         require_once EDDCDP_PLUGIN_DIR . 'includes/class-shortcodes.php';
+        require_once EDDCDP_PLUGIN_DIR . 'includes/class-fullscreen.php';
     }
     
     public function hooks() {
@@ -81,6 +82,7 @@ class EDDCDP_Dashboard_Pro {
         
         new EDDCDP_Templates();
         new EDDCDP_Shortcodes();
+        new EDDCDP_Fullscreen(); // Add fullscreen handler
         
         // Plugin hooks
         register_activation_hook(__FILE__, array($this, 'activate'));

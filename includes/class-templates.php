@@ -66,6 +66,8 @@ class EDDCDP_Templates {
         
         $template_path = $this->get_template_path($active_template);
         
+        exit ($template_path);
+        
         if ($template_path && file_exists($template_path . '/dashboard.php')) {
             include $template_path . '/dashboard.php';
             return true;
@@ -128,6 +130,32 @@ class EDDCDP_Templates {
         
         // Add inline CSS for critical layout fixes
         $this->add_critical_css();
+    }
+    
+    /**
+     * Include template section
+     */
+    public function include_section($section, $template_name = null) {
+        if (!$template_name) {
+            $settings = get_option('eddcdp_settings', array());
+            $template_name = isset($settings['active_template']) ? $settings['active_template'] : 'default';
+        }
+        
+        $template_path = $this->get_template_path($template_name);
+        $section_file = $template_path . '/sections/' . $section . '.php';
+        
+        if (file_exists($section_file)) {
+            include $section_file;
+            return true;
+        }
+        
+        // Fallback content if section doesn't exist
+        echo '<div class="text-center py-12">';
+        echo '<h3 class="text-2xl font-bold text-gray-800 mb-3">' . ucfirst($section) . ' ' . __('section coming soon', 'eddcdp') . '</h3>';
+        echo '<p class="text-gray-600">' . __('This section is under development.', 'eddcdp') . '</p>';
+        echo '</div>';
+        
+        return false;
     }
     
     /**

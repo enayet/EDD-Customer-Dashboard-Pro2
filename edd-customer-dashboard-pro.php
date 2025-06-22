@@ -109,7 +109,6 @@ class EDD_Customer_Dashboard_Pro {
         
         // Load all registered components
         $this->component_manager->load_components();
-        
     }
     
     /**
@@ -134,6 +133,7 @@ class EDD_Customer_Dashboard_Pro {
                 'includes/frontend/class-shortcode-handler.php'
             ),
             'admin' => array(
+                'includes/admin/class-admin-menu.php',
                 'includes/admin/class-admin-ajax.php'
             )
         );
@@ -158,50 +158,12 @@ class EDD_Customer_Dashboard_Pro {
             'EDDCDP_Asset_Manager',
             'EDDCDP_Template_Manager',
             'EDDCDP_Shortcode_Handler',
+            'EDDCDP_Admin_Menu',
             'EDDCDP_Admin_Ajax'
         );
         
         foreach ($components_to_register as $component_class) {
             $this->component_manager->register($component_class);
-        }
-        
-    }
-    
-    
-    /**
-     * Setup dependencies between components
-     */
-    private function setup_component_dependencies() {
-        
-        // Shortcode handler needs dependencies
-        if (isset($this->components['shortcode_handler'])) {
-            $handler = $this->components['shortcode_handler'];
-            
-            if (isset($this->components['template_manager']) && method_exists($handler, 'set_template_manager')) {
-                $handler->set_template_manager($this->components['template_manager']);
-            }
-            
-            if (isset($this->components['customer_data']) && method_exists($handler, 'set_customer_data')) {
-                $handler->set_customer_data($this->components['customer_data']);
-            }
-            
-            if (isset($this->components['edd_integration']) && method_exists($handler, 'set_edd_integration')) {
-                $handler->set_edd_integration($this->components['edd_integration']);
-            }
-        }
-        
-        // Customer data needs EDD integration
-        if (isset($this->components['customer_data']) && isset($this->components['edd_integration'])) {
-            if (method_exists($this->components['customer_data'], 'set_edd_integration')) {
-                $this->components['customer_data']->set_edd_integration($this->components['edd_integration']);
-            }
-        }
-        
-        // License data needs EDD integration
-        if (isset($this->components['license_data']) && isset($this->components['edd_integration'])) {
-            if (method_exists($this->components['license_data'], 'set_edd_integration')) {
-                $this->components['license_data']->set_edd_integration($this->components['edd_integration']);
-            }
         }
     }
     
@@ -212,8 +174,6 @@ class EDD_Customer_Dashboard_Pro {
         EDDCDP_Cache_Helper::setup_auto_invalidation();
         EDDCDP_Cache_Helper::schedule_cleanup();
     }
-    
-
     
     /**
      * Safely require a file
@@ -295,11 +255,57 @@ class EDD_Customer_Dashboard_Pro {
         delete_option('eddcdp_activated');
     }
     
+    // ==================== PUBLIC ACCESS METHODS ====================
+    
     /**
-     * Get component (for backward compatibility)
+     * Get component manager (PUBLIC ACCESS)
+     */
+    public function get_component_manager() {
+        return $this->component_manager;
+    }
+    
+    /**
+     * Get component (for backward compatibility and easier access)
      */
     public function get_component($component_name) {
-        return isset($this->components[$component_name]) ? $this->components[$component_name] : null;
+        if ($this->component_manager) {
+            return $this->component_manager->get_component($component_name);
+        }
+        return null;
+    }
+    
+    /**
+     * Get template manager (helper method)
+     */
+    public function get_template_manager() {
+        return $this->get_component('EDDCDP_Template_Manager');
+    }
+    
+    /**
+     * Get customer data manager (helper method)
+     */
+    public function get_customer_data() {
+        return $this->get_component('EDDCDP_Customer_Data');
+    }
+    
+    /**
+     * Get all loaded components
+     */
+    public function get_loaded_components() {
+        if ($this->component_manager) {
+            return $this->component_manager->get_loaded_components();
+        }
+        return array();
+    }
+    
+    /**
+     * Check if component is loaded
+     */
+    public function is_component_loaded($component_name) {
+        if ($this->component_manager) {
+            return $this->component_manager->is_loaded($component_name);
+        }
+        return false;
     }
     
     /**

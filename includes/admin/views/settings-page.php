@@ -1,8 +1,6 @@
 <?php
 /**
- * Admin Settings Page View
- * 
- * Clean, separated view for admin settings
+ * Admin Settings Page View - Clean Modern Version
  */
 
 if (!defined('ABSPATH')) {
@@ -16,30 +14,34 @@ $replace_edd_pages = isset($settings['replace_edd_pages']) ? $settings['replace_
 $fullscreen_mode = isset($settings['fullscreen_mode']) ? $settings['fullscreen_mode'] : false;
 $enabled_sections = isset($settings['enabled_sections']) ? $settings['enabled_sections'] : array();
 
-// Get available templates
-$template_manager = eddcdp()->component_manager->get_component('EDDCDP_Template_Manager');
-$available_templates = $template_manager ? $template_manager->get_available_templates() : array();
+// Get template manager and available templates
+$template_manager = eddcdp()->get_template_manager();
+$available_templates = array();
+
+if ($template_manager) {
+    $available_templates = $template_manager->get_available_templates();
+}
 
 // Fallback if no templates found
 if (empty($available_templates)) {
     $available_templates = array(
         'default' => array(
-            'name' => esc_html__('Default Dashboard', 'edd-customer-dashboard-pro'),
-            'description' => esc_html__('Modern, clean dashboard interface', 'edd-customer-dashboard-pro'),
+            'name' => 'Default Dashboard',
+            'description' => 'Modern, clean dashboard interface',
             'version' => '1.0.0',
-            'author' => esc_html__('EDD Customer Dashboard Pro', 'edd-customer-dashboard-pro')
+            'author' => 'EDD Customer Dashboard Pro'
         )
     );
 }
 
 // Available sections
 $available_sections = array(
-    'purchases' => esc_html__('Purchases', 'edd-customer-dashboard-pro'),
-    'downloads' => esc_html__('Downloads', 'edd-customer-dashboard-pro'),
-    'licenses' => esc_html__('Licenses', 'edd-customer-dashboard-pro'),
-    'wishlist' => esc_html__('Wishlist', 'edd-customer-dashboard-pro'),
-    'analytics' => esc_html__('Analytics', 'edd-customer-dashboard-pro'),
-    'support' => esc_html__('Support', 'edd-customer-dashboard-pro')
+    'purchases' => __('Purchases', 'edd-customer-dashboard-pro'),
+    'downloads' => __('Downloads', 'edd-customer-dashboard-pro'),
+    'licenses' => __('Licenses', 'edd-customer-dashboard-pro'),
+    'wishlist' => __('Wishlist', 'edd-customer-dashboard-pro'),
+    'analytics' => __('Analytics', 'edd-customer-dashboard-pro'),
+    'support' => __('Support', 'edd-customer-dashboard-pro')
 );
 ?>
 
@@ -59,12 +61,22 @@ $available_sections = array(
                         <tr>
                             <th scope="row"><?php esc_html_e('Replace EDD Pages', 'edd-customer-dashboard-pro'); ?></th>
                             <td>
-                                <label>
+                                <label class="eddcdp-toggle">
                                     <input type="checkbox" name="replace_edd_pages" value="1" <?php checked($replace_edd_pages, true); ?> />
-                                    <?php esc_html_e('Replace default EDD customer pages with Dashboard Pro', 'edd-customer-dashboard-pro'); ?>
+                                    <span class="eddcdp-toggle-slider"></span>
                                 </label>
-                                <p class="description"><?php esc_html_e('When enabled, all EDD customer dashboard pages will automatically open in full screen mode by default.', 'edd-customer-dashboard-pro'); ?></p>
-
+                                <p class="description"><?php esc_html_e('Replace default EDD customer pages with Dashboard Pro', 'edd-customer-dashboard-pro'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php esc_html_e('Fullscreen Mode', 'edd-customer-dashboard-pro'); ?></th>
+                            <td>
+                                <label class="eddcdp-toggle">
+                                    <input type="checkbox" name="fullscreen_mode" value="1" <?php checked($fullscreen_mode, true); ?> />
+                                    <span class="eddcdp-toggle-slider"></span>
+                                </label>
+                                <p class="description"><?php esc_html_e('Enable automatic fullscreen dashboard mode', 'edd-customer-dashboard-pro'); ?></p>
+                                
                                 <?php if ($fullscreen_mode) : ?>
                                     <div class="eddcdp-fullscreen-preview" style="margin-top: 15px; padding: 15px; background: #f0f8ff; border-left: 4px solid #667eea; border-radius: 4px;">
                                         <h4 style="margin: 0 0 10px 0; color: #333;">🚀 <?php esc_html_e('Auto Full Screen Mode Active', 'edd-customer-dashboard-pro'); ?></h4>
@@ -98,36 +110,11 @@ $available_sections = array(
                         <?php endforeach; ?>
                     </table>
                     
-                    <?php submit_button(esc_html__('Save Settings', 'edd-customer-dashboard-pro')); ?>
+                    <?php submit_button(__('Save Settings', 'edd-customer-dashboard-pro')); ?>
                 </form>
             </div>
-        </div>
-        
-        <div class="eddcdp-admin-sidebar">
-            <div class="eddcdp-info-box">
-                <h3><?php esc_html_e('How to Use', 'edd-customer-dashboard-pro'); ?></h3>
-                <p><?php esc_html_e('Use this shortcode to display the dashboard:', 'edd-customer-dashboard-pro'); ?></p>
-                <code>[edd_customer_dashboard_pro]</code>
-
-                <h4><?php esc_html_e('Plugin Info', 'edd-customer-dashboard-pro'); ?></h4>
-                <p><strong><?php esc_html_e('Version:', 'edd-customer-dashboard-pro'); ?></strong> <?php echo esc_html(EDDCDP_VERSION); ?></p>
-                <p><strong><?php esc_html_e('Active Template:', 'edd-customer-dashboard-pro'); ?></strong> <?php echo esc_html(ucfirst($active_template)); ?></p>
-                
-                <?php if ($fullscreen_mode) : ?>
-                    <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 8px; border: 1px solid #4caf50;">
-                        <h4 style="margin: 0 0 10px 0; color: #2e7d32;">🔍 <?php esc_html_e('Full Screen Mode Active', 'edd-customer-dashboard-pro'); ?></h4>
-                        <p style="margin: 0; font-size: 13px; color: #333;">
-                            <?php esc_html_e('Customers will see a clean, immersive dashboard experience.', 'edd-customer-dashboard-pro'); ?>
-                        </p>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Template Selection -->
-    <div class="eddcdp-admin-wrapper">
-        <div class="eddcdp-admin-main">
+            
+            <!-- Template Selection -->
             <div class="eddcdp-templates-section">
                 <h2><?php esc_html_e('Template Settings', 'edd-customer-dashboard-pro'); ?></h2>
                 <p class="description"><?php esc_html_e('Choose and configure your dashboard template.', 'edd-customer-dashboard-pro'); ?></p>
@@ -139,8 +126,8 @@ $available_sections = array(
                             <div class="eddcdp-template-preview">
                                 <?php
                                 $screenshot = false;
-                                if ($template_loader) {
-                                    $screenshot = $template_loader->get_template_screenshot($template_key);
+                                if ($template_manager && method_exists($template_manager, 'get_template_screenshot')) {
+                                    $screenshot = $template_manager->get_template_screenshot($template_key);
                                 }
                                 
                                 if ($screenshot) :
@@ -169,11 +156,11 @@ $available_sections = array(
                                 
                                 <div class="eddcdp-template-meta">
                                     <span class="eddcdp-template-version">
-                                        <?php printf(esc_html__('Version: %s', 'edd-customer-dashboard-pro'), esc_html($template_info['version'])); ?>
+                                        <?php printf(__('Version: %s', 'edd-customer-dashboard-pro'), esc_html($template_info['version'])); ?>
                                     </span>
                                     <?php if (isset($template_info['author'])) : ?>
                                         <span class="eddcdp-template-author">
-                                            <?php printf(esc_html__('by %s', 'edd-customer-dashboard-pro'), esc_html($template_info['author'])); ?>
+                                            <?php printf(__('by %s', 'edd-customer-dashboard-pro'), esc_html($template_info['author'])); ?>
                                         </span>
                                     <?php endif; ?>
                                 </div>
@@ -202,191 +189,65 @@ $available_sections = array(
                 </div>
             </div>
         </div>
+        
+        <div class="eddcdp-admin-sidebar">
+            <div class="eddcdp-info-box">
+                <h3><?php esc_html_e('How to Use', 'edd-customer-dashboard-pro'); ?></h3>
+                <p><?php esc_html_e('Use this shortcode to display the dashboard:', 'edd-customer-dashboard-pro'); ?></p>
+                <code>[edd_customer_dashboard_pro]</code>
+
+                <h4><?php esc_html_e('Plugin Info', 'edd-customer-dashboard-pro'); ?></h4>
+                <p><strong><?php esc_html_e('Version:', 'edd-customer-dashboard-pro'); ?></strong> <?php echo esc_html(EDDCDP_VERSION); ?></p>
+                <p><strong><?php esc_html_e('Active Template:', 'edd-customer-dashboard-pro'); ?></strong> <?php echo esc_html(ucfirst($active_template)); ?></p>
+                
+                <?php if ($fullscreen_mode) : ?>
+                    <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 8px; border: 1px solid #4caf50;">
+                        <h4 style="margin: 0 0 10px 0; color: #2e7d32;">🔍 <?php esc_html_e('Full Screen Mode Active', 'edd-customer-dashboard-pro'); ?></h4>
+                        <p style="margin: 0; font-size: 13px; color: #333;">
+                            <?php esc_html_e('Customers will see a clean, immersive dashboard experience.', 'edd-customer-dashboard-pro'); ?>
+                        </p>
+                    </div>
+                <?php endif; ?>
+
+                <h4><?php esc_html_e('Quick Actions', 'edd-customer-dashboard-pro'); ?></h4>
+                <p>
+                    <a href="<?php echo esc_url(add_query_arg(array('eddcdp_action' => 'flush_cache', '_wpnonce' => wp_create_nonce('eddcdp_flush_cache')))); ?>" class="button button-secondary">
+                        <?php esc_html_e('Clear Cache', 'edd-customer-dashboard-pro'); ?>
+                    </a>
+                </p>
+
+                <h4><?php esc_html_e('System Status', 'edd-customer-dashboard-pro'); ?></h4>
+                <ul style="margin: 0; padding-left: 0; list-style: none;">
+                    <li style="margin-bottom: 8px;">
+                        <?php if (class_exists('Easy_Digital_Downloads')) : ?>
+                            <span style="color: #4caf50;">✅</span> <?php esc_html_e('EDD Active', 'edd-customer-dashboard-pro'); ?>
+                        <?php else : ?>
+                            <span style="color: #f44336;">❌</span> <?php esc_html_e('EDD Required', 'edd-customer-dashboard-pro'); ?>
+                        <?php endif; ?>
+                    </li>
+                    <li style="margin-bottom: 8px;">
+                        <?php if ($template_manager) : ?>
+                            <span style="color: #4caf50;">✅</span> <?php esc_html_e('Templates Loaded', 'edd-customer-dashboard-pro'); ?>
+                        <?php else : ?>
+                            <span style="color: #ff9800;">⚠️</span> <?php esc_html_e('Template Issues', 'edd-customer-dashboard-pro'); ?>
+                        <?php endif; ?>
+                    </li>
+                    <li style="margin-bottom: 8px;">
+                        <?php if (class_exists('EDD_Software_Licensing')) : ?>
+                            <span style="color: #4caf50;">✅</span> <?php esc_html_e('Licensing Support', 'edd-customer-dashboard-pro'); ?>
+                        <?php else : ?>
+                            <span style="color: #9e9e9e;">⚪</span> <?php esc_html_e('Licensing Optional', 'edd-customer-dashboard-pro'); ?>
+                        <?php endif; ?>
+                    </li>
+                    <li style="margin-bottom: 8px;">
+                        <?php if (class_exists('EDD_Wish_Lists')) : ?>
+                            <span style="color: #4caf50;">✅</span> <?php esc_html_e('Wishlist Support', 'edd-customer-dashboard-pro'); ?>
+                        <?php else : ?>
+                            <span style="color: #9e9e9e;">⚪</span> <?php esc_html_e('Wishlist Optional', 'edd-customer-dashboard-pro'); ?>
+                        <?php endif; ?>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
-
-<style>
-.eddcdp-admin-wrapper {
-    display: flex;
-    gap: 30px;
-    margin-bottom: 30px;
-}
-
-.eddcdp-admin-main {
-    flex: 1;
-}
-
-.eddcdp-admin-sidebar {
-    width: 300px;
-}
-
-.eddcdp-settings-section {
-    background: #fff;
-    border: 1px solid #ccd0d4;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-}
-
-.eddcdp-info-box {
-    background: #fff;
-    border: 1px solid #ccd0d4;
-    border-radius: 8px;
-    padding: 20px;
-}
-
-.eddcdp-info-box h3 {
-    margin-top: 0;
-}
-
-.eddcdp-info-box code {
-    display: block;
-    margin: 10px 0;
-    padding: 10px;
-    background: #f6f7f7;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.eddcdp-toggle {
-    position: relative;
-    display: inline-block;
-    width: 60px;
-    height: 34px;
-}
-
-.eddcdp-toggle input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.eddcdp-toggle-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-    border-radius: 34px;
-}
-
-.eddcdp-toggle-slider:before {
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-}
-
-.eddcdp-toggle input:checked + .eddcdp-toggle-slider {
-    background-color: #2196F3;
-}
-
-.eddcdp-toggle input:checked + .eddcdp-toggle-slider:before {
-    transform: translateX(26px);
-}
-
-.eddcdp-template-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.eddcdp-template-card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #fff;
-    transition: all 0.3s ease;
-}
-
-.eddcdp-template-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.eddcdp-template-card.active {
-    border-color: #2196F3;
-    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
-}
-
-.eddcdp-template-preview {
-    position: relative;
-    height: 200px;
-    background: #f6f7f7;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.eddcdp-template-screenshot {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.eddcdp-no-screenshot .dashicons {
-    font-size: 48px;
-    color: #999;
-}
-
-.eddcdp-active-badge {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: #2196F3;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.eddcdp-template-info {
-    padding: 20px;
-}
-
-.eddcdp-template-name {
-    margin: 0 0 10px 0;
-    font-size: 18px;
-}
-
-.eddcdp-template-description {
-    color: #666;
-    margin: 0 0 15px 0;
-}
-
-.eddcdp-template-meta {
-    font-size: 12px;
-    color: #999;
-    margin-bottom: 15px;
-}
-
-.eddcdp-template-meta span {
-    display: block;
-    margin-bottom: 5px;
-}
-
-.eddcdp-template-actions {
-    text-align: right;
-}
-
-@media (max-width: 1200px) {
-    .eddcdp-admin-wrapper {
-        flex-direction: column;
-    }
-    
-    .eddcdp-admin-sidebar {
-        width: 100%;
-    }
-}
-</style>

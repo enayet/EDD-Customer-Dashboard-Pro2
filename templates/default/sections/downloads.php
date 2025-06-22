@@ -1,6 +1,6 @@
 <?php
 /**
- * Downloads Section Template
+ * Downloads Section Template - Using EDD 3.0+ functions
  */
 
 // Prevent direct access
@@ -8,12 +8,12 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Get current user and download history using correct EDD functions
+// Get current user and download history using EDD 3.0+ functions
 $current_user = wp_get_current_user();
 
-// Get download logs using the correct EDD function
+// Get download logs using EDD 3.0+ function
 $download_logs = edd_get_file_download_logs(array(
-    'user_id' => $current_user->ID,
+    'customer' => $current_user->user_email,
     'number' => 20,
     'orderby' => 'date_created',
     'order' => 'DESC'
@@ -32,9 +32,9 @@ $download_logs = edd_get_file_download_logs(array(
         $download_date = $log->date_created;
         $file_id = $log->file_id;
         
-        // Get payment info if available
-        $payment_id = !empty($log->payment_id) ? $log->payment_id : 0;
-        $payment = $payment_id ? new EDD_Payment($payment_id) : null;
+        // Get order info if available
+        $order_id = !empty($log->order_id) ? $log->order_id : 0;
+        $order = $order_id ? edd_get_order($order_id) : null;
     ?>
     
     <div class="bg-gray-50/80 rounded-2xl p-6 border border-gray-200/50">
@@ -45,9 +45,9 @@ $download_logs = edd_get_file_download_logs(array(
                     <?php printf(__('Downloaded: %s', 'eddcdp'), date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($download_date))); ?>
                 </p>
                 
-                <?php if ($payment) : ?>
+                <?php if ($order) : ?>
                 <p class="text-sm text-gray-500 mt-1">
-                    <?php printf(__('Order #%s', 'eddcdp'), $payment->number); ?>
+                    <?php printf(__('Order #%s', 'eddcdp'), $order->get_number()); ?>
                 </p>
                 <?php endif; ?>
                 
@@ -56,8 +56,12 @@ $download_logs = edd_get_file_download_logs(array(
                     <?php 
                     // Check download limits
                     $limit = edd_get_file_download_limit($download_id);
-                    if ($limit && $payment_id) {
-                        $downloads_used = edd_count_file_downloads($download_id, $payment_id, $current_user->ID);
+                    if ($limit && $order_id) {
+                        $downloads_used = edd_count_file_downloads(array(
+                            'product_id' => $download_id,
+                            'order_id' => $order_id,
+                            'customer' => $current_user->user_email
+                        ));
                         $remaining = max(0, $limit - $downloads_used);
                         echo $remaining . ' ' . __('of', 'eddcdp') . ' ' . $limit;
                     } else {

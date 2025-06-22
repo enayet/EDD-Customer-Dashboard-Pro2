@@ -1,6 +1,6 @@
 <?php
 /**
- * Purchases Section Template - Using only core EDD functions
+ * Purchases Section Template - Using EDD 3.0+ functions
  */
 
 // Prevent direct access
@@ -11,19 +11,12 @@ if (!defined('ABSPATH')) {
 // Get current user
 $current_user = wp_get_current_user();
 
-// Get user's purchases using basic query
-$purchases = get_posts(array(
-    'post_type' => 'edd_payment',
-    'posts_per_page' => 20,
-    'post_status' => array('publish', 'edd_subscription'),
-    'meta_query' => array(
-        array(
-            'key' => '_edd_payment_user_email',
-            'value' => $current_user->user_email,
-            'compare' => '='
-        )
-    ),
-    'orderby' => 'date',
+// Get user's orders using EDD 3.0+ function
+$orders = edd_get_orders(array(
+    'customer' => $current_user->user_email,
+    'number' => 20,
+    'status' => array('complete', 'pending', 'processing'),
+    'orderby' => 'date_created',
     'order' => 'DESC'
 ));
 ?>
@@ -32,17 +25,15 @@ $purchases = get_posts(array(
     📦 <?php _e('Your Orders & Purchases', 'eddcdp'); ?>
 </h2>
 
-<?php if ($purchases) : ?>
+<?php if ($orders) : ?>
 <div class="space-y-6">
-    <?php foreach ($purchases as $purchase) : 
-        $payment_meta = get_post_meta($purchase->ID);
-        $total = isset($payment_meta['_edd_payment_total'][0]) ? $payment_meta['_edd_payment_total'][0] : '0.00';
-        $status = $purchase->post_status;
-        $payment_key = isset($payment_meta['_edd_payment_purchase_key'][0]) ? $payment_meta['_edd_payment_purchase_key'][0] : '';
+    <?php foreach ($orders as $order) : 
+        $total = $order->total;
+        $status = $order->status;
+        $order_number = $order->get_number();
         
-        // Get cart details
-        $cart_details = isset($payment_meta['_edd_payment_meta'][0]) ? maybe_unserialize($payment_meta['_edd_payment_meta'][0]) : array();
-        $downloads = isset($cart_details['cart_details']) ? $cart_details['cart_details'] : array();
+        // Get order items
+        $order_items = $order->get_items();
     ?>
     
     <!-- Purchase Item -->
@@ -50,12 +41,12 @@ $purchases = get_posts(array(
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
             <div>
                 <h3 class="text-xl font-semibold text-gray-800 mb-2">
-                    <?php printf(__('Purchase #%s', 'eddcdp'), $purchase->ID); ?>
+                    <?php printf(__('Order #%s', 'eddcdp'), $order_number); ?>
                 </h3>
                 <div class="flex flex-wrap gap-4 text-sm text-gray-600">
-                    <span class="flex items-center gap-1">📋 <?php printf(__('Order #%s', 'eddcdp'), $purchase->ID); ?></span>
-                    <span class="flex items-center gap-1">📅 <?php echo date_i18n(get_option('date_format'), strtotime($purchase->post_date)); ?></span>
-                    <span class="flex items-center gap-1 font-semibold">💰 <?php echo function_exists('edd_currency_filter') ? edd_currency_filter($total) : '$' . $total; ?></span>
+                    <span class="flex items-center gap-1">📋 <?php printf(__('Order #%s', 'eddcdp'), $order_number); ?></span>
+                    <span class="flex items-center gap-1">📅 <?php echo date_i18n(get_option('date_format'), strtotime($order->date_created)); ?></span>
+                    <span class="flex items-center gap-1 font-semibold">💰 <?php echo edd_currency_filter(edd_format_amount($total)); ?></span>
                 </div>
             </div>
             <?php 
@@ -78,14 +69,14 @@ $purchases = get_posts(array(
             </span>
         </div>
         
-        <?php if ($downloads && $status == 'publish') : ?>
+        <?php if ($order_items && $status == 'complete') : ?>
         <div class="bg-white/60 rounded-xl p-4 mb-4 space-y-3">
-            <?php foreach ($downloads as $download_item) : 
-                $download_id = isset($download_item['id']) ? $download_item['id'] : 0;
-                $download_name = get_the_title($download_id);
-                $download_files = function_exists('edd_get_download_files') ? edd_get_download_files($download_id) : array();
+            <?php foreach ($order_items as $item) : 
+                $download_id = $item->product_id;
+                $download_name = $item->product_name;
+                $download_files = edd_get_download_files($download_id);
             ?>
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 <?php echo count($downloads) > 1 ? 'pb-3 border-b border-gray-200 last:border-b-0 last:pb-0' : ''; ?>">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 <?php echo count($order_items) > 1 ? 'pb-3 border-b border-gray-200 last:border-b-0 last:pb-0' : ''; ?>">
                 <div>
                     <p class="font-medium text-gray-800"><?php echo $download_name; ?></p>
                     <?php if ($download_files) : ?>

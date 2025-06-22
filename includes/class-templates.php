@@ -9,6 +9,15 @@ if (!defined('ABSPATH')) {
 
 class EDDCDP_Templates {
     
+    private static $instance = null;
+    
+    public static function get_instance() {
+        if (null === self::$instance) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+    
     public function __construct() {
         add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
     }
@@ -18,16 +27,36 @@ class EDDCDP_Templates {
      */
     public function load_dashboard_template() {
         $settings = get_option('eddcdp_settings', array());
+        
+        // Debug the settings
+        error_log('EDDCDP Debug - Settings: ' . print_r($settings, true));
+        
         $active_template = isset($settings['active_template']) ? $settings['active_template'] : 'default';
         
-        $template_path = $this->get_template_path($active_template);
+        // Make sure we have a valid template name
+        if (empty($active_template)) {
+            $active_template = 'default';
+        }
         
-        if ($template_path && file_exists($template_path . '/dashboard.php')) {
-            include $template_path . '/dashboard.php';
+        $template_path = $this->get_template_path($active_template);
+        $dashboard_file = $template_path . '/dashboard.php';
+        
+        // Debug output
+        error_log('EDDCDP Debug - Active template: "' . $active_template . '"');
+        error_log('EDDCDP Debug - Template path: ' . $template_path);
+        error_log('EDDCDP Debug - Dashboard file: ' . $dashboard_file);
+        error_log('EDDCDP Debug - File exists: ' . (file_exists($dashboard_file) ? 'YES' : 'NO'));
+        
+        if ($template_path && file_exists($dashboard_file)) {
+            include $dashboard_file;
             return true;
         }
         
-        echo '<div class="notice notice-error"><p>Dashboard template not found: ' . $active_template . '</p></div>';
+        echo '<div class="notice notice-error">';
+        echo '<p>Dashboard template not found: "' . $active_template . '"</p>';
+        echo '<p>Looking for: ' . $dashboard_file . '</p>';
+        echo '<p>Template path: ' . $template_path . '</p>';
+        echo '</div>';
         return false;
     }
     
@@ -35,10 +64,26 @@ class EDDCDP_Templates {
      * Get template path
      */
     public function get_template_path($template_name) {
+        // Ensure we have a template name
+        if (empty($template_name)) {
+            $template_name = 'default';
+        }
+        
         $template_dir = EDDCDP_PLUGIN_DIR . 'templates/' . $template_name;
+        
+        error_log('EDDCDP Debug - get_template_path called with: ' . $template_name);
+        error_log('EDDCDP Debug - Full template dir: ' . $template_dir);
+        error_log('EDDCDP Debug - Directory exists: ' . (is_dir($template_dir) ? 'YES' : 'NO'));
         
         if (is_dir($template_dir)) {
             return $template_dir;
+        }
+        
+        // Fallback to default if template not found
+        $default_dir = EDDCDP_PLUGIN_DIR . 'templates/default';
+        if (is_dir($default_dir)) {
+            error_log('EDDCDP Debug - Falling back to default template');
+            return $default_dir;
         }
         
         return false;

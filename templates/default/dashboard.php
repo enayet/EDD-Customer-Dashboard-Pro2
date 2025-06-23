@@ -15,6 +15,10 @@ $enabled_sections = isset($settings['enabled_sections']) ? $settings['enabled_se
 
 // Include header
 include 'header.php';
+
+
+$order_details = EDDCDP_Order_Details::instance();
+
 ?>
 
 <div class="eddcdp-dashboard" x-data="dashboard()">
@@ -25,12 +29,28 @@ include 'header.php';
 
         <!-- Stats Grid Section -->
         <?php include 'sections/stats.php'; ?>
-
-        <!-- Navigation Tabs Section -->
-        <?php include 'sections/navigation.php'; ?>
+        
+        <!-- Navigation Tabs Section (only show if not viewing order details) -->
+        <?php if (!$order_details->is_viewing_order_details()) : ?>
+            <?php include 'sections/navigation.php'; ?>
+        <?php endif; ?>        
 
         <!-- Content Area -->
         <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 min-h-[600px]">
+            
+            <?php 
+            // Check if we're viewing order details
+            if ($order_details->is_viewing_order_details()) : 
+            ?>
+            
+            <!-- Order Details View -->
+            <div class="p-8">
+                <?php include 'sections/order-details.php'; ?>
+            </div>
+            
+            <?php else : ?>
+            
+            <!-- Normal Dashboard Tabs -->
             
             <!-- Tab Content Sections -->
             <?php if (!empty($enabled_sections['purchases'])) : ?>
@@ -68,7 +88,10 @@ include 'header.php';
                 <?php include 'sections/support.php'; ?>
             </div>
             <?php endif; ?>
+            
+            <?php endif; ?>
         </div>
+        
     </div>
 </div>
 

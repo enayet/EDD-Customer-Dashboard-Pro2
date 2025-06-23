@@ -158,7 +158,7 @@ $download_logs = edd_get_file_download_logs(array(
 <?php endif; ?>
 
 <script>
-function viewOrderDetails(orderId) {
+function viewOrderDetails1(orderId) {
     // This could open a modal or redirect to order details page
     alert('<?php _e('Order details functionality would be implemented here.', 'eddcdp'); ?>');
 }

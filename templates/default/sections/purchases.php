@@ -1,6 +1,6 @@
 <?php
 /**
- * Purchases Section Template - EDD 3.0+ Compatible
+ * Purchases Section Template - Using EDD 3.0+ functions
  */
 
 // Prevent direct access
@@ -11,19 +11,9 @@ if (!defined('ABSPATH')) {
 // Get current user
 $current_user = wp_get_current_user();
 
-// Get customer first to ensure we have valid customer ID
-$customer = edd_get_customer_by('email', $current_user->user_email);
-
-if (!$customer) {
-    echo '<div class="bg-yellow-50/80 rounded-2xl p-6 border border-yellow-200/50">';
-    echo '<p class="text-yellow-800">' . __('No customer data found.', 'eddcdp') . '</p>';
-    echo '</div>';
-    return;
-}
-
-// Get user's orders using EDD 3.0+ method
+// Get user's orders using EDD 3.0+ function
 $orders = edd_get_orders(array(
-    'customer' => $customer->id,
+    'customer' => $current_user->user_email,
     'number' => 20,
     'status' => array('complete', 'pending', 'processing'),
     'orderby' => 'date_created',
@@ -42,7 +32,7 @@ $orders = edd_get_orders(array(
         $status = $order->status;
         $order_number = $order->get_number();
         
-        // Get order items using EDD 3.0+ method
+        // Get order items
         $order_items = $order->get_items();
     ?>
     
@@ -68,10 +58,6 @@ $orders = edd_get_orders(array(
                 $status_class = 'bg-yellow-100 text-yellow-800';
                 $status_icon = '⏳';
                 $status_text = __('Pending', 'eddcdp');
-            } elseif ($status == 'processing') {
-                $status_class = 'bg-blue-100 text-blue-800';
-                $status_icon = '⚙️';
-                $status_text = __('Processing', 'eddcdp');
             } elseif ($status == 'failed') {
                 $status_class = 'bg-red-100 text-red-800';
                 $status_icon = '❌';
@@ -89,41 +75,33 @@ $orders = edd_get_orders(array(
                 $download_id = $item->product_id;
                 $download_name = $item->product_name;
                 $download_files = edd_get_download_files($download_id);
-                
-                // Get download URL using EDD 3.0+ method
-                $download_url = edd_get_download_file_url($order->payment_key, $current_user->user_email, 0, $download_id);
             ?>
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 <?php echo count($order_items) > 1 ? 'pb-3 border-b border-gray-200 last:border-b-0 last:pb-0' : ''; ?>">
                 <div>
-                    <p class="font-medium text-gray-800"><?php echo esc_html($download_name); ?></p>
+                    <p class="font-medium text-gray-800"><?php echo $download_name; ?></p>
                     <?php if ($download_files) : ?>
                         <p class="text-sm text-gray-500 mt-1">
                             <?php 
                             $file_info = reset($download_files);
-                            printf(__('File: %s', 'eddcdp'), isset($file_info['name']) ? esc_html($file_info['name']) : __('Download File', 'eddcdp'));
+                            printf(__('File: %s', 'eddcdp'), isset($file_info['name']) ? $file_info['name'] : __('Download File', 'eddcdp'));
                             ?>
                         </p>
                     <?php endif; ?>
                 </div>
                 
-                <?php if ($download_url) : ?>
-                <a href="<?php echo esc_url($download_url); ?>" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-xl font-medium hover:shadow-lg transition-all duration-300 flex items-center gap-2 text-decoration-none">
+                <button class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-xl font-medium hover:shadow-lg transition-all duration-300 flex items-center gap-2">
                     🔽 <?php _e('Download', 'eddcdp'); ?>
-                </a>
-                <?php else : ?>
-                <span class="bg-gray-300 text-gray-600 px-6 py-2 rounded-xl font-medium flex items-center gap-2">
-                    🔽 <?php _e('Not Available', 'eddcdp'); ?>
-                </span>
-                <?php endif; ?>
+                </button>
             </div>
             <?php endforeach; ?>
         </div>
         <?php endif; ?>
         
         <div class="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
-            <button onclick="viewOrderDetails(<?php echo $order->id; ?>)" class="bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2">
+            <a href="<?php echo EDDCDP_Order_Details::instance()->get_order_details_url($order->id, get_permalink()); ?>" 
+               class="bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 text-decoration-none">
                 📋 <?php _e('Details', 'eddcdp'); ?>
-            </button>
+            </a>
             
             <?php if (function_exists('edd_get_order_receipt_url')) : ?>
             <a href="<?php echo edd_get_order_receipt_url($order->id); ?>" class="bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 text-decoration-none">
@@ -131,10 +109,12 @@ $orders = edd_get_orders(array(
             </a>
             <?php endif; ?>
             
-            <button onclick="contactSupport(<?php echo $order->id; ?>)" class="bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2">
+            <a href="mailto:support@example.com?subject=<?php echo urlencode(sprintf(__('Order #%s Support Request', 'eddcdp'), $order->get_number())); ?>" 
+               class="bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 text-decoration-none">
                 💬 <?php _e('Support', 'eddcdp'); ?>
-            </button>
+            </a>
         </div>
+        
     </div>
     
     <?php endforeach; ?>
@@ -147,20 +127,8 @@ $orders = edd_get_orders(array(
     </div>
     <h3 class="text-2xl font-bold text-gray-800 mb-3"><?php _e('No Purchases Yet', 'eddcdp'); ?></h3>
     <p class="text-gray-600 mb-6"><?php _e('You haven\'t made any purchases yet. Start exploring our products!', 'eddcdp'); ?></p>
-    <button onclick="window.location.href='<?php echo esc_url(home_url('/downloads/')); ?>'" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
+    <button onclick="window.location.href='<?php echo home_url('/downloads/'); ?>'" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
         🛒 <?php _e('Browse Products', 'eddcdp'); ?>
     </button>
 </div>
 <?php endif; ?>
-
-<script>
-function viewOrderDetails(orderId) {
-    // This could open a modal or redirect to order details page
-    alert('<?php _e('Order details functionality would be implemented here.', 'eddcdp'); ?>');
-}
-
-function contactSupport(orderId) {
-    // This could open support form or redirect to support page
-    alert('<?php _e('Support contact functionality would be implemented here.', 'eddcdp'); ?>');
-}
-</script>

@@ -494,9 +494,4 @@ class EDDCDP_Admin {
             echo '</div>';
         }
     }
-}
-
-
-
-                        
-                        
+}               

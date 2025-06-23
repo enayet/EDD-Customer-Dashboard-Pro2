@@ -397,3 +397,91 @@ function eddcdp_get_customer_wishlist_count($customer_id = null) {
     $wishlist_items = edd_wl_get_wish_list_downloads($wishlist->ID);
     return is_array($wishlist_items) ? count($wishlist_items) : 0;
 }
+
+/**
+ * Get license status information for display
+ */
+function eddcdp_get_license_status_info($license) {
+    $license_status = strtolower($license->status);
+    $is_expired = false;
+    $is_disabled = ($license_status === 'disabled');
+    
+    // Check expiration
+    if (!empty($license->expiration) && $license->expiration !== '0000-00-00 00:00:00') {
+        $expiration_date = strtotime($license->expiration);
+        $is_expired = ($expiration_date < time());
+    }
+    
+    // Determine display status and styling
+    if ($is_disabled) {
+        return array(
+            'container_class' => 'bg-gray-50/50 border-gray-200/50',
+            'badge_class' => 'bg-gray-100 text-gray-800',
+            'text' => __('Disabled', 'eddcdp'),
+            'icon' => '🚫',
+            'can_activate' => false
+        );
+    } elseif ($is_expired) {
+        return array(
+            'container_class' => 'bg-red-50/50 border-red-200/50',
+            'badge_class' => 'bg-red-100 text-red-800',
+            'text' => __('Expired', 'eddcdp'),
+            'icon' => '⏰',
+            'can_activate' => false
+        );
+    } elseif ($license_status === 'active') {
+        return array(
+            'container_class' => 'bg-green-50/50 border-green-200/50',
+            'badge_class' => 'bg-green-100 text-green-800',
+            'text' => __('Active', 'eddcdp'),
+            'icon' => '✅',
+            'can_activate' => true
+        );
+    } elseif ($license_status === 'inactive') {
+        return array(
+            'container_class' => 'bg-gray-50/50 border-gray-200/50',
+            'badge_class' => 'bg-gray-100 text-red-600',
+            'text' => __('Inactive', 'eddcdp'),
+            'icon' => '⚪',
+            'can_activate' => true
+        );
+    } else {
+        return array(
+            'container_class' => 'bg-yellow-50/50 border-yellow-200/50',
+            'badge_class' => 'bg-yellow-100 text-yellow-800',
+            'text' => ucfirst($license_status),
+            'icon' => '⚠️',
+            'can_activate' => false
+        );
+    }
+}
+
+/**
+ * Get active sites for a license
+ */
+function eddcdp_get_license_active_sites($license_id) {
+    global $wpdb;
+    
+    return $wpdb->get_results($wpdb->prepare(
+        "SELECT site_id, site_name FROM {$wpdb->prefix}edd_license_activations WHERE license_id = %d AND activated = 1",
+        $license_id
+    ));
+}
+
+/**
+ * Check if license can activate more sites
+ */
+function eddcdp_can_license_activate_sites($license, $active_sites_count) {
+    $license_info = eddcdp_get_license_status_info($license);
+    
+    if (!$license_info['can_activate']) {
+        return false;
+    }
+    
+    $activation_limit = (int) $license->activation_limit;
+    if ($activation_limit > 0 && $active_sites_count >= $activation_limit) {
+        return false;
+    }
+    
+    return true;
+}

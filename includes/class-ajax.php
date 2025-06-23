@@ -1,6 +1,6 @@
 <?php
 /**
- * AJAX Handler Class - Simplified (No License Management)
+ * AJAX Handler Class - Simplified & Fast
  */
 
 if (!defined('ABSPATH')) {

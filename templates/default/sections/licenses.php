@@ -1,6 +1,6 @@
 <?php
 /**
- * Licenses Section Template - EDD 3.0+ Compatible
+ * Licenses Section Template - Simplified & Fast
  */
 
 // Prevent direct access
@@ -46,26 +46,15 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
         $download_id = $license->download_id;
         $download_name = get_the_title($download_id);
         
-        // Check license status using proper methods
-        $is_active = ($license->status === 'active');
-        $is_expired = false;
+        // Use helper function to get license status info
+        $license_info = eddcdp_get_license_status_info($license);
         
-        if (!empty($license->expiration)) {
-            $expiration_date = strtotime($license->expiration);
-            $is_expired = ($expiration_date < time());
-        }
-        
-        // Get license sites and limits
-        $sites = maybe_unserialize($license->sites);
-        if (!is_array($sites)) {
-            $sites = array();
-        }
+        // Get active sites using helper function
+        $active_sites = eddcdp_get_license_active_sites($license->ID);
         
         $activation_limit = (int) $license->activation_limit;
-        $activation_count = (int) $license->activation_count;
-        
-        // Determine overall license status
-        $is_license_valid = ($is_active && !$is_expired);
+        $activation_count = count($active_sites);
+        $activation_limit_reached = ($activation_limit > 0 && $activation_count >= $activation_limit);
         
         // Get price name if available
         $price_name = __('Standard', 'eddcdp');
@@ -78,22 +67,12 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
     ?>
     
     <!-- License Item -->
-    <div class="<?php echo $is_license_valid ? 'bg-green-50/50 border-green-200/50' : 'bg-red-50/50 border-red-200/50'; ?> rounded-2xl p-6 border">
+    <div class="<?php echo $license_info['container_class']; ?> rounded-2xl p-6 border">
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
             <h3 class="text-xl font-semibold text-gray-800"><?php echo esc_html($download_name); ?></h3>
-            <?php if ($is_license_valid) : ?>
-            <span class="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
-                ✅ <?php _e('Active', 'eddcdp'); ?>
+            <span class="<?php echo $license_info['badge_class']; ?> px-4 py-2 rounded-full text-sm font-medium">
+                <?php echo $license_info['icon'] . ' ' . $license_info['text']; ?>
             </span>
-            <?php else : ?>
-            <span class="bg-red-100 text-red-800 px-4 py-2 rounded-full text-sm font-medium">
-                <?php if ($is_expired) : ?>
-                    ⏰ <?php _e('Expired', 'eddcdp'); ?>
-                <?php else : ?>
-                    ❌ <?php _e('Inactive', 'eddcdp'); ?>
-                <?php endif; ?>
-            </span>
-            <?php endif; ?>
         </div>
         
         <div class="bg-white/80 rounded-xl p-6">
@@ -146,36 +125,65 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
             <div class="border-t pt-4">
                 <h4 class="font-medium text-gray-800 mb-3"><?php _e('Manage Sites', 'eddcdp'); ?></h4>
                 
-                <?php if ($is_license_valid && ($activation_limit == 0 || $activation_count < $activation_limit)) : ?>
-                <div class="flex gap-3 mb-4">
-                    <input 
-                        type="url" 
-                        placeholder="<?php esc_attr_e('Enter your site URL (e.g., https://example.com)', 'eddcdp'); ?>"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        id="new-site-url-<?php echo $license->ID; ?>">
-                    <button 
-                        onclick="activateLicenseSite(<?php echo $license->ID; ?>)"
-                        class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
-                        ✅ <?php _e('Activate', 'eddcdp'); ?>
-                    </button>
+                <?php if ($license_info['can_activate'] && !$activation_limit_reached) : ?>
+                <!-- Add Site Form (Same as order-licenses.php) -->
+                <form method="post" class="edd_sl_form mb-4">
+                    <div class="flex gap-3">
+                        <input type="url" name="site_url" 
+                               placeholder="<?php esc_attr_e('Enter your site URL (e.g., https://example.com)', 'eddcdp'); ?>"
+                               class="flex-1 px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                               value="https://" required>
+                        <input type="submit" 
+                               class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-xl font-medium hover:shadow-lg transition-all duration-300" 
+                               value="<?php esc_attr_e('Activate', 'eddcdp'); ?>">
+                    </div>
+                    <input type="hidden" name="license_id" value="<?php echo esc_attr($license->ID); ?>">
+                    <input type="hidden" name="edd_action" value="insert_site">
+                    <?php wp_nonce_field('edd_add_site_nonce', 'edd_add_site_nonce'); ?>
+                </form>
+                
+                <?php elseif (!$license_info['can_activate']) : ?>
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+                    <p class="text-gray-700 text-sm">
+                        <?php 
+                        if ($license_info['text'] === 'Disabled') {
+                            echo '🚫 ' . __('This license has been disabled and cannot be used to activate sites.', 'eddcdp');
+                        } elseif ($license_info['text'] === 'Expired') {
+                            echo '⏰ ' . __('This license has expired and cannot be used to activate new sites. Please renew your license.', 'eddcdp');
+                        }
+                        ?>
+                    </p>
                 </div>
-                <?php elseif (!$is_license_valid) : ?>
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                    <p class="text-yellow-800 text-sm">
-                        <?php _e('License must be active and not expired to activate new sites.', 'eddcdp'); ?>
+                
+                <?php elseif ($activation_limit_reached) : ?>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <p class="text-blue-800 text-sm">
+                        🔒 <?php _e('Activation limit reached. Deactivate a site first or upgrade your license.', 'eddcdp'); ?>
                     </p>
                 </div>
                 <?php endif; ?>
                 
-                <?php if (!empty($sites)) : ?>
+                <?php if (!empty($active_sites)) : ?>
                 <div class="space-y-2 mb-4">
                     <h5 class="font-medium text-gray-800"><?php _e('Active Sites', 'eddcdp'); ?></h5>
-                    <?php foreach ($sites as $site) : ?>
+                    <?php foreach ($active_sites as $site) : ?>
                     <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
-                        <span class="text-sm break-all"><?php echo esc_url($site); ?></span>
-                        <button onclick="deactivateLicenseSite(<?php echo $license->ID; ?>, '<?php echo esc_js($site); ?>')" class="text-red-600 hover:text-red-800 text-sm font-medium ml-2">
+                        <span class="text-sm break-all flex-1 mr-2"><?php echo esc_url($site->site_name); ?></span>
+                        <a href="#" 
+                        onclick="showDeactivateModal('<?php echo esc_js($site->site_name); ?>', '<?php echo wp_nonce_url(
+                            add_query_arg(array(
+                                'action' => 'manage_licenses',
+                                'payment_id' => '', // Not needed for main licenses
+                                'license_id' => $license->ID,
+                                'site_id' => $site->site_id,
+                                'edd_action' => 'deactivate_site',
+                                'license' => $license->ID
+                            )), 
+                            'edd_deactivate_site_nonce'
+                        ); ?>'); return false;"
+                        class="text-red-600 hover:text-red-800 text-sm font-medium px-3 py-1 rounded hover:bg-red-50 transition-colors">
                             🔓 <?php _e('Deactivate', 'eddcdp'); ?>
-                        </button>
+                        </a>
                     </div>
                     <?php endforeach; ?>
                 </div>
@@ -185,18 +193,17 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
             </div>
             
             <div class="flex flex-wrap gap-3 mt-6 pt-4 border-t">
-                <?php if ($is_expired) : ?>
-                <button onclick="renewLicense(<?php echo $license->ID; ?>, <?php echo $download_id; ?>)" class="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded-xl hover:shadow-lg transition-all duration-300">
+                <?php if ($license_info['text'] === 'Expired') : ?>
+                <a href="<?php echo edd_get_checkout_uri(); ?>?edd_action=purchase_renewal&license_id=<?php echo $license->ID; ?>" 
+                   class="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded-xl hover:shadow-lg transition-all duration-300 text-decoration-none">
                     🔄 <?php _e('Renew License', 'eddcdp'); ?>
-                </button>
+                </a>
                 <?php endif; ?>
                 
-                <button onclick="manageLicense(<?php echo $license->ID; ?>)" class="bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors">
-                    ⚙️ <?php _e('Manage', 'eddcdp'); ?>
-                </button>
-                <button onclick="viewLicenseInvoice(<?php echo $license->ID; ?>)" class="bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors">
-                    📄 <?php _e('Invoice', 'eddcdp'); ?>
-                </button>
+                <a href="<?php echo get_permalink($license->download_id); ?>" 
+                   class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-xl hover:shadow-lg transition-all duration-300 text-decoration-none">
+                    ⬆️ <?php _e('Upgrade', 'eddcdp'); ?>
+                </a>
             </div>
         </div>
     </div>
@@ -217,127 +224,46 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
 </div>
 <?php endif; ?>
 
-<script>
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        showNotification('<?php _e('License key copied to clipboard!', 'eddcdp'); ?>', 'success');
-    }).catch(() => {
-        showNotification('<?php _e('Failed to copy license key.', 'eddcdp'); ?>', 'error');
-    });
-}
-
-function activateLicenseSite(licenseId) {
-    const siteUrl = document.getElementById('new-site-url-' + licenseId).value;
-    if (!siteUrl.trim()) {
-        showNotification('<?php _e('Please enter a site URL.', 'eddcdp'); ?>', 'error');
-        return;
-    }
-    
-    // AJAX call to activate site
-    fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-            action: 'eddcdp_activate_license_site',
-            license_id: licenseId,
-            site_url: siteUrl,
-            nonce: '<?php echo wp_create_nonce('eddcdp_ajax_nonce'); ?>'
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showNotification('<?php _e('Site activated successfully!', 'eddcdp'); ?>', 'success');
-            setTimeout(() => location.reload(), 1500);
-        } else {
-            showNotification(data.data || '<?php _e('Error activating site. Please try again.', 'eddcdp'); ?>', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showNotification('<?php _e('Error activating site. Please try again.', 'eddcdp'); ?>', 'error');
-    });
-}
-
-function deactivateLicenseSite(licenseId, siteUrl) {
-    if (!confirm('<?php _e('Are you sure you want to deactivate this site?', 'eddcdp'); ?>')) {
-        return;
-    }
-    
-    // AJAX call to deactivate site
-    fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-            action: 'eddcdp_deactivate_license_site',
-            license_id: licenseId,
-            site_url: siteUrl,
-            nonce: '<?php echo wp_create_nonce('eddcdp_ajax_nonce'); ?>'
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showNotification('<?php _e('Site deactivated successfully!', 'eddcdp'); ?>', 'success');
-            setTimeout(() => location.reload(), 1500);
-        } else {
-            showNotification(data.data || '<?php _e('Error deactivating site. Please try again.', 'eddcdp'); ?>', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showNotification('<?php _e('Error deactivating site. Please try again.', 'eddcdp'); ?>', 'error');
-    });
-}
-
-function renewLicense(licenseId, downloadId) {
-    // This could redirect to renewal page or open renewal modal
-    alert('<?php _e('License renewal functionality would be implemented here.', 'eddcdp'); ?>');
-}
-
-function manageLicense(licenseId) {
-    // This could open license management modal
-    alert('<?php _e('License management functionality would be implemented here.', 'eddcdp'); ?>');
-}
-
-function viewLicenseInvoice(licenseId) {
-    // This could open invoice in new window
-    alert('<?php _e('Invoice viewing functionality would be implemented here.', 'eddcdp'); ?>');
-}
-
-// Simple notification function
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm`;
-    
-    switch (type) {
-        case 'success':
-            notification.className += ' bg-green-500 text-white';
-            break;
-        case 'error':
-            notification.className += ' bg-red-500 text-white';
-            break;
-        default:
-            notification.className += ' bg-blue-500 text-white';
-    }
-    
-    notification.innerHTML = `
-        <div class="flex items-center justify-between">
-            <span>${message}</span>
-            <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">×</button>
+<!-- Deactivation Modal -->
+<div id="deactivateModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 transform transition-all duration-300 scale-95">
+        <div class="text-center">
+            <div class="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+                <span class="text-2xl">🔓</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2"><?php _e('Deactivate Site License', 'eddcdp'); ?></h3>
+            <p class="text-gray-600 mb-6">
+                <?php _e('Are you sure you want to deactivate the license for:', 'eddcdp'); ?>
+                <br><strong id="modalSiteName" class="text-gray-800"></strong>
+            </p>
+            <div class="flex gap-3">
+                <button onclick="closeDeactivateModal()" 
+                        class="flex-1 bg-gray-100 text-gray-700 px-4 py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors">
+                    <?php _e('Cancel', 'eddcdp'); ?>
+                </button>
+                <button onclick="confirmDeactivation()" 
+                        class="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
+                    <?php _e('Deactivate', 'eddcdp'); ?>
+                </button>
+            </div>
         </div>
-    `;
+    </div>
+</div>
+
+<script src="<?php echo EDDCDP_PLUGIN_URL; ?>templates/default/js/license-management.js"></script>
+
+<script>
+// Simple solution: Always go to licenses tab when this section loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Set hash to licenses
+    window.location.hash = 'licenses';
     
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        if (notification.parentElement) {
-            notification.remove();
+    // Try to set Alpine.js activeTab
+    setTimeout(function() {
+        const dashboardElement = document.querySelector('[x-data]');
+        if (dashboardElement && dashboardElement._x_dataStack && dashboardElement._x_dataStack[0]) {
+            dashboardElement._x_dataStack[0].activeTab = 'licenses';
         }
-    }, 5000);
-}
+    }, 100);
+});
 </script>

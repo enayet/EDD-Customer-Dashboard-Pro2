@@ -1,6 +1,6 @@
 <?php
 /**
- * AJAX Handler Class - Optimized
+ * AJAX Handler Class - Simplified (No License Management)
  */
 
 if (!defined('ABSPATH')) {
@@ -19,9 +19,7 @@ class EDDCDP_Ajax {
     }
     
     public function __construct() {
-        // Public AJAX actions (for logged-in and non-logged-in users)
-        add_action('wp_ajax_eddcdp_deactivate_license_site', array($this, 'deactivate_license_site'));
-        add_action('wp_ajax_eddcdp_activate_license_site', array($this, 'activate_license_site'));
+        // Public AJAX actions (for logged-in users)
         add_action('wp_ajax_eddcdp_remove_from_wishlist', array($this, 'remove_from_wishlist'));
         add_action('wp_ajax_eddcdp_add_to_cart', array($this, 'add_to_cart'));
         
@@ -72,107 +70,6 @@ class EDDCDP_Ajax {
         
         return true;
     }
-    
- 
-     /**
-     * Deactivate license site
-     */
-    public function deactivate_license_site() {
-        $this->validate_ajax_request();
-        
-        // Check if EDD Software Licensing is active
-        if (!class_exists('EDD_Software_Licensing') || !function_exists('edd_software_licensing')) {
-            wp_send_json_error(__('Software Licensing extension is not active.', 'eddcdp'));
-        }
-        
-        $license_id = intval($_POST['license_id']);
-        $site_url = sanitize_url($_POST['site_url']);
-        
-        if (!$license_id || !$site_url) {
-            wp_send_json_error(__('Invalid license ID or site URL.', 'eddcdp'));
-        }
-        
-        // Get license using the correct method
-        $license = edd_software_licensing()->get_license($license_id);
-        if (!$license || $license->user_id != get_current_user_id()) {
-            wp_send_json_error(__('Invalid license or insufficient permissions.', 'eddcdp'));
-        }
-        
-        // Deactivate the site using EDD SL method
-        $deactivated = edd_software_licensing()->deactivate_license($license->license_key, $site_url);
-        
-        if ($deactivated) {
-            wp_send_json_success(array(
-                'message' => __('Site deactivated successfully.', 'eddcdp'),
-                'license_id' => $license_id,
-                'site_url' => $site_url
-            ));
-        } else {
-            wp_send_json_error(__('Failed to deactivate site. Please try again or contact support.', 'eddcdp'));
-        }
-    }
-    
-    /**
-     * Activate license site
-     */
-    public function activate_license_site() {
-        $this->validate_ajax_request();
-        
-        // Check if EDD Software Licensing is active
-        if (!class_exists('EDD_Software_Licensing') || !function_exists('edd_software_licensing')) {
-            wp_send_json_error(__('Software Licensing extension is not active.', 'eddcdp'));
-        }
-        
-        $license_id = intval($_POST['license_id']);
-        $site_url = sanitize_url($_POST['site_url']);
-        
-        if (!$license_id || !$site_url) {
-            wp_send_json_error(__('Invalid license ID or site URL.', 'eddcdp'));
-        }
-        
-        // Validate URL format
-        if (!filter_var($site_url, FILTER_VALIDATE_URL)) {
-            wp_send_json_error(__('Please enter a valid URL (e.g., https://example.com).', 'eddcdp'));
-        }
-        
-        // Get license using the correct method
-        $license = edd_software_licensing()->get_license($license_id);
-        if (!$license || $license->user_id != get_current_user_id()) {
-            wp_send_json_error(__('Invalid license or insufficient permissions.', 'eddcdp'));
-        }
-        
-        // Check if license is active and not expired
-        if ($license->status !== 'active') {
-            wp_send_json_error(__('License must be active to activate sites.', 'eddcdp'));
-        }
-        
-        if (!empty($license->expiration)) {
-            $expiration_date = strtotime($license->expiration);
-            if ($expiration_date < time()) {
-                wp_send_json_error(__('License has expired. Please renew to activate sites.', 'eddcdp'));
-            }
-        }
-        
-        // Check activation limits
-        if ($license->activation_limit > 0 && $license->activation_count >= $license->activation_limit) {
-            wp_send_json_error(__('Activation limit reached. Please deactivate a site first or upgrade your license.', 'eddcdp'));
-        }
-        
-        // Activate the site using EDD SL method
-        $activated = edd_software_licensing()->activate_license($license->license_key, $site_url);
-        
-        if ($activated) {
-            wp_send_json_success(array(
-                'message' => __('Site activated successfully.', 'eddcdp'),
-                'license_id' => $license_id,
-                'site_url' => $site_url
-            ));
-        } else {
-            wp_send_json_error(__('Failed to activate site. The site may already be activated or there was an error. Please try again.', 'eddcdp'));
-        }
-    }   
-
-    
     
     /**
      * Remove from wishlist
@@ -277,138 +174,8 @@ class EDDCDP_Ajax {
         // Clear template cache
         EDDCDP_Templates::instance()->clear_cache();
         
-        // Clear any other related caches
-        do_action('eddcdp_clear_cache');
-        
         wp_send_json_success(array(
             'message' => __('Template cache cleared successfully!', 'eddcdp')
-        ));
-    }
-    
-    /**
-     * Log license actions for debugging/audit purposes
-     */
-    private function log_license_action($action, $license_id, $site_url) {
-        $user_id = get_current_user_id();
-        $user = get_userdata($user_id);
-        
-        $log_entry = array(
-            'timestamp' => current_time('mysql'),
-            'user_id' => $user_id,
-            'user_email' => $user->user_email,
-            'action' => $action,
-            'license_id' => $license_id,
-            'site_url' => $site_url,
-            'ip_address' => $this->get_client_ip()
-        );
-        
-        // Store in option (could be extended to use custom table)
-        $logs = get_option('eddcdp_license_logs', array());
-        $logs[] = $log_entry;
-        
-        // Keep only last 100 entries
-        if (count($logs) > 100) {
-            $logs = array_slice($logs, -100);
-        }
-        
-        update_option('eddcdp_license_logs', $logs);
-        
-        // Also log to WordPress debug.log if WP_DEBUG_LOG is enabled
-        if (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
-            error_log(sprintf(
-                'EDDCDP License Action: %s performed %s on license %d for site %s',
-                $user->user_email,
-                $action,
-                $license_id,
-                $site_url
-            ));
-        }
-    }
-    
-    /**
-     * Get client IP address
-     */
-    private function get_client_ip() {
-        $ip_keys = array(
-            'HTTP_CLIENT_IP',
-            'HTTP_X_FORWARDED_FOR',
-            'HTTP_X_FORWARDED',
-            'HTTP_X_CLUSTER_CLIENT_IP',
-            'HTTP_FORWARDED_FOR',
-            'HTTP_FORWARDED',
-            'REMOTE_ADDR'
-        );
-        
-        foreach ($ip_keys as $key) {
-            if (array_key_exists($key, $_SERVER) === true) {
-                foreach (explode(',', $_SERVER[$key]) as $ip) {
-                    $ip = trim($ip);
-                    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
-                        return $ip;
-                    }
-                }
-            }
-        }
-        
-        return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
-    }
-    
-    /**
-     * Sanitize and validate license site URL
-     */
-    private function sanitize_license_url($url) {
-        // Remove www. prefix for consistency
-        $url = preg_replace('/^https?:\/\/www\./', 'https://', $url);
-        
-        // Ensure URL has protocol
-        if (!preg_match('/^https?:\/\//', $url)) {
-            $url = 'https://' . $url;
-        }
-        
-        // Remove trailing slash
-        $url = rtrim($url, '/');
-        
-        // Validate URL
-        if (!filter_var($url, FILTER_VALIDATE_URL)) {
-            return false;
-        }
-        
-        return $url;
-    }
-    
-    /**
-     * Rate limiting for AJAX requests
-     */
-    private function check_rate_limit($action, $user_id, $limit = 10, $window = 300) {
-        $transient_key = 'eddcdp_rate_limit_' . $action . '_' . $user_id;
-        $requests = get_transient($transient_key);
-        
-        if ($requests === false) {
-            $requests = 1;
-            set_transient($transient_key, $requests, $window);
-            return true;
-        }
-        
-        if ($requests >= $limit) {
-            wp_send_json_error(__('Too many requests. Please wait a moment and try again.', 'eddcdp'));
-        }
-        
-        set_transient($transient_key, $requests + 1, $window);
-        return true;
-    }
-    
-    /**
-     * Get license action logs (admin only)
-     */
-    public function get_license_logs() {
-        $this->validate_ajax_request('manage_shop_settings');
-        
-        $logs = get_option('eddcdp_license_logs', array());
-        $logs = array_reverse($logs); // Most recent first
-        
-        wp_send_json_success(array(
-            'logs' => $logs,
-            'total' => count($logs)
         ));
     }
 }

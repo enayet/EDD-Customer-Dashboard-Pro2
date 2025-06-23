@@ -1,6 +1,6 @@
 <?php
 /**
- * Analytics Section Template
+ * Analytics Section Template - EDD 3.0+ Compatible
  */
 
 // Prevent direct access
@@ -10,24 +10,43 @@ if (!defined('ABSPATH')) {
 
 // Get current user and analytics data
 $current_user = wp_get_current_user();
-$customer = new EDD_Customer($current_user->user_email);
+$customer = edd_get_customer_by('email', $current_user->user_email);
 
-// Calculate analytics
+if (!$customer) {
+    echo '<div class="bg-yellow-50/80 rounded-2xl p-6 border border-yellow-200/50">';
+    echo '<p class="text-yellow-800">' . __('Customer data not found.', 'eddcdp') . '</p>';
+    echo '</div>';
+    return;
+}
+
+// Calculate analytics using EDD 3.0+ methods
 $total_spent = $customer->purchase_value;
 $total_purchases = $customer->purchase_count;
-$total_downloads = edd_count_file_downloads_of_user($current_user->ID);
+
+// Get download count using EDD 3.0+ method
+$download_logs = edd_get_file_download_logs(array(
+    'customer' => $current_user->user_email,
+    'number' => 999999, // Large number instead of -1
+    'fields' => 'ids'
+));
+$total_downloads = is_array($download_logs) ? count($download_logs) : 0;
+
 $avg_downloads_per_product = $total_purchases > 0 ? round($total_downloads / $total_purchases, 1) : 0;
 
-// Get purchase history for trend analysis
-$purchases = edd_get_users_purchases($current_user->ID, -1, true, 'any');
+// Get purchase history using EDD 3.0+ orders
+$orders = edd_get_orders(array(
+    'customer' => $customer->id,
+    'number' => 999999, // Large number instead of -1
+    'status' => array('complete')
+));
+
 $monthly_spending = array();
 $yearly_spending = array();
 
-if ($purchases) {
-    foreach ($purchases as $purchase) {
-        $payment = new EDD_Payment($purchase->ID);
-        $date = date('Y-m', strtotime($payment->date));
-        $year = date('Y', strtotime($payment->date));
+if ($orders) {
+    foreach ($orders as $order) {
+        $date = date('Y-m', strtotime($order->date_created));
+        $year = date('Y', strtotime($order->date_created));
         
         if (!isset($monthly_spending[$date])) {
             $monthly_spending[$date] = 0;
@@ -36,14 +55,24 @@ if ($purchases) {
             $yearly_spending[$year] = 0;
         }
         
-        $monthly_spending[$date] += $payment->total;
-        $yearly_spending[$year] += $payment->total;
+        $monthly_spending[$date] += $order->total;
+        $yearly_spending[$year] += $order->total;
     }
 }
 
 // Sort by date
 ksort($monthly_spending);
 ksort($yearly_spending);
+
+// Calculate days active
+$first_order = null;
+if ($orders) {
+    $first_order = end($orders);
+}
+$days_active = 0;
+if ($first_order) {
+    $days_active = ceil((time() - strtotime($first_order->date_created)) / (60 * 60 * 24));
+}
 ?>
 
 <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
@@ -138,17 +167,7 @@ ksort($yearly_spending);
         </div>
         
         <div class="text-center">
-            <div class="text-2xl font-bold text-gray-800">
-                <?php 
-                $first_purchase = !empty($purchases) ? end($purchases) : null;
-                if ($first_purchase) {
-                    $days_since = ceil((time() - strtotime($first_purchase->post_date)) / (60 * 60 * 24));
-                    echo $days_since;
-                } else {
-                    echo '0';
-                }
-                ?>
-            </div>
+            <div class="text-2xl font-bold text-gray-800"><?php echo $days_active; ?></div>
             <div class="text-sm text-gray-600"><?php _e('Days Active', 'eddcdp'); ?></div>
         </div>
     </div>

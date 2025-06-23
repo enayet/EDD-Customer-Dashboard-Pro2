@@ -1,6 +1,6 @@
 <?php
 /**
- * Stats Grid Section - Using EDD 3.0+ functions
+ * Stats Grid Section - EDD 3.0+ Compatible
  */
 
 // Prevent direct access
@@ -10,30 +10,32 @@ if (!defined('ABSPATH')) {
 
 $current_user = wp_get_current_user();
 
-// Get customer data using EDD 3.0 customer functions
+// Get customer data using EDD 3.0+ methods
 $customer = edd_get_customer_by('email', $current_user->user_email);
 $purchase_count = $customer ? $customer->purchase_count : 0;
 
-// Get download count
+// Get download count using EDD 3.0+ method
 $download_logs = edd_get_file_download_logs(array(
     'customer' => $current_user->user_email,
-    'number' => -1
+    'number' => 999999,
+    'fields' => 'ids'
 ));
 $download_count = is_array($download_logs) ? count($download_logs) : 0;
 
-// Get license count if Software Licensing is active
+// Get active license count if Software Licensing is active
 $license_count = 0;
-if (class_exists('EDD_Software_Licensing')) {
+if (class_exists('EDD_Software_Licensing') && function_exists('edd_software_licensing')) {
     $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
         'user_id' => $current_user->ID,
-        'status' => 'active'
+        'status' => 'active',
+        'number' => 999999
     ));
     $license_count = is_array($licenses) ? count($licenses) : 0;
 }
 
 // Get wishlist count if Wish Lists is active
 $wishlist_count = 0;
-if (function_exists('edd_wl_get_wish_list')) {
+if (function_exists('edd_wl_get_wish_list') && function_exists('edd_wl_get_wish_list_downloads')) {
     $wishlist = edd_wl_get_wish_list($current_user->ID);
     if ($wishlist) {
         $wishlist_items = edd_wl_get_wish_list_downloads($wishlist->ID);

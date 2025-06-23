@@ -1,6 +1,6 @@
 <?php
 /**
- * Order Details Template Section
+ * Order Details Template Section - Updated
  */
 
 // Prevent direct access
@@ -38,13 +38,22 @@ $status_icons = array(
 
 $status_class = isset($status_classes[$order->status]) ? $status_classes[$order->status] : 'bg-gray-100 text-gray-800';
 $status_icon = isset($status_icons[$order->status]) ? $status_icons[$order->status] : '📋';
+
+// Generate invoice URL
+$invoice_hash = md5($order->id . $order->email . $order->date_created);
+$invoice_url = home_url('/?edd_action=view_invoice&payment_id=' . $order->id . '&invoice=' . $invoice_hash);
 ?>
 
-<!-- Back Button -->
-<div class="mb-6">
+<!-- Header with Back Button and Invoice -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
     <a href="<?php echo esc_url($order_details->get_return_url()); ?>" 
        class="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium">
         ← <?php _e('Back to Dashboard', 'eddcdp'); ?>
+    </a>
+    
+    <a href="<?php echo esc_url($invoice_url); ?>" 
+       class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-2 rounded-xl font-medium hover:shadow-lg transition-all duration-300 flex items-center gap-2 text-decoration-none">
+        📄 <?php _e('View Invoice', 'eddcdp'); ?>
     </a>
 </div>
 
@@ -92,27 +101,48 @@ $status_icon = isset($status_icons[$order->status]) ? $status_icons[$order->stat
                         $licenses = edd_software_licensing()->get_licenses_of_purchase($order->id, $download_id);
                         if ($licenses) :
                     ?>
-                    <div class="mt-3 p-3 bg-blue-50 rounded-lg">
-                        <h6 class="text-sm font-medium text-blue-800 mb-2">🔑 <?php _e('License Keys:', 'eddcdp'); ?></h6>
-                        <?php foreach ($licenses as $license) : ?>
-                        <div class="mb-2 last:mb-0">
-                            <div class="flex items-center gap-3">
-                                <code class="bg-white px-3 py-1 rounded border text-sm font-mono select-all">
-                                    <?php echo esc_html($license->license_key); ?>
-                                </code>
-                                <button onclick="copyToClipboard('<?php echo esc_js($license->license_key); ?>')" 
-                                        class="text-blue-600 hover:text-blue-800 text-sm">
-                                    📋 <?php _e('Copy', 'eddcdp'); ?>
-                                </button>
+                    <div class="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                        <h6 class="text-sm font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                            🔑 <?php _e('License Keys', 'eddcdp'); ?>
+                        </h6>
+                        
+                        <div class="space-y-3">
+                            <?php foreach ($licenses as $license) : ?>
+                            <div class="bg-white rounded-lg p-3 border border-blue-200">
+                                <!-- License Key Row -->
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="flex-1">
+                                        <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-3 font-mono text-sm select-all cursor-pointer hover:border-indigo-400 transition-colors"
+                                             onclick="copyLicenseKey(this, '<?php echo esc_js($license->license_key); ?>')">
+                                            <?php echo esc_html($license->license_key); ?>
+                                        </div>
+                                    </div>
+                                    <button onclick="copyLicenseKey(this, '<?php echo esc_js($license->license_key); ?>')" 
+                                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+                                        📋 <span class="copy-text"><?php _e('Copy', 'eddcdp'); ?></span>
+                                    </button>
+                                </div>
+                                
+                                <!-- License Status -->
+                                <div class="flex flex-wrap gap-4 text-xs text-blue-700">
+                                    <span class="flex items-center gap-1">
+                                        <span class="w-2 h-2 bg-<?php echo $license->status === 'active' ? 'green' : 'red'; ?>-500 rounded-full"></span>
+                                        <?php printf(__('Status: %s', 'eddcdp'), ucfirst($license->status)); ?>
+                                    </span>
+                                    
+                                    <?php if (!empty($license->expiration) && $license->expiration !== '0000-00-00 00:00:00') : ?>
+                                    <span class="flex items-center gap-1">
+                                        ⏰ <?php printf(__('Expires: %s', 'eddcdp'), date_i18n(get_option('date_format'), strtotime($license->expiration))); ?>
+                                    </span>
+                                    <?php endif; ?>
+                                    
+                                    <span class="flex items-center gap-1">
+                                        🌐 <?php printf(__('Sites: %d/%s', 'eddcdp'), $license->activation_count, $license->activation_limit ?: __('∞', 'eddcdp')); ?>
+                                    </span>
+                                </div>
                             </div>
-                            <p class="text-xs text-blue-600 mt-1">
-                                <?php printf(__('Status: %s', 'eddcdp'), ucfirst($license->status)); ?>
-                                <?php if (!empty($license->expiration) && $license->expiration !== '0000-00-00 00:00:00') : ?>
-                                    | <?php printf(__('Expires: %s', 'eddcdp'), date_i18n(get_option('date_format'), strtotime($license->expiration))); ?>
-                                <?php endif; ?>
-                            </p>
+                            <?php endforeach; ?>
                         </div>
-                        <?php endforeach; ?>
                     </div>
                     <?php endif; } ?>
                 </div>
@@ -127,33 +157,15 @@ $status_icon = isset($status_icons[$order->status]) ? $status_icons[$order->stat
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     <?php foreach ($files as $file_key => $file) : 
                         $download_url = edd_get_download_file_url($order->payment_key, $order->email, $file_key, $download_id);
-                        $file_size = '';
-                        
-                        // Get file size if available
-                        if (!empty($file['file'])) {
-                            $file_path = EDD()->session->get('edd_download_file');
-                            if (file_exists($file['file'])) {
-                                $file_size = ' (' . size_format(filesize($file['file'])) . ')';
-                            }
-                        }
                     ?>
                     <a href="<?php echo esc_url($download_url); ?>" 
                        class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-3 rounded-lg font-medium hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 text-decoration-none text-center">
                         <span class="text-lg">📥</span>
                         <div class="flex-1 min-w-0">
                             <div class="truncate"><?php echo esc_html($file['name']); ?></div>
-                            <?php if ($file_size) : ?>
-                            <div class="text-xs opacity-90"><?php echo $file_size; ?></div>
-                            <?php endif; ?>
                         </div>
                     </a>
                     <?php endforeach; ?>
-                </div>
-                
-                <div class="mt-3 text-sm text-gray-600">
-                    <span class="inline-flex items-center gap-1">
-                        ℹ️ <?php _e('Right-click and "Save As" to download files directly.', 'eddcdp'); ?>
-                    </span>
                 </div>
             </div>
             <?php elseif ($order->status !== 'complete') : ?>
@@ -268,197 +280,87 @@ $status_icon = isset($status_icons[$order->status]) ? $status_icons[$order->stat
     <?php endif; ?>
 </div>
 
-<!-- Order Notes -->
-<?php 
-$notes = edd_get_payment_notes($order->id);
-$public_notes = array();
-
-if ($notes) {
-    foreach ($notes as $note) {
-        // Only show notes that are not private
-        if (empty($note->comment_type) || $note->comment_type !== 'private') {
-            $public_notes[] = $note;
-        }
-    }
-}
-
-if (!empty($public_notes)) : ?>
-<div class="bg-white/80 backdrop-blur-xl rounded-2xl p-6 mb-6 shadow-lg border border-white/20">
-    <h3 class="text-xl font-semibold text-gray-800 mb-4"><?php _e('Order Notes', 'eddcdp'); ?></h3>
-    
-    <div class="space-y-4">
-        <?php foreach ($public_notes as $note) : ?>
-        <div class="border-l-4 border-indigo-500 pl-4 py-2">
-            <p class="text-gray-700 mb-1"><?php echo esc_html($note->comment_content); ?></p>
-            <small class="text-gray-500"><?php echo date_i18n(get_option('date_format'), strtotime($note->comment_date)); ?></small>
-        </div>
-        <?php endforeach; ?>
-    </div>
-</div>
-<?php endif; ?>
-
-<!-- Action Buttons -->
-<div class="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/20">
-    <h3 class="text-xl font-semibold text-gray-800 mb-4">📋 <?php _e('Order Actions', 'eddcdp'); ?></h3>
-    
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <!-- View Receipt -->
-        <?php if (function_exists('edd_get_order_receipt_url')) : ?>
-        <a href="<?php echo edd_get_order_receipt_url($order->id); ?>" 
-           class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 text-decoration-none">
-            📄 <?php _e('View Receipt', 'eddcdp'); ?>
-        </a>
-        <?php endif; ?>
-        
-        <!-- Download Invoice -->
-        <?php 
-        $invoice_url = '';
-        // Check for various invoice plugins
-        if (function_exists('edd_get_invoice_url')) {
-            $invoice_url = edd_get_invoice_url($order->id);
-        } elseif (function_exists('eddpdfi_get_invoice_url')) {
-            $invoice_url = eddpdfi_get_invoice_url($order->id);
-        } elseif (class_exists('EDD_Invoices') && method_exists('EDD_Invoices', 'get_invoice_url')) {
-            $invoice_url = EDD_Invoices::get_invoice_url($order->id);
-        }
-        
-        if ($invoice_url) :
-        ?>
-        <a href="<?php echo esc_url($invoice_url); ?>" 
-           class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 text-decoration-none">
-            📊 <?php _e('Download Invoice', 'eddcdp'); ?>
-        </a>
-        <?php else : ?>
-        <button onclick="generateInvoice(<?php echo $order->id; ?>)" 
-                class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2">
-            📊 <?php _e('Generate Invoice', 'eddcdp'); ?>
-        </button>
-        <?php endif; ?>
-        
-        <!-- Print Order -->
-        <button onclick="window.print()" 
-                class="bg-white text-gray-600 border border-gray-300 px-6 py-3 rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
-            🖨️ <?php _e('Print Order', 'eddcdp'); ?>
-        </button>
-        
-        <!-- Contact Support -->
-        <a href="mailto:<?php echo get_option('admin_email'); ?>?subject=<?php echo urlencode(sprintf(__('Order #%s Support Request', 'eddcdp'), $order->get_number())); ?>&body=<?php echo urlencode(sprintf(__('Hi, I need help with Order #%s placed on %s.', 'eddcdp'), $order->get_number(), date_i18n(get_option('date_format'), strtotime($order->date_created)))); ?>" 
-           class="bg-white text-gray-600 border border-gray-300 px-6 py-3 rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 text-decoration-none">
-            💬 <?php _e('Contact Support', 'eddcdp'); ?>
-        </a>
-    </div>
-    
-    <!-- Download All Files Button (if multiple files) -->
-    <?php 
-    $all_files = array();
-    $total_files = 0;
-    
-    if ($order->status === 'complete') {
-        foreach ($order_items as $item) {
-            $download_id = $item->product_id;
-            $price_id = !empty($item->price_id) ? $item->price_id : null;
-            $files = edd_get_download_files($download_id, $price_id);
-            
-            if ($files) {
-                $total_files += count($files);
-                foreach ($files as $file_key => $file) {
-                    $all_files[] = array(
-                        'name' => $file['name'],
-                        'url' => edd_get_download_file_url($order->payment_key, $order->email, $file_key, $download_id)
-                    );
-                }
-            }
-        }
-    }
-    
-    if ($total_files > 1) :
-    ?>
-    <div class="mt-6 pt-6 border-t border-gray-200">
-        <div class="bg-blue-50 rounded-xl p-4">
-            <div class="flex items-center justify-between gap-4">
-                <div>
-                    <h4 class="font-medium text-blue-800">📦 <?php _e('Download All Files', 'eddcdp'); ?></h4>
-                    <p class="text-sm text-blue-600 mt-1">
-                        <?php printf(_n('%d file available', '%d files available', $total_files, 'eddcdp'), $total_files); ?>
-                    </p>
-                </div>
-                <button onclick="downloadAllFiles()" 
-                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                    📥 <?php _e('Download All', 'eddcdp'); ?>
-                </button>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
-</div>
-
 <script>
-// Copy license key to clipboard
-function copyToClipboard(text) {
+/**
+ * Copy license key to clipboard with visual feedback
+ */
+function copyLicenseKey(element, licenseKey) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => {
-            // Create a temporary success message
-            const button = event.target;
-            const originalText = button.textContent;
-            button.textContent = '✅ <?php _e('Copied!', 'eddcdp'); ?>';
-            button.style.color = '#10b981';
-            
-            setTimeout(() => {
-                button.textContent = originalText;
-                button.style.color = '';
-            }, 2000);
+        navigator.clipboard.writeText(licenseKey).then(() => {
+            showCopySuccess(element);
         }).catch(() => {
-            alert('<?php _e('Failed to copy to clipboard. Please copy manually.', 'eddcdp'); ?>');
+            fallbackCopy(licenseKey, element);
         });
     } else {
-        // Fallback for older browsers
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        try {
-            document.execCommand('copy');
-            const button = event.target;
-            const originalText = button.textContent;
-            button.textContent = '✅ <?php _e('Copied!', 'eddcdp'); ?>';
-            button.style.color = '#10b981';
-            
-            setTimeout(() => {
-                button.textContent = originalText;
-                button.style.color = '';
-            }, 2000);
-        } catch (err) {
-            alert('<?php _e('Failed to copy to clipboard. Please copy manually.', 'eddcdp'); ?>');
-        }
-        document.body.removeChild(textArea);
+        fallbackCopy(licenseKey, element);
     }
 }
 
-// Generate invoice (fallback if no invoice plugin)
-function generateInvoice(orderId) {
-    alert('<?php _e('Invoice generation requires an EDD invoice plugin to be installed and activated.', 'eddcdp'); ?>');
+/**
+ * Fallback copy method for older browsers
+ */
+function fallbackCopy(text, element) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    document.body.appendChild(textArea);
+    textArea.select();
+    
+    try {
+        document.execCommand('copy');
+        showCopySuccess(element);
+    } catch (err) {
+        showCopyError(element);
+    }
+    
+    document.body.removeChild(textArea);
 }
 
-// Download all files functionality
-function downloadAllFiles() {
-    const files = <?php echo json_encode($all_files); ?>;
-    let downloadCount = 0;
-    
-    files.forEach((file, index) => {
+/**
+ * Show copy success feedback
+ */
+function showCopySuccess(element) {
+    const copyText = element.querySelector('.copy-text');
+    if (copyText) {
+        const originalText = copyText.textContent;
+        copyText.textContent = '<?php _e('Copied!', 'eddcdp'); ?>';
+        element.classList.add('bg-green-600');
+        element.classList.remove('bg-indigo-600');
+        
         setTimeout(() => {
-            const link = document.createElement('a');
-            link.href = file.url;
-            link.download = file.name;
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            downloadCount++;
-            if (downloadCount === files.length) {
-                alert('<?php printf(__('Started downloading %d files. Check your downloads folder.', 'eddcdp'), $total_files); ?>');
-            }
-        }, index * 500); // Stagger downloads by 500ms
-    });
+            copyText.textContent = originalText;
+            element.classList.remove('bg-green-600');
+            element.classList.add('bg-indigo-600');
+        }, 2000);
+    }
+    
+    // Add visual feedback to the license key container
+    const container = element.closest('.bg-white').querySelector('.bg-gray-50');
+    if (container) {
+        container.classList.add('border-green-400', 'bg-green-50');
+        setTimeout(() => {
+            container.classList.remove('border-green-400', 'bg-green-50');
+        }, 2000);
+    }
+}
+
+/**
+ * Show copy error feedback
+ */
+function showCopyError(element) {
+    const copyText = element.querySelector('.copy-text');
+    if (copyText) {
+        const originalText = copyText.textContent;
+        copyText.textContent = '<?php _e('Failed', 'eddcdp'); ?>';
+        element.classList.add('bg-red-600');
+        element.classList.remove('bg-indigo-600');
+        
+        setTimeout(() => {
+            copyText.textContent = originalText;
+            element.classList.remove('bg-red-600');
+            element.classList.add('bg-indigo-600');
+        }, 2000);
+    }
 }
 </script>

@@ -73,7 +73,8 @@ class EDDCDP_Ajax {
         return true;
     }
     
-    /**
+ 
+     /**
      * Deactivate license site
      */
     public function deactivate_license_site() {
@@ -91,19 +92,16 @@ class EDDCDP_Ajax {
             wp_send_json_error(__('Invalid license ID or site URL.', 'eddcdp'));
         }
         
-        // Get and verify license
+        // Get license using the correct method
         $license = edd_software_licensing()->get_license($license_id);
         if (!$license || $license->user_id != get_current_user_id()) {
             wp_send_json_error(__('Invalid license or insufficient permissions.', 'eddcdp'));
         }
         
-        // Deactivate the site
-        $result = $license->deactivate($site_url);
+        // Deactivate the site using EDD SL method
+        $deactivated = edd_software_licensing()->deactivate_license($license->license_key, $site_url);
         
-        if ($result) {
-            // Log the action
-            $this->log_license_action('deactivate', $license_id, $site_url);
-            
+        if ($deactivated) {
             wp_send_json_success(array(
                 'message' => __('Site deactivated successfully.', 'eddcdp'),
                 'license_id' => $license_id,
@@ -137,7 +135,7 @@ class EDDCDP_Ajax {
             wp_send_json_error(__('Please enter a valid URL (e.g., https://example.com).', 'eddcdp'));
         }
         
-        // Get and verify license
+        // Get license using the correct method
         $license = edd_software_licensing()->get_license($license_id);
         if (!$license || $license->user_id != get_current_user_id()) {
             wp_send_json_error(__('Invalid license or insufficient permissions.', 'eddcdp'));
@@ -160,13 +158,10 @@ class EDDCDP_Ajax {
             wp_send_json_error(__('Activation limit reached. Please deactivate a site first or upgrade your license.', 'eddcdp'));
         }
         
-        // Activate the site
-        $result = $license->activate($site_url);
+        // Activate the site using EDD SL method
+        $activated = edd_software_licensing()->activate_license($license->license_key, $site_url);
         
-        if ($result) {
-            // Log the action
-            $this->log_license_action('activate', $license_id, $site_url);
-            
+        if ($activated) {
             wp_send_json_success(array(
                 'message' => __('Site activated successfully.', 'eddcdp'),
                 'license_id' => $license_id,
@@ -175,7 +170,9 @@ class EDDCDP_Ajax {
         } else {
             wp_send_json_error(__('Failed to activate site. The site may already be activated or there was an error. Please try again.', 'eddcdp'));
         }
-    }
+    }   
+
+    
     
     /**
      * Remove from wishlist

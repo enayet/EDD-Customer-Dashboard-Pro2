@@ -127,7 +127,7 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
                 
                 <?php if ($license_info['can_activate'] && !$activation_limit_reached) : ?>
                 <!-- Add Site Form (Same as order-licenses.php) -->
-                <form method="post" class="edd_sl_form mb-4">
+                <form method="post" class="edd_sl_form mb-4" onsubmit="setLicenseTabFlag()">
                     <div class="flex gap-3">
                         <input type="url" name="site_url" 
                                placeholder="<?php esc_attr_e('Enter your site URL (e.g., https://example.com)', 'eddcdp'); ?>"
@@ -170,7 +170,7 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
                     <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
                         <span class="text-sm break-all flex-1 mr-2"><?php echo esc_url($site->site_name); ?></span>
                         <a href="#" 
-                        onclick="showDeactivateModal('<?php echo esc_js($site->site_name); ?>', '<?php echo wp_nonce_url(
+                        onclick="setLicenseTabFlag(); showDeactivateModal('<?php echo esc_js($site->site_name); ?>', '<?php echo wp_nonce_url(
                             add_query_arg(array(
                                 'action' => 'manage_licenses',
                                 'payment_id' => '', // Not needed for main licenses
@@ -253,17 +253,28 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
 <script src="<?php echo EDDCDP_PLUGIN_URL; ?>templates/default/js/license-management.js"></script>
 
 <script>
-// Simple solution: Always go to licenses tab when this section loads
+// Set flag when license forms are submitted from main licenses tab
+function setLicenseTabFlag() {
+    sessionStorage.setItem('returnToLicensesTab', 'true');
+}
+
+// Check if we should return to licenses tab
 document.addEventListener('DOMContentLoaded', function() {
-    // Set hash to licenses
-    window.location.hash = 'licenses';
-    
-    // Try to set Alpine.js activeTab
-    setTimeout(function() {
-        const dashboardElement = document.querySelector('[x-data]');
-        if (dashboardElement && dashboardElement._x_dataStack && dashboardElement._x_dataStack[0]) {
-            dashboardElement._x_dataStack[0].activeTab = 'licenses';
-        }
-    }, 100);
+    // Check if we have the flag set
+    if (sessionStorage.getItem('returnToLicensesTab') === 'true') {
+        // Clear the flag
+        sessionStorage.removeItem('returnToLicensesTab');
+        
+        // Set hash to licenses
+        window.location.hash = 'licenses';
+        
+        // Try to set Alpine.js activeTab
+        setTimeout(function() {
+            const dashboardElement = document.querySelector('[x-data]');
+            if (dashboardElement && dashboardElement._x_dataStack && dashboardElement._x_dataStack[0]) {
+                dashboardElement._x_dataStack[0].activeTab = 'licenses';
+            }
+        }, 100);
+    }
 });
 </script>

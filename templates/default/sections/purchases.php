@@ -165,8 +165,7 @@ $invoices_active = function_exists('edd_invoices_get_invoice_url');
                 $invoice_url = $order_details->get_order_invoice_url($order->id);
             ?>
             <a href="<?php echo esc_url($invoice_url); ?>" 
-               class="bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 text-decoration-none"
-               target="_blank">
+               class="bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 text-decoration-none">
                 📄 <?php _e('Invoice', 'eddcdp'); ?>
             </a>
             <?php endif; ?>

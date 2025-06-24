@@ -172,15 +172,3 @@ if ($first_order) {
         </div>
     </div>
 </div>
-
-<!-- Advanced Analytics Coming Soon -->
-<div class="bg-gray-50/80 rounded-2xl p-12 text-center border border-gray-200/50">
-    <div class="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-4xl mx-auto mb-6">
-        📊
-    </div>
-    <h3 class="text-2xl font-bold text-gray-800 mb-3"><?php _e('Advanced Analytics Coming Soon', 'eddcdp'); ?></h3>
-    <p class="text-gray-600 mb-6"><?php _e('Detailed charts and insights about your purchase history, usage patterns, and recommendations.', 'eddcdp'); ?></p>
-    <button class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
-        📬 <?php _e('Notify Me When Available', 'eddcdp'); ?>
-    </button>
-</div>

@@ -170,18 +170,6 @@ $invoices_active = function_exists('edd_invoices_get_invoice_url');
             </a>
             <?php endif; ?>
             
-            <!-- Receipt Button (if available) -->
-            <?php 
-            $receipt_url = $order_details->get_order_receipt_url($order->id);
-            if ($receipt_url) : 
-            ?>
-            <a href="<?php echo esc_url($receipt_url); ?>" 
-               class="bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 text-decoration-none"
-               target="_blank">
-                🧾 <?php _e('Receipt', 'eddcdp'); ?>
-            </a>
-            <?php endif; ?>
-            
             <!-- License Button (only if order has licenses) -->
             <?php if ($has_licenses) : ?>
             <a href="<?php echo $order_details->get_order_licenses_url($order->id, get_permalink()); ?>" 
@@ -190,13 +178,7 @@ $invoices_active = function_exists('edd_invoices_get_invoice_url');
             </a>
             <?php endif; ?>
             
-            <!-- Reorder Button (for completed orders) -->
-            <?php if ($status === 'complete' && count($order_items) > 0) : ?>
-            <button onclick="reorderItems(<?php echo $order->id; ?>)" 
-                    class="bg-indigo-100 text-indigo-700 border border-indigo-200 px-4 py-2 rounded-xl hover:bg-indigo-200 transition-colors flex items-center gap-2">
-                🔄 <?php _e('Reorder', 'eddcdp'); ?>
-            </button>
-            <?php endif; ?>
+
         </div>
         
     </div>

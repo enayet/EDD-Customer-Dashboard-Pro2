@@ -129,7 +129,7 @@ function dashboard() {
             { id: 'wishlist', label: '❤️ <?php _e('Wishlist', 'eddcdp'); ?>' },
             <?php endif; ?>
             <?php if (!empty($enabled_sections['analytics'])) : ?>
-            { id: 'analytics', label: '📊 <?php _e('Analytics', 'eddcdp'); ?>' },
+            { id: 'analytics', label: '📊 <?php _e('Reports', 'eddcdp'); ?>' },
             <?php endif; ?>
             <?php if (!empty($enabled_sections['support'])) : ?>
             { id: 'support', label: '💬 <?php _e('Support', 'eddcdp'); ?>' }

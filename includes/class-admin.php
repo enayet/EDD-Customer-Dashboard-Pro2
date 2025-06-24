@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin Settings Class - Fixed and Simplified
+ * Admin Settings Class - Enhanced
  */
 
 if (!defined('ABSPATH')) {
@@ -17,9 +17,6 @@ class EDDCDP_Admin {
         }
         return self::$instance;
     }
-    
-
-        
     
     private function __construct() {
         add_action('admin_menu', array($this, 'add_admin_menu'));
@@ -259,16 +256,29 @@ class EDDCDP_Admin {
     }
     
     /**
+     * Check if EDD Pro is active
+     */
+    private function is_edd_pro_active() {
+        // Only check for actual EDD Pro indicators, not extensions
+        if (defined('EDD_PRO_VERSION') || 
+            class_exists('EDD_Pro') || 
+            function_exists('edd_pro_version')) {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
      * Get system status
      */
     private function get_system_status() {
         $status = array();
         
-        // EDD Status
-        $status['edd'] = array(
-            'label' => __('EDD Active', 'eddcdp'),
-            'status' => class_exists('Easy_Digital_Downloads') ? 'active' : 'inactive',
-            'message' => class_exists('Easy_Digital_Downloads') ? __('Easy Digital Downloads is active', 'eddcdp') : __('Easy Digital Downloads is not active', 'eddcdp')
+        // EDD Pro Status
+        $status['edd_pro'] = array(
+            'label' => __('EDD Pro', 'eddcdp'),
+            'status' => $this->is_edd_pro_active() ? 'active' : 'inactive',
+            'message' => $this->is_edd_pro_active() ? __('Easy Digital Downloads Pro is active', 'eddcdp') : __('Easy Digital Downloads Pro is not active', 'eddcdp')
         );
         
         // Software Licensing
@@ -373,47 +383,9 @@ class EDDCDP_Admin {
                             <?php endforeach; ?>
                         </div>
                         
-                        
-                        <?php submit_button(__('Save Settings', 'eddcdp'), 'primary', 'submit', false); ?>
-                    </form>
-                    
-                    <!-- Template Selection - Outside of form -->
-                    <div class="eddcdp-section">
-                        <h2><?php _e('Template Selection', 'eddcdp'); ?></h2>
-                        <p class="description"><?php _e('Choose and configure your dashboard template.', 'eddcdp'); ?></p>
-                        
-                        <div class="eddcdp-templates-grid">
-                            <?php foreach ($templates as $template_key => $template) : 
-                                $is_active = ($settings['active_template'] === $template_key);
-                            ?>
-                            <div class="eddcdp-template-card <?php echo $is_active ? 'active' : ''; ?>">
-                                <div class="eddcdp-template-preview">
-                                    <div class="eddcdp-template-icon">
-                                        📱
-                                    </div>
-                                </div>
-                                <div class="eddcdp-template-info">
-                                    <h3><?php echo esc_html($template['name']); ?></h3>
-                                    <p><?php echo esc_html($template['description']); ?></p>
-                                    <div class="eddcdp-template-meta">
-                                        <span class="version"><?php printf(__('Version: %s', 'eddcdp'), esc_html($template['version'])); ?></span>
-                                        <span class="author"><?php printf(__('by %s', 'eddcdp'), esc_html($template['author'])); ?></span>
-                                    </div>
-                                </div>
-                                <div class="eddcdp-template-actions">
-                                    <?php if ($is_active) : ?>
-                                        <span class="eddcdp-template-status active">✓ <?php _e('Active', 'eddcdp'); ?></span>
-                                    <?php else : ?>
-                                        <a href="<?php echo wp_nonce_url(admin_url('edit.php?post_type=download&page=eddcdp-settings&action=activate_template&template=' . $template_key), 'eddcdp_activate_template'); ?>" 
-                                           class="button button-primary">
-                                            <?php _e('Activate', 'eddcdp'); ?>
-                                        </a>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                            <?php endforeach; ?>
+                        <div class="eddcdp-submit-section">
+                            <?php submit_button(__('Save Settings', 'eddcdp'), 'primary', 'submit', false); ?>
                         </div>
-                    </div>
                     </form>
                 </div>
                 
@@ -447,6 +419,44 @@ class EDDCDP_Admin {
                     </div>
                 </div>
             </div>
+            
+            <!-- Template Selection - Full Width Section -->
+            <div class="eddcdp-section eddcdp-template-selection-section">
+                <h2><?php _e('Template Selection', 'eddcdp'); ?></h2>
+                <p class="description"><?php _e('Choose and configure your dashboard template.', 'eddcdp'); ?></p>
+                
+                <div class="eddcdp-templates-grid eddcdp-templates-three-column">
+                    <?php foreach ($templates as $template_key => $template) : 
+                        $is_active = ($settings['active_template'] === $template_key);
+                    ?>
+                    <div class="eddcdp-template-card <?php echo $is_active ? 'active' : ''; ?>">
+                        <div class="eddcdp-template-preview">
+                            <div class="eddcdp-template-icon">
+                                📱
+                            </div>
+                        </div>
+                        <div class="eddcdp-template-info">
+                            <h3><?php echo esc_html($template['name']); ?></h3>
+                            <p><?php echo esc_html($template['description']); ?></p>
+                            <div class="eddcdp-template-meta">
+                                <span class="version"><?php printf(__('Version: %s', 'eddcdp'), esc_html($template['version'])); ?></span>
+                                <span class="author"><?php printf(__('by %s', 'eddcdp'), esc_html($template['author'])); ?></span>
+                            </div>
+                        </div>
+                        <div class="eddcdp-template-actions">
+                            <?php if ($is_active) : ?>
+                                <span class="eddcdp-template-status active">✓ <?php _e('Active', 'eddcdp'); ?></span>
+                            <?php else : ?>
+                                <a href="<?php echo wp_nonce_url(admin_url('edit.php?post_type=download&page=eddcdp-settings&action=activate_template&template=' . $template_key), 'eddcdp_activate_template'); ?>" 
+                                   class="button button-primary">
+                                    <?php _e('Activate', 'eddcdp'); ?>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
         </div>
         
         <?php
@@ -459,6 +469,20 @@ class EDDCDP_Admin {
         $screen = get_current_screen();
         if ($screen->id !== 'download_page_eddcdp-settings') {
             return;
+        }
+        
+        // Show settings saved success message
+        if (isset($_GET['settings-updated']) && $_GET['settings-updated'] == 'true') {
+            echo '<div class="notice notice-success is-dismissible">';
+            echo '<p>' . __('Settings saved successfully!', 'eddcdp') . '</p>';
+            echo '</div>';
+        }
+        
+        // Show template activation success
+        if (isset($_GET['template_activated'])) {
+            echo '<div class="notice notice-success is-dismissible">';
+            echo '<p>' . __('Template activated successfully!', 'eddcdp') . '</p>';
+            echo '</div>';
         }
         
         // Check EDD version

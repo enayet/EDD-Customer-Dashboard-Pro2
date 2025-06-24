@@ -107,7 +107,7 @@ final class EDD_Customer_Dashboard_Pro {
             'includes/class-templates.php',
             'includes/class-admin.php', 
             'includes/class-shortcodes.php',
-            'includes/class-ajax.php',
+            'includes/class-invoice.php',
             'includes/class-order-details.php'
         );
         
@@ -130,8 +130,8 @@ final class EDD_Customer_Dashboard_Pro {
         // Always initialize these
         EDDCDP_Templates::instance();
         EDDCDP_Shortcodes::instance();
-        EDDCDP_Ajax::instance();
         EDDCDP_Order_Details::instance();
+        EDDCDP_Invoice_Redirect::instance();
         
         // Setup hooks
         add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));

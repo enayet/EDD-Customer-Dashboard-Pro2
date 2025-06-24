@@ -412,4 +412,6 @@ class EDDCDP_Order_Details {
         
         return implode('<br>', $address_parts);
     }
+      
+    
 }

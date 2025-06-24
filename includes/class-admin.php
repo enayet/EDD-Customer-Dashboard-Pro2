@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin Settings Class - Optimized
+ * Admin Settings Class - Fixed and Simplified
  */
 
 if (!defined('ABSPATH')) {
@@ -10,7 +10,6 @@ if (!defined('ABSPATH')) {
 class EDDCDP_Admin {
     
     private static $instance = null;
-    private $settings = null;
     
     public static function instance() {
         if (is_null(self::$instance)) {
@@ -19,11 +18,14 @@ class EDDCDP_Admin {
         return self::$instance;
     }
     
+
+        
+    
     private function __construct() {
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
+        add_action('admin_init', array($this, 'handle_template_activation'));
         add_action('admin_enqueue_scripts', array($this, 'admin_scripts'));
-        add_action('wp_ajax_eddcdp_clear_cache', array($this, 'ajax_clear_cache'));
         add_action('admin_notices', array($this, 'show_admin_notices'));
     }
     
@@ -31,7 +33,7 @@ class EDDCDP_Admin {
      * Add admin menu
      */
     public function add_admin_menu() {
-        $page_hook = add_submenu_page(
+        add_submenu_page(
             'edit.php?post_type=download',
             __('Dashboard Pro', 'eddcdp'),
             __('Dashboard Pro', 'eddcdp'),
@@ -39,26 +41,30 @@ class EDDCDP_Admin {
             'eddcdp-settings',
             array($this, 'admin_page')
         );
-        
-        add_action('load-' . $page_hook, array($this, 'admin_page_init'));
     }
     
     /**
-     * Initialize admin page
+     * Handle template activation
      */
-    public function admin_page_init() {
-        // Handle form submission
-        if (isset($_POST['submit']) && wp_verify_nonce($_POST['eddcdp_nonce'], 'eddcdp_save_settings')) {
-            $this->save_settings();
-            wp_redirect(admin_url('edit.php?post_type=download&page=eddcdp-settings&updated=1'));
-            exit;
+    public function handle_template_activation() {
+        // Only handle on our admin page
+        if (!isset($_GET['page']) || $_GET['page'] !== 'eddcdp-settings') {
+            return;
         }
         
-        // Handle cache clear
-        if (isset($_GET['action']) && $_GET['action'] === 'clear_cache' && wp_verify_nonce($_GET['nonce'], 'eddcdp_clear_cache')) {
-            $this->clear_all_cache();
-            wp_redirect(admin_url('edit.php?post_type=download&page=eddcdp-settings&cache_cleared=1'));
-            exit;
+        // Handle template activation
+        if (isset($_GET['action']) && $_GET['action'] === 'activate_template' && isset($_GET['template'])) {
+            if (wp_verify_nonce($_GET['_wpnonce'], 'eddcdp_activate_template')) {
+                $template = sanitize_text_field($_GET['template']);
+                $settings = $this->get_settings();
+                $settings['active_template'] = $template;
+                update_option('eddcdp_settings', $settings);
+                
+                wp_redirect(admin_url('edit.php?post_type=download&page=eddcdp-settings&template_activated=1'));
+                exit;
+            } else {
+                wp_die(__('Security check failed. Please try again.', 'eddcdp'));
+            }
         }
     }
     
@@ -71,6 +77,28 @@ class EDDCDP_Admin {
             'eddcdp_settings',
             array($this, 'sanitize_settings')
         );
+        
+        // Add settings sections
+        add_settings_section(
+            'eddcdp_general_section',
+            __('General Settings', 'eddcdp'),
+            null,
+            'eddcdp-settings'
+        );
+        
+        add_settings_section(
+            'eddcdp_sections_section',
+            __('Dashboard Sections', 'eddcdp'),
+            null,
+            'eddcdp-settings'
+        );
+        
+        add_settings_section(
+            'eddcdp_template_section',
+            __('Template Selection', 'eddcdp'),
+            null,
+            'eddcdp-settings'
+        );
     }
     
     /**
@@ -82,7 +110,7 @@ class EDDCDP_Admin {
         // Sanitize basic settings
         $sanitized['replace_edd_pages'] = !empty($input['replace_edd_pages']);
         $sanitized['fullscreen_mode'] = !empty($input['fullscreen_mode']);
-        $sanitized['active_template'] = sanitize_text_field($input['active_template']);
+        $sanitized['active_template'] = sanitize_text_field($input['active_template'] ?? 'default');
         
         // Sanitize enabled sections
         $sanitized['enabled_sections'] = array();
@@ -95,8 +123,17 @@ class EDDCDP_Admin {
             }
         }
         
-        // Clear cache when settings change
-        EDDCDP_Templates::instance()->clear_cache();
+        // Set default enabled sections if none provided
+        if (empty($sanitized['enabled_sections'])) {
+            $sanitized['enabled_sections'] = array(
+                'purchases' => true,
+                'downloads' => true,
+                'licenses' => true,
+                'wishlist' => true,
+                'analytics' => true,
+                'support' => true
+            );
+        }
         
         return $sanitized;
     }
@@ -115,42 +152,13 @@ class EDDCDP_Admin {
             array(),
             EDDCDP_VERSION
         );
-        
-        wp_enqueue_script(
-            'eddcdp-admin',
-            EDDCDP_PLUGIN_URL . 'assets/js/admin.js',
-            array('jquery'),
-            EDDCDP_VERSION,
-            true
-        );
-        
-        wp_localize_script('eddcdp-admin', 'eddcdpAdmin', array(
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('eddcdp_admin_nonce'),
-            'strings' => array(
-                'cache_clearing' => __('Clearing cache...', 'eddcdp'),
-                'cache_cleared' => __('Cache cleared successfully!', 'eddcdp'),
-                'error_occurred' => __('An error occurred. Please try again.', 'eddcdp')
-            )
-        ));
     }
     
     /**
-     * Get settings with caching
+     * Get settings with defaults
      */
     private function get_settings() {
-        if (is_null($this->settings)) {
-            $defaults = $this->get_default_settings();
-            $this->settings = wp_parse_args(get_option('eddcdp_settings', array()), $defaults);
-        }
-        return $this->settings;
-    }
-    
-    /**
-     * Get default settings
-     */
-    private function get_default_settings() {
-        return array(
+        $defaults = array(
             'replace_edd_pages' => false,
             'fullscreen_mode' => false,
             'active_template' => 'default',
@@ -162,6 +170,91 @@ class EDDCDP_Admin {
                 'analytics' => true,
                 'support' => true
             )
+        );
+        
+        return wp_parse_args(get_option('eddcdp_settings', array()), $defaults);
+    }
+    
+    /**
+     * Get available templates
+     */
+    private function get_available_templates() {
+        $templates = array();
+        
+        // Scan plugin templates directory
+        $plugin_templates_dir = EDDCDP_PLUGIN_DIR . 'templates/';
+        if (is_dir($plugin_templates_dir)) {
+            $dirs = scandir($plugin_templates_dir);
+            foreach ($dirs as $dir) {
+                if ($dir === '.' || $dir === '..' || !is_dir($plugin_templates_dir . $dir)) {
+                    continue;
+                }
+                
+                $template_config = $this->get_template_config($plugin_templates_dir . $dir);
+                if ($template_config) {
+                    $templates[$dir] = $template_config;
+                }
+            }
+        }
+        
+        // Scan theme templates directory
+        $theme_templates_dir = get_stylesheet_directory() . '/eddcdp/templates/';
+        if (is_dir($theme_templates_dir)) {
+            $dirs = scandir($theme_templates_dir);
+            foreach ($dirs as $dir) {
+                if ($dir === '.' || $dir === '..' || !is_dir($theme_templates_dir . $dir)) {
+                    continue;
+                }
+                
+                $template_config = $this->get_template_config($theme_templates_dir . $dir);
+                if ($template_config) {
+                    $template_config['source'] = 'theme';
+                    $template_config['name'] .= ' (Theme)';
+                    $templates[$dir] = $template_config;
+                }
+            }
+        }
+        
+        // Fallback if no templates found
+        if (empty($templates)) {
+            $templates['default'] = array(
+                'name' => 'Default Dashboard',
+                'description' => 'Modern, clean dashboard interface',
+                'version' => '1.0.0',
+                'author' => 'EDD Customer Dashboard Pro'
+            );
+        }
+        
+        return $templates;
+    }
+    
+    /**
+     * Get template configuration
+     */
+    private function get_template_config($template_dir) {
+        $config_file = $template_dir . '/template.json';
+        
+        if (file_exists($config_file)) {
+            $config = json_decode(file_get_contents($config_file), true);
+            if ($config && is_array($config)) {
+                return wp_parse_args($config, $this->get_default_template_config());
+            }
+        }
+        
+        // Default config if no JSON file
+        return $this->get_default_template_config(basename($template_dir));
+    }
+    
+    /**
+     * Get default template configuration
+     */
+    private function get_default_template_config($template_name = '') {
+        return array(
+            'name' => !empty($template_name) ? ucfirst($template_name) . ' Template' : 'Unknown Template',
+            'description' => 'Custom dashboard template',
+            'version' => '1.0.0',
+            'author' => 'EDD Customer Dashboard Pro',
+            'supports' => array('purchases', 'downloads', 'licenses', 'wishlist', 'analytics', 'support')
         );
     }
     
@@ -192,13 +285,11 @@ class EDDCDP_Admin {
             'message' => function_exists('edd_wl_get_wish_list') ? __('Wish Lists extension is active', 'eddcdp') : __('Wish Lists extension is not active (optional)', 'eddcdp')
         );
         
-        // Template validation
-        $settings = $this->get_settings();
-        $template_valid = EDDCDP_Templates::instance()->validate_template($settings['active_template']);
-        $status['template'] = array(
-            'label' => __('Active Template', 'eddcdp'),
-            'status' => $template_valid ? 'active' : 'warning',
-            'message' => $template_valid ? __('Template is compatible', 'eddcdp') : __('Template may have compatibility issues', 'eddcdp')
+        // Invoices
+        $status['invoices'] = array(
+            'label' => __('Invoices', 'eddcdp'),
+            'status' => function_exists('edd_invoices_get_invoice_url') ? 'active' : 'optional',
+            'message' => function_exists('edd_invoices_get_invoice_url') ? __('Invoices extension is active', 'eddcdp') : __('Invoices extension is not active (optional)', 'eddcdp')
         );
         
         return $status;
@@ -209,8 +300,7 @@ class EDDCDP_Admin {
      */
     public function admin_page() {
         $settings = $this->get_settings();
-        $templates = EDDCDP_Templates::instance()->get_available_templates();
-        $system_status = $this->get_system_status();
+        $templates = $this->get_available_templates();
         ?>
         
         <div class="wrap eddcdp-admin">
@@ -218,9 +308,8 @@ class EDDCDP_Admin {
             
             <div class="eddcdp-admin-container">
                 <div class="eddcdp-admin-main">
-                    <form method="post" action="">
-                        <?php wp_nonce_field('eddcdp_save_settings', 'eddcdp_nonce'); ?>
-                        
+                    <form method="post" action="options.php">
+                        <?php settings_fields('eddcdp_settings_group'); ?>
                         
                         <div class="eddcdp-section">
                             <h2><?php _e('General Settings', 'eddcdp'); ?></h2>
@@ -284,57 +373,47 @@ class EDDCDP_Admin {
                             <?php endforeach; ?>
                         </div>
                         
-                        <!-- Template Selection -->
-                        <div class="eddcdp-section">
-                            <h2><?php _e('Template Selection', 'eddcdp'); ?></h2>
-                            <p class="description"><?php _e('Choose and configure your dashboard template.', 'eddcdp'); ?></p>
-                            
-                            <div class="eddcdp-templates-grid">
-                                <?php foreach ($templates as $template_key => $template) : 
-                                    $is_active = ($settings['active_template'] === $template_key);
-                                    $is_valid = EDDCDP_Templates::instance()->validate_template($template_key);
-                                ?>
-                                <div class="eddcdp-template-card <?php echo $is_active ? 'active' : ''; ?> <?php echo !$is_valid ? 'invalid' : ''; ?>">
-                                    <div class="eddcdp-template-preview">
-                                        <div class="eddcdp-template-icon">
-                                            <?php echo isset($template['source']) && $template['source'] === 'theme' ? '🎨' : '📱'; ?>
-                                        </div>
-                                    </div>
-                                    <div class="eddcdp-template-info">
-                                        <h3><?php echo esc_html($template['name']); ?></h3>
-                                        <p><?php echo esc_html($template['description']); ?></p>
-                                        <div class="eddcdp-template-meta">
-                                            <span class="version"><?php printf(__('Version: %s', 'eddcdp'), esc_html($template['version'])); ?></span>
-                                            <span class="author"><?php printf(__('by %s', 'eddcdp'), esc_html($template['author'])); ?></span>
-                                        </div>
-                                        
-                                        <?php if (!$is_valid) : ?>
-                                        <div class="eddcdp-template-warning">
-                                            <small><?php _e('This template may not be compatible with your current setup.', 'eddcdp'); ?></small>
-                                        </div>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="eddcdp-template-actions">
-                                        <?php if ($is_active) : ?>
-                                            <span class="eddcdp-template-status active">✓ <?php _e('Active', 'eddcdp'); ?></span>
-                                        <?php else : ?>
-                                            <label class="eddcdp-template-radio">
-                                                <input type="radio" name="eddcdp_settings[active_template]" value="<?php echo esc_attr($template_key); ?>" <?php echo !$is_valid ? 'disabled' : ''; ?>>
-                                                <?php _e('Select', 'eddcdp'); ?>
-                                            </label>
-                                        <?php endif; ?>
+                        
+                        <?php submit_button(__('Save Settings', 'eddcdp'), 'primary', 'submit', false); ?>
+                    </form>
+                    
+                    <!-- Template Selection - Outside of form -->
+                    <div class="eddcdp-section">
+                        <h2><?php _e('Template Selection', 'eddcdp'); ?></h2>
+                        <p class="description"><?php _e('Choose and configure your dashboard template.', 'eddcdp'); ?></p>
+                        
+                        <div class="eddcdp-templates-grid">
+                            <?php foreach ($templates as $template_key => $template) : 
+                                $is_active = ($settings['active_template'] === $template_key);
+                            ?>
+                            <div class="eddcdp-template-card <?php echo $is_active ? 'active' : ''; ?>">
+                                <div class="eddcdp-template-preview">
+                                    <div class="eddcdp-template-icon">
+                                        📱
                                     </div>
                                 </div>
-                                <?php endforeach; ?>
+                                <div class="eddcdp-template-info">
+                                    <h3><?php echo esc_html($template['name']); ?></h3>
+                                    <p><?php echo esc_html($template['description']); ?></p>
+                                    <div class="eddcdp-template-meta">
+                                        <span class="version"><?php printf(__('Version: %s', 'eddcdp'), esc_html($template['version'])); ?></span>
+                                        <span class="author"><?php printf(__('by %s', 'eddcdp'), esc_html($template['author'])); ?></span>
+                                    </div>
+                                </div>
+                                <div class="eddcdp-template-actions">
+                                    <?php if ($is_active) : ?>
+                                        <span class="eddcdp-template-status active">✓ <?php _e('Active', 'eddcdp'); ?></span>
+                                    <?php else : ?>
+                                        <a href="<?php echo wp_nonce_url(admin_url('edit.php?post_type=download&page=eddcdp-settings&action=activate_template&template=' . $template_key), 'eddcdp_activate_template'); ?>" 
+                                           class="button button-primary">
+                                            <?php _e('Activate', 'eddcdp'); ?>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
                             </div>
-                        </div>                        
-                        
-                        
-                        
-                        <!-- General Settings -->
-                        <div class="eddcdp-submit-section">
-                            <?php submit_button(__('Save Settings', 'eddcdp')); ?>
+                            <?php endforeach; ?>
                         </div>
+                    </div>
                     </form>
                 </div>
                 
@@ -356,89 +435,21 @@ class EDDCDP_Admin {
                     </div>
                     
                     <div class="eddcdp-sidebar-section">
-                        <h3><?php _e('Quick Actions', 'eddcdp'); ?></h3>
-                        <p>
-                            <a href="<?php echo wp_nonce_url(admin_url('edit.php?post_type=download&page=eddcdp-settings&action=clear_cache'), 'eddcdp_clear_cache', 'nonce'); ?>" 
-                               class="button button-secondary">
-                                <?php _e('Clear Template Cache', 'eddcdp'); ?>
-                            </a>
-                        </p>
-                        
-                        <p>
-                            <a href="<?php echo admin_url('post-new.php?post_type=page'); ?>" class="button button-secondary">
-                                <?php _e('Create Dashboard Page', 'eddcdp'); ?>
-                            </a>
-                        </p>
-                    </div>
-                    
-                    <div class="eddcdp-sidebar-section">
                         <h3><?php _e('System Status', 'eddcdp'); ?></h3>
-                        <?php foreach ($system_status as $item) : ?>
+                        <?php
+                        $system_status = $this->get_system_status();
+                        foreach ($system_status as $item) : ?>
                         <div class="eddcdp-status-item">
                             <span class="status-indicator <?php echo esc_attr($item['status']); ?>"></span>
                             <span title="<?php echo esc_attr($item['message']); ?>"><?php echo esc_html($item['label']); ?></span>
                         </div>
                         <?php endforeach; ?>
                     </div>
-                    
-                    <div class="eddcdp-sidebar-section">
-                        <h3><?php _e('Support', 'eddcdp'); ?></h3>
-                        <p><?php _e('Need help? Check our documentation or contact support.', 'eddcdp'); ?></p>
-                        <p>
-                            <a href="#" class="button button-secondary" target="_blank">
-                                <?php _e('Documentation', 'eddcdp'); ?>
-                            </a>
-                        </p>
-                    </div>
                 </div>
             </div>
         </div>
         
         <?php
-    }
-    
-    /**
-     * Save settings
-     */
-    private function save_settings() {
-        if (!current_user_can('manage_shop_settings')) {
-            wp_die(__('You do not have sufficient permissions to access this page.', 'eddcdp'));
-        }
-        
-        // Settings are automatically sanitized via register_setting callback
-        $this->settings = null; // Clear cache
-        
-        add_settings_error(
-            'eddcdp_settings',
-            'settings_updated',
-            __('Settings saved successfully!', 'eddcdp'),
-            'updated'
-        );
-    }
-    
-    /**
-     * Clear all cache
-     */
-    private function clear_all_cache() {
-        EDDCDP_Templates::instance()->clear_cache();
-        
-        // Clear any other plugin caches here
-        do_action('eddcdp_clear_cache');
-    }
-    
-    /**
-     * AJAX clear cache
-     */
-    public function ajax_clear_cache() {
-        check_ajax_referer('eddcdp_admin_nonce', 'nonce');
-        
-        if (!current_user_can('manage_shop_settings')) {
-            wp_send_json_error(__('Permission denied.', 'eddcdp'));
-        }
-        
-        $this->clear_all_cache();
-        
-        wp_send_json_success(__('Cache cleared successfully!', 'eddcdp'));
     }
     
     /**
@@ -450,28 +461,6 @@ class EDDCDP_Admin {
             return;
         }
         
-        // Show update notice
-        if (isset($_GET['updated']) && $_GET['updated'] == '1') {
-            echo '<div class="notice notice-success is-dismissible">';
-            echo '<p>' . __('Settings saved successfully!', 'eddcdp') . '</p>';
-            echo '</div>';
-        }
-        
-        // Show cache cleared notice
-        if (isset($_GET['cache_cleared']) && $_GET['cache_cleared'] == '1') {
-            echo '<div class="notice notice-success is-dismissible">';
-            echo '<p>' . __('Template cache cleared successfully!', 'eddcdp') . '</p>';
-            echo '</div>';
-        }
-        
-        // Show compatibility warnings
-        $this->show_compatibility_notices();
-    }
-    
-    /**
-     * Show compatibility notices
-     */
-    private function show_compatibility_notices() {
         // Check EDD version
         if (defined('EDD_VERSION') && version_compare(EDD_VERSION, '3.0.0', '<')) {
             echo '<div class="notice notice-warning">';
@@ -485,13 +474,5 @@ class EDDCDP_Admin {
             echo '<p>' . sprintf(__('EDD Customer Dashboard Pro requires PHP 7.4 or higher. You are currently running version %s.', 'eddcdp'), PHP_VERSION) . '</p>';
             echo '</div>';
         }
-        
-        // Check if current template is valid
-        $settings = $this->get_settings();
-        if (!EDDCDP_Templates::instance()->validate_template($settings['active_template'])) {
-            echo '<div class="notice notice-warning">';
-            echo '<p>' . sprintf(__('The currently active template "%s" may not be compatible with your setup.', 'eddcdp'), $settings['active_template']) . '</p>';
-            echo '</div>';
-        }
     }
-}               
+}

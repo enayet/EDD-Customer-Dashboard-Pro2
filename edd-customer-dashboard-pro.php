@@ -108,7 +108,8 @@ final class EDD_Customer_Dashboard_Pro {
             'includes/class-admin.php', 
             'includes/class-shortcodes.php',
             'includes/class-invoice.php',
-            'includes/class-order-details.php'
+            'includes/class-order-details.php',
+            'includes/class-wishlist-handler.php'
         );
         
         foreach ($includes as $file) {
@@ -132,6 +133,7 @@ final class EDD_Customer_Dashboard_Pro {
         EDDCDP_Shortcodes::instance();
         EDDCDP_Order_Details::instance();
         EDDCDP_Invoice_Redirect::instance();
+        EDDCDP_Wishlist_Handler::instance();
         
         // Setup hooks
         add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));

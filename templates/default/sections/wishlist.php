@@ -27,63 +27,10 @@ if (!is_user_logged_in()) {
     return;
 }
 
-// Get wishlist data using the actual EDD Wish Lists approach
-// Based on wish-lists.php template
-$private = edd_wl_get_query('private'); // get the private lists
-$public = edd_wl_get_query('public');   // get the public lists
-
-// Collect all wishlist items from all lists
-$all_wishlist_items = array();
-
-// Get items from private lists
-if ($private) {
-    foreach ($private as $list_id) {
-        $items = get_post_meta($list_id, 'edd_wish_list', true);
-        if (!empty($items) && is_array($items)) {
-            $all_wishlist_items = array_merge($all_wishlist_items, $items);
-        }
-    }
-}
-
-// Get items from public lists
-if ($public) {
-    foreach ($public as $list_id) {
-        $items = get_post_meta($list_id, 'edd_wish_list', true);
-        if (!empty($items) && is_array($items)) {
-            $all_wishlist_items = array_merge($all_wishlist_items, $items);
-        }
-    }
-}
-
-// Remove duplicates
-$unique_items = array();
-$seen_items = array();
-
-foreach ($all_wishlist_items as $item) {
-    $item_key = $item['id'];
-    if (isset($item['options']['price_id'])) {
-        $item_key .= '_' . $item['options']['price_id'];
-    }
-    
-    if (!in_array($item_key, $seen_items)) {
-        $unique_items[] = $item;
-        $seen_items[] = $item_key;
-    }
-}
-
-$wishlist_items = $unique_items;
-
-// Get public wishlist URLs for sharing
-$public_wishlist_urls = array();
-if ($public) {
-    foreach ($public as $list_id) {
-        $public_wishlist_urls[] = array(
-            'title' => get_the_title($list_id),
-            'url' => edd_wl_get_wish_list_view_uri($list_id),
-            'item_count' => edd_wl_get_item_count($list_id)
-        );
-    }
-}
+// Get wishlist data using our handler class
+$wishlist_handler = EDDCDP_Wishlist_Handler::instance();
+$wishlist_items = $wishlist_handler->get_user_wishlist_items();
+$public_wishlist_urls = $wishlist_handler->get_public_wishlist_urls();
 ?>
 
 <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
@@ -152,6 +99,21 @@ if ($public) {
                class="block w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-xl font-medium hover:shadow-lg transition-all duration-300 text-decoration-none text-center">
                 👁️ <?php _e('Product Details', 'eddcdp'); ?>
             </a>
+            
+            <!-- Remove from Wishlist Button -->
+            <form method="post" action="" class="w-full">
+                <input type="hidden" name="eddcdp_action" value="remove_from_wishlist">
+                <input type="hidden" name="download_id" value="<?php echo esc_attr($download_id); ?>">
+                <?php if ($price_id !== null) : ?>
+                <input type="hidden" name="price_id" value="<?php echo esc_attr($price_id); ?>">
+                <?php endif; ?>
+                <?php wp_nonce_field('eddcdp_remove_wishlist', 'eddcdp_nonce'); ?>
+                <button type="submit" 
+                        onclick="return confirm('<?php esc_attr_e('Are you sure you want to remove this item from your wishlist?', 'eddcdp'); ?>')"
+                        class="w-full bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors">
+                    ❌ <?php _e('Remove', 'eddcdp'); ?>
+                </button>
+            </form>
         </div>
     </div>
     

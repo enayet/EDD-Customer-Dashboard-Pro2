@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Footer
+ * Template Footer - Updated
  */
 
 // Prevent direct access
@@ -18,8 +18,9 @@ if ($is_fullscreen) {
     </html>
     <?php
 } else {
-    // Embedded mode - close wrapper
+    // Embedded mode - close wrappers
     ?>
+        </div> <!-- Close eddcdp-embedded-wrapper -->
     </div> <!-- Close eddcdp-dashboard-wrapper -->
     <?php
 }

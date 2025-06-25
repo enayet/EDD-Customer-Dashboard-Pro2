@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Header
+ * Template Header - Updated with Fullscreen Exit
  */
 
 // Prevent direct access
@@ -55,22 +55,55 @@ if ($is_fullscreen) {
         <link rel="stylesheet" href="<?php echo $template_css; ?>?v=<?php echo EDDCDP_VERSION; ?>">
         <?php endif; ?>
     </head>
-    <body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen">
+    <body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen eddcdp-fullscreen-mode">
+        
+        <!-- Fullscreen Exit Button -->
+        <?php EDDCDP_Fullscreen_Helper::render_exit_button(); ?>
+        
     <?php
 } else {
-    // Embedded mode - just scripts and styles
+    // Embedded mode - just scripts, styles, and wrapper
     ?>
     <style>
-    /* Override WordPress layout constraints for embedded mode */
+    /* Enhanced WordPress override styles for embedded mode */
+    .eddcdp-dashboard-wrapper,
     .eddcdp-dashboard-wrapper * {
         max-width: none !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
     }
+    
     .eddcdp-dashboard-wrapper .is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
         max-width: none !important;
         margin-left: 0 !important;
         margin-right: 0 !important;
     }
+    
+    /* Typography reset for embedded mode */
+    .eddcdp-dashboard h1,
+    .eddcdp-dashboard h2,
+    .eddcdp-dashboard h3,
+    .eddcdp-dashboard h4,
+    .eddcdp-dashboard h5,
+    .eddcdp-dashboard h6 {
+        font-family: inherit !important;
+        font-weight: inherit !important;
+        line-height: inherit !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        color: inherit !important;
+    }
+    
+    .eddcdp-dashboard p,
+    .eddcdp-dashboard span,
+    .eddcdp-dashboard div {
+        font-family: inherit !important;
+        line-height: inherit !important;
+        margin: 0 !important;
+        color: inherit !important;
+    }
     </style>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
@@ -96,6 +129,8 @@ if ($is_fullscreen) {
             }
         }
     </script>
+    
     <div class="eddcdp-dashboard-wrapper">
+        <div class="eddcdp-embedded-wrapper">
     <?php
 }

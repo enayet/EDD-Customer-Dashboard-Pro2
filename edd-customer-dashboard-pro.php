@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('EDDCDP_VERSION', '1.0.4');
+define('EDDCDP_VERSION', '1.0.5');
 define('EDDCDP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('EDDCDP_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('EDDCDP_PLUGIN_FILE', __FILE__);
@@ -109,7 +109,8 @@ final class EDD_Customer_Dashboard_Pro {
             'includes/class-shortcodes.php',
             'includes/class-invoice.php',
             'includes/class-order-details.php',
-            'includes/class-wishlist-handler.php'
+            'includes/class-wishlist-handler.php',
+            'includes/class-fullscreen-helper.php'
         );
         
         foreach ($includes as $file) {
@@ -134,6 +135,7 @@ final class EDD_Customer_Dashboard_Pro {
         EDDCDP_Order_Details::instance();
         EDDCDP_Invoice_Redirect::instance();
         EDDCDP_Wishlist_Handler::instance();
+        EDDCDP_Fullscreen_Helper::instance();
         
         // Setup hooks
         add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));

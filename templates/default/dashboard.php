@@ -19,9 +19,12 @@ include 'header.php';
 // Get order details instance
 $order_details = EDDCDP_Order_Details::instance();
 
+// Check if we're in fullscreen mode
+$is_fullscreen = defined('EDDCDP_IS_FULLSCREEN') && EDDCDP_IS_FULLSCREEN;
+
 ?>
 
-<div class="eddcdp-dashboard" x-data="dashboard()">
+<div class="eddcdp-dashboard <?php echo $is_fullscreen ? 'eddcdp-fullscreen-content' : 'eddcdp-embedded-content'; ?>" x-data="dashboard()">
     <div class="container mx-auto px-4 py-8 max-w-7xl">
         
         <!-- Welcome Header Section -->

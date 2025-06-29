@@ -71,24 +71,27 @@ final class EDD_Customer_Dashboard_Pro {
         
         // Check PHP version
         if (version_compare(PHP_VERSION, '7.4', '<')) {
-            $errors[] = sprintf(__('EDD Customer Dashboard Pro requires PHP 7.4 or higher. You are running version %s.', 'edd-customer-dashboard-pro'), PHP_VERSION);
+            /* translators: %s: Current PHP version */
+            $errors[] = sprintf(esc_html__('EDD Customer Dashboard Pro requires PHP 7.4 or higher. You are running version %s.', 'edd-customer-dashboard-pro'), PHP_VERSION);
         }
         
         // Check WordPress version
         global $wp_version;
         if (version_compare($wp_version, '5.0', '<')) {
-            $errors[] = sprintf(__('EDD Customer Dashboard Pro requires WordPress 5.0 or higher. You are running version %s.', 'edd-customer-dashboard-pro'), $wp_version);
+            /* translators: %s: Current WordPress version */
+            $errors[] = sprintf(esc_html__('EDD Customer Dashboard Pro requires WordPress 5.0 or higher. You are running version %s.', 'edd-customer-dashboard-pro'), $wp_version);
         }
         
         // Check EDD version
         if (defined('EDD_VERSION') && version_compare(EDD_VERSION, '2.8', '<')) {
-            $errors[] = sprintf(__('EDD Customer Dashboard Pro requires Easy Digital Downloads 2.8 or higher. You are running version %s.', 'edd-customer-dashboard-pro'), EDD_VERSION);
+            /* translators: %s: Current EDD version */
+            $errors[] = sprintf(esc_html__('EDD Customer Dashboard Pro requires Easy Digital Downloads 2.8 or higher. You are running version %s.', 'edd-customer-dashboard-pro'), EDD_VERSION);
         }
         
         if (!empty($errors)) {
             add_action('admin_notices', function() use ($errors) {
                 foreach ($errors as $error) {
-                    echo '<div class="notice notice-error"><p>' . esc_html($error) . '</p></div>';
+                    echo '<div class="notice notice-error"><p>' . wp_kses_post($error) . '</p></div>';
                 }
             });
             return false;
@@ -118,7 +121,8 @@ final class EDD_Customer_Dashboard_Pro {
             if (file_exists($file_path)) {
                 require_once $file_path;
             } else {
-                wp_die(sprintf(__('Required file missing: %s', 'edd-customer-dashboard-pro'), $file));
+                /* translators: %s: Missing file path */
+                wp_die(sprintf(esc_html__('Required file missing: %s', 'edd-customer-dashboard-pro'), esc_html($file)));
             }
         }
     }
@@ -175,9 +179,9 @@ final class EDD_Customer_Dashboard_Pro {
             'is_user_logged_in' => is_user_logged_in(),
             'checkout_url' => edd_get_checkout_uri(),
             'strings' => array(
-                'loading' => __('Loading...', 'edd-customer-dashboard-pro'),
-                'error' => __('An error occurred. Please try again.', 'edd-customer-dashboard-pro'),
-                'success' => __('Success!', 'edd-customer-dashboard-pro')
+                'loading' => esc_html__('Loading...', 'edd-customer-dashboard-pro'),
+                'error' => esc_html__('An error occurred. Please try again.', 'edd-customer-dashboard-pro'),
+                'success' => esc_html__('Success!', 'edd-customer-dashboard-pro')
             )
         ));
     }
@@ -235,7 +239,7 @@ final class EDD_Customer_Dashboard_Pro {
     }
     
     public function plugin_action_links($links) {
-        $settings_link = '<a href="' . admin_url('edit.php?post_type=download&page=eddcdp-settings') . '">' . __('Settings', 'edd-customer-dashboard-pro') . '</a>';
+        $settings_link = '<a href="' . esc_url(admin_url('edit.php?post_type=download&page=eddcdp-settings')) . '">' . esc_html__('Settings', 'edd-customer-dashboard-pro') . '</a>';
         array_unshift($links, $settings_link);
         return $links;
     }
@@ -243,7 +247,7 @@ final class EDD_Customer_Dashboard_Pro {
     public function activate() {
         // Check requirements on activation
         if (!$this->is_edd_active()) {
-            wp_die(__('EDD Customer Dashboard Pro requires Easy Digital Downloads to be installed and active.', 'edd-customer-dashboard-pro'));
+            wp_die(esc_html__('EDD Customer Dashboard Pro requires Easy Digital Downloads to be installed and active.', 'edd-customer-dashboard-pro'));
         }
         
         // Create default settings
@@ -293,10 +297,10 @@ final class EDD_Customer_Dashboard_Pro {
     
     public function edd_missing_notice() {
         echo '<div class="notice notice-error">';
-        echo '<p><strong>' . __('EDD Customer Dashboard Pro', 'edd-customer-dashboard-pro') . '</strong></p>';
-        echo '<p>' . __('This plugin requires Easy Digital Downloads to be installed and active.', 'edd-customer-dashboard-pro') . '</p>';
+        echo '<p><strong>' . esc_html__('EDD Customer Dashboard Pro', 'edd-customer-dashboard-pro') . '</strong></p>';
+        echo '<p>' . esc_html__('This plugin requires Easy Digital Downloads to be installed and active.', 'edd-customer-dashboard-pro') . '</p>';
         if (current_user_can('install_plugins')) {
-            echo '<p><a href="' . admin_url('plugin-install.php?s=easy+digital+downloads&tab=search&type=term') . '" class="button button-primary">' . __('Install Easy Digital Downloads', 'edd-customer-dashboard-pro') . '</a></p>';
+            echo '<p><a href="' . esc_url(admin_url('plugin-install.php?s=easy+digital+downloads&tab=search&type=term')) . '" class="button button-primary">' . esc_html__('Install Easy Digital Downloads', 'edd-customer-dashboard-pro') . '</a></p>';
         }
         echo '</div>';
     }
@@ -343,7 +347,7 @@ add_action('admin_init', function() {
     if (get_option('eddcdp_activation_redirect', false)) {
         delete_option('eddcdp_activation_redirect');
         if (!isset($_GET['activate-multi'])) {
-            wp_redirect(admin_url('edit.php?post_type=download&page=eddcdp-settings'));
+            wp_redirect(esc_url_raw(admin_url('edit.php?post_type=download&page=eddcdp-settings')));
             exit;
         }
     }

@@ -126,21 +126,21 @@ function eddcdp_format_license_status($license) {
     if ($status === 'active' && !$is_expired) {
         return array(
             'status' => 'active',
-            'text' => __('Active', 'edd-customer-dashboard-pro'),
+            'text' => esc_html__('Active', 'edd-customer-dashboard-pro'),
             'icon' => '✅',
             'class' => 'text-green-600'
         );
     } elseif ($is_expired) {
         return array(
             'status' => 'expired',
-            'text' => __('Expired', 'edd-customer-dashboard-pro'),
+            'text' => esc_html__('Expired', 'edd-customer-dashboard-pro'),
             'icon' => '⏰',
             'class' => 'text-red-600'
         );
     } else {
         return array(
             'status' => 'inactive',
-            'text' => __('Inactive', 'edd-customer-dashboard-pro'),
+            'text' => esc_html__('Inactive', 'edd-customer-dashboard-pro'),
             'icon' => '❌',
             'class' => 'text-gray-600'
         );
@@ -186,14 +186,16 @@ function eddcdp_sanitize_license_url($url) {
  */
 function eddcdp_format_activation_count($activation_count, $activation_limit) {
     if ($activation_limit > 0) {
+        /* translators: %1$d: current activation count, %2$d: activation limit */
         return sprintf(
-            __('%d of %d sites', 'edd-customer-dashboard-pro'),
+            esc_html__('%1$d of %2$d sites', 'edd-customer-dashboard-pro'),
             $activation_count,
             $activation_limit
         );
     } else {
+        /* translators: %d: current activation count */
         return sprintf(
-            __('%d of unlimited sites', 'edd-customer-dashboard-pro'),
+            esc_html__('%d of unlimited sites', 'edd-customer-dashboard-pro'),
             $activation_count
         );
     }
@@ -417,7 +419,7 @@ function eddcdp_get_license_status_info($license) {
         return array(
             'container_class' => 'bg-gray-50/50 border-gray-200/50',
             'badge_class' => 'bg-gray-100 text-gray-800',
-            'text' => __('Disabled', 'edd-customer-dashboard-pro'),
+            'text' => esc_html__('Disabled', 'edd-customer-dashboard-pro'),
             'icon' => '🚫',
             'can_activate' => false
         );
@@ -425,7 +427,7 @@ function eddcdp_get_license_status_info($license) {
         return array(
             'container_class' => 'bg-red-50/50 border-red-200/50',
             'badge_class' => 'bg-red-100 text-red-800',
-            'text' => __('Expired', 'edd-customer-dashboard-pro'),
+            'text' => esc_html__('Expired', 'edd-customer-dashboard-pro'),
             'icon' => '⏰',
             'can_activate' => false
         );
@@ -433,7 +435,7 @@ function eddcdp_get_license_status_info($license) {
         return array(
             'container_class' => 'bg-green-50/50 border-green-200/50',
             'badge_class' => 'bg-green-100 text-green-800',
-            'text' => __('Active', 'edd-customer-dashboard-pro'),
+            'text' => esc_html__('Active', 'edd-customer-dashboard-pro'),
             'icon' => '✅',
             'can_activate' => true
         );
@@ -441,7 +443,7 @@ function eddcdp_get_license_status_info($license) {
         return array(
             'container_class' => 'bg-gray-50/50 border-gray-200/50',
             'badge_class' => 'bg-gray-100 text-red-600',
-            'text' => __('Inactive', 'edd-customer-dashboard-pro'),
+            'text' => esc_html__('Inactive', 'edd-customer-dashboard-pro'),
             'icon' => '⚪',
             'can_activate' => true
         );
@@ -462,6 +464,8 @@ function eddcdp_get_license_status_info($license) {
 function eddcdp_get_license_active_sites($license_id) {
     global $wpdb;
     
+    // Necessary for license activations table - no WP API available
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
     return $wpdb->get_results($wpdb->prepare(
         "SELECT site_id, site_name FROM {$wpdb->prefix}edd_license_activations WHERE license_id = %d AND activated = 1",
         $license_id

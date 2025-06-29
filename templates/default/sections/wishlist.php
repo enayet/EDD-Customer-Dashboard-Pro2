@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 // Check if EDD Wish Lists is active
 if (!class_exists('EDD_Wish_Lists')) {
     echo '<div class="bg-yellow-50/80 rounded-2xl p-6 border border-yellow-200/50">';
-    echo '<p class="text-yellow-800">' . __('Wish Lists extension is not active.', 'edd-customer-dashboard-pro') . '</p>';
+    echo '<p class="text-yellow-800">' . esc_html__('Wish Lists extension is not active.', 'edd-customer-dashboard-pro') . '</p>';
     echo '</div>';
     return;
 }
@@ -22,7 +22,7 @@ $current_user = wp_get_current_user();
 
 if (!is_user_logged_in()) {
     echo '<div class="bg-yellow-50/80 rounded-2xl p-6 border border-yellow-200/50">';
-    echo '<p class="text-yellow-800">' . __('Please log in to view your wishlist.', 'edd-customer-dashboard-pro') . '</p>';
+    echo '<p class="text-yellow-800">' . esc_html__('Please log in to view your wishlist.', 'edd-customer-dashboard-pro') . '</p>';
     echo '</div>';
     return;
 }
@@ -34,7 +34,7 @@ $public_wishlist_urls = $wishlist_handler->get_public_wishlist_urls();
 ?>
 
 <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-    ❤️ <?php _e('Your Wishlist', 'edd-customer-dashboard-pro'); ?>
+    ❤️ <?php esc_html_e('Your Wishlist', 'edd-customer-dashboard-pro'); ?>
 </h2>
 
 <?php if (!empty($wishlist_items)) : ?>
@@ -60,7 +60,7 @@ $public_wishlist_urls = $wishlist_handler->get_public_wishlist_urls();
             $price_name = '';
         }
         
-        $formatted_price = $price ? edd_currency_filter(edd_format_amount($price)) : __('Free', 'edd-customer-dashboard-pro');
+        $formatted_price = $price ? edd_currency_filter(edd_format_amount($price)) : esc_html__('Free', 'edd-customer-dashboard-pro');
         $thumbnail = get_the_post_thumbnail_url($download_id, 'medium');
         $download_url = get_permalink($download_id);
         
@@ -91,27 +91,27 @@ $public_wishlist_urls = $wishlist_handler->get_public_wishlist_urls();
         <p class="text-sm text-gray-600 mb-2"><?php echo esc_html($price_name); ?></p>
         <?php endif; ?>
         
-        <p class="text-xl font-bold text-indigo-600 mb-4"><?php echo $formatted_price; ?></p>
+        <p class="text-xl font-bold text-indigo-600 mb-4"><?php echo esc_html($formatted_price); ?></p>
         
         <div class="space-y-2">
             <!-- Product Details Link -->
             <a href="<?php echo esc_url($download_url); ?>" 
                class="block w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-xl font-medium hover:shadow-lg transition-all duration-300 text-decoration-none text-center">
-                👁️ <?php _e('Product Details', 'edd-customer-dashboard-pro'); ?>
+                👁️ <?php esc_html_e('Product Details', 'edd-customer-dashboard-pro'); ?>
             </a>
             
             <!-- Remove from Wishlist Button -->
             <form method="post" action="" class="w-full">
+                <?php wp_nonce_field('eddcdp_remove_wishlist', 'eddcdp_nonce'); ?>
                 <input type="hidden" name="eddcdp_action" value="remove_from_wishlist">
                 <input type="hidden" name="download_id" value="<?php echo esc_attr($download_id); ?>">
                 <?php if ($price_id !== null) : ?>
                 <input type="hidden" name="price_id" value="<?php echo esc_attr($price_id); ?>">
                 <?php endif; ?>
-                <?php wp_nonce_field('eddcdp_remove_wishlist', 'eddcdp_nonce'); ?>
                 <button type="submit" 
                         onclick="return confirm('<?php esc_attr_e('Are you sure you want to remove this item from your wishlist?', 'edd-customer-dashboard-pro'); ?>')"
                         class="w-full bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors">
-                    ❌ <?php _e('Remove', 'edd-customer-dashboard-pro'); ?>
+                    ❌ <?php esc_html_e('Remove', 'edd-customer-dashboard-pro'); ?>
                 </button>
             </form>
         </div>
@@ -125,11 +125,11 @@ $public_wishlist_urls = $wishlist_handler->get_public_wishlist_urls();
     <div class="w-24 h-24 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center text-white text-4xl mx-auto mb-6">
         ❤️
     </div>
-    <h3 class="text-2xl font-bold text-gray-800 mb-3"><?php _e('Your Wishlist is Empty', 'edd-customer-dashboard-pro'); ?></h3>
-    <p class="text-gray-600 mb-6"><?php _e('Start adding products to your wishlist to keep track of items you want to purchase later!', 'edd-customer-dashboard-pro'); ?></p>
+    <h3 class="text-2xl font-bold text-gray-800 mb-3"><?php esc_html_e('Your Wishlist is Empty', 'edd-customer-dashboard-pro'); ?></h3>
+    <p class="text-gray-600 mb-6"><?php esc_html_e('Start adding products to your wishlist to keep track of items you want to purchase later!', 'edd-customer-dashboard-pro'); ?></p>
     <a href="<?php echo esc_url(home_url('/downloads/')); ?>" 
        class="bg-gradient-to-r from-pink-500 to-rose-600 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300 text-decoration-none">
-        🛒 <?php _e('Browse Products', 'edd-customer-dashboard-pro'); ?>
+        🛒 <?php esc_html_e('Browse Products', 'edd-customer-dashboard-pro'); ?>
     </a>
 </div>
 <?php endif; ?>
@@ -138,7 +138,7 @@ $public_wishlist_urls = $wishlist_handler->get_public_wishlist_urls();
 <!-- Public Wishlist Sharing Section -->
 <div class="bg-blue-50/80 rounded-2xl p-6 border border-blue-200/50 mt-8">
     <h3 class="text-xl font-semibold text-blue-800 mb-4 flex items-center gap-2">
-        🔗 <?php _e('Share Your Public Wishlists', 'edd-customer-dashboard-pro'); ?>
+        🔗 <?php esc_html_e('Share Your Public Wishlists', 'edd-customer-dashboard-pro'); ?>
     </h3>
     <div class="space-y-3">
         <?php foreach ($public_wishlist_urls as $wishlist) : ?>
@@ -146,16 +146,16 @@ $public_wishlist_urls = $wishlist_handler->get_public_wishlist_urls();
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <h4 class="font-medium text-gray-800"><?php echo esc_html($wishlist['title']); ?></h4>
-                    <p class="text-sm text-gray-600"><?php echo $wishlist['item_count']; ?></p>
+                    <p class="text-sm text-gray-600"><?php echo esc_html($wishlist['item_count']); ?></p>
                 </div>
                 <div class="flex gap-2">
                     <a href="<?php echo esc_url($wishlist['url']); ?>" 
                        class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-decoration-none text-sm">
-                        👁️ <?php _e('View', 'edd-customer-dashboard-pro'); ?>
+                        👁️ <?php esc_html_e('View', 'edd-customer-dashboard-pro'); ?>
                     </a>
                     <button onclick="copyToClipboard('<?php echo esc_js($wishlist['url']); ?>')" 
                             class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors text-sm">
-                        📋 <?php _e('Copy Link', 'edd-customer-dashboard-pro'); ?>
+                        📋 <?php esc_html_e('Copy Link', 'edd-customer-dashboard-pro'); ?>
                     </button>
                 </div>
             </div>
@@ -169,7 +169,7 @@ $public_wishlist_urls = $wishlist_handler->get_public_wishlist_urls();
 function copyToClipboard(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
-            showNotification('<?php _e('Link copied to clipboard!', 'edd-customer-dashboard-pro'); ?>', 'success');
+            showNotification('<?php esc_js_e('Link copied to clipboard!', 'edd-customer-dashboard-pro'); ?>', 'success');
         }).catch(() => {
             fallbackCopy(text);
         });
@@ -188,9 +188,9 @@ function fallbackCopy(text) {
     
     try {
         document.execCommand('copy');
-        showNotification('<?php _e('Link copied to clipboard!', 'edd-customer-dashboard-pro'); ?>', 'success');
+        showNotification('<?php esc_js_e('Link copied to clipboard!', 'edd-customer-dashboard-pro'); ?>', 'success');
     } catch (err) {
-        showNotification('<?php _e('Failed to copy link.', 'edd-customer-dashboard-pro'); ?>', 'error');
+        showNotification('<?php esc_js_e('Failed to copy link.', 'edd-customer-dashboard-pro'); ?>', 'error');
     }
     
     document.body.removeChild(textArea);

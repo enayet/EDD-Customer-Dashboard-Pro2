@@ -126,22 +126,22 @@ function dashboard() {
         
         tabs: [
             <?php if (!empty($enabled_sections['purchases'])) : ?>
-            { id: 'purchases', label: '📦 <?php _e('Purchases', 'edd-customer-dashboard-pro'); ?>' },
+            { id: 'purchases', label: '📦 <?php esc_html_e('Purchases', 'edd-customer-dashboard-pro'); ?>' },
             <?php endif; ?>
             <?php if (!empty($enabled_sections['downloads'])) : ?>
-            { id: 'downloads', label: '⬇️ <?php _e('Downloads', 'edd-customer-dashboard-pro'); ?>' },
+            { id: 'downloads', label: '⬇️ <?php esc_html_e('Downloads', 'edd-customer-dashboard-pro'); ?>' },
             <?php endif; ?>
             <?php if (!empty($enabled_sections['licenses'])) : ?>
-            { id: 'licenses', label: '🔑 <?php _e('Licenses', 'edd-customer-dashboard-pro'); ?>' },
+            { id: 'licenses', label: '🔑 <?php esc_html_e('Licenses', 'edd-customer-dashboard-pro'); ?>' },
             <?php endif; ?>
             <?php if (!empty($enabled_sections['wishlist'])) : ?>
-            { id: 'wishlist', label: '❤️ <?php _e('Wishlist', 'edd-customer-dashboard-pro'); ?>' },
+            { id: 'wishlist', label: '❤️ <?php esc_html_e('Wishlist', 'edd-customer-dashboard-pro'); ?>' },
             <?php endif; ?>
             <?php if (!empty($enabled_sections['analytics'])) : ?>
-            { id: 'analytics', label: '📊 <?php _e('Reports', 'edd-customer-dashboard-pro'); ?>' },
+            { id: 'analytics', label: '📊 <?php esc_html_e('Reports', 'edd-customer-dashboard-pro'); ?>' },
             <?php endif; ?>
             <?php if (!empty($enabled_sections['support'])) : ?>
-            { id: 'support', label: '💬 <?php _e('Support', 'edd-customer-dashboard-pro'); ?>' }
+            { id: 'support', label: '💬 <?php esc_html_e('Support', 'edd-customer-dashboard-pro'); ?>' }
             <?php endif; ?>
         ].filter(tab => tab),
         
@@ -190,7 +190,8 @@ add_action('wp_footer', function() {
     if (current_user_can('manage_options')) {
         $invoice_class = EDDCDP_Invoice_Redirect::instance();
         $url = $invoice_class->find_dashboard_page(); // Make this method public temporarily
-        echo '<script>console.log("Debug: Dashboard URL = ' . $url . '");</script>';
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Debug output for admins only
+        echo '<script>console.log("Debug: Dashboard URL = ' . esc_js($url) . '");</script>';
     }
 });
 ?>

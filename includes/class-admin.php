@@ -32,8 +32,8 @@ class EDDCDP_Admin {
     public function add_admin_menu() {
         add_submenu_page(
             'edit.php?post_type=download',
-            __('Dashboard Pro', 'edd-customer-dashboard-pro'),
-            __('Dashboard Pro', 'edd-customer-dashboard-pro'),
+            esc_html__('Dashboard Pro', 'edd-customer-dashboard-pro'),
+            esc_html__('Dashboard Pro', 'edd-customer-dashboard-pro'),
             'manage_shop_settings',
             'eddcdp-settings',
             array($this, 'admin_page')
@@ -50,17 +50,20 @@ class EDDCDP_Admin {
         }
         
         // Handle template activation
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         if (isset($_GET['action']) && $_GET['action'] === 'activate_template' && isset($_GET['template'])) {
-            if (wp_verify_nonce($_GET['_wpnonce'], 'eddcdp_activate_template')) {
-                $template = sanitize_text_field($_GET['template']);
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            if (wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'eddcdp_activate_template')) {
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                $template = sanitize_text_field(wp_unslash($_GET['template']));
                 $settings = $this->get_settings();
                 $settings['active_template'] = $template;
                 update_option('eddcdp_settings', $settings);
                 
-                wp_redirect(admin_url('edit.php?post_type=download&page=eddcdp-settings&template_activated=1'));
+                wp_redirect(esc_url_raw(admin_url('edit.php?post_type=download&page=eddcdp-settings&template_activated=1')));
                 exit;
             } else {
-                wp_die(__('Security check failed. Please try again.', 'edd-customer-dashboard-pro'));
+                wp_die(esc_html__('Security check failed. Please try again.', 'edd-customer-dashboard-pro'));
             }
         }
     }
@@ -78,21 +81,21 @@ class EDDCDP_Admin {
         // Add settings sections
         add_settings_section(
             'eddcdp_general_section',
-            __('General Settings', 'edd-customer-dashboard-pro'),
+            esc_html__('General Settings', 'edd-customer-dashboard-pro'),
             null,
             'eddcdp-settings'
         );
         
         add_settings_section(
             'eddcdp_sections_section',
-            __('Dashboard Sections', 'edd-customer-dashboard-pro'),
+            esc_html__('Dashboard Sections', 'edd-customer-dashboard-pro'),
             null,
             'eddcdp-settings'
         );
         
         add_settings_section(
             'eddcdp_template_section',
-            __('Template Selection', 'edd-customer-dashboard-pro'),
+            esc_html__('Template Selection', 'edd-customer-dashboard-pro'),
             null,
             'eddcdp-settings'
         );
@@ -114,7 +117,7 @@ class EDDCDP_Admin {
         if (!empty($input['enabled_sections']) && is_array($input['enabled_sections'])) {
             $valid_sections = array('purchases', 'downloads', 'licenses', 'wishlist', 'analytics', 'support');
             foreach ($input['enabled_sections'] as $section => $enabled) {
-                if (in_array($section, $valid_sections)) {
+                if (in_array($section, $valid_sections, true)) {
                     $sanitized['enabled_sections'][$section] = !empty($enabled);
                 }
             }
@@ -206,7 +209,8 @@ class EDDCDP_Admin {
                 $template_config = $this->get_template_config($theme_templates_dir . $dir);
                 if ($template_config) {
                     $template_config['source'] = 'theme';
-                    $template_config['name'] .= ' (Theme)';
+                    /* translators: %s: Template name from theme */
+                    $template_config['name'] = sprintf(esc_html__('%s (Theme)', 'edd-customer-dashboard-pro'), $template_config['name']);
                     $templates[$dir] = $template_config;
                 }
             }
@@ -215,10 +219,10 @@ class EDDCDP_Admin {
         // Fallback if no templates found
         if (empty($templates)) {
             $templates['default'] = array(
-                'name' => 'Default Dashboard',
-                'description' => 'Modern, clean dashboard interface',
+                'name' => esc_html__('Default Dashboard', 'edd-customer-dashboard-pro'),
+                'description' => esc_html__('Modern, clean dashboard interface', 'edd-customer-dashboard-pro'),
                 'version' => '1.0.0',
-                'author' => 'EDD Customer Dashboard Pro'
+                'author' => esc_html__('EDD Customer Dashboard Pro', 'edd-customer-dashboard-pro')
             );
         }
         
@@ -247,10 +251,10 @@ class EDDCDP_Admin {
      */
     private function get_default_template_config($template_name = '') {
         return array(
-            'name' => !empty($template_name) ? ucfirst($template_name) . ' Template' : 'Unknown Template',
-            'description' => 'Custom dashboard template',
+            'name' => !empty($template_name) ? ucfirst($template_name) . ' ' . esc_html__('Template', 'edd-customer-dashboard-pro') : esc_html__('Unknown Template', 'edd-customer-dashboard-pro'),
+            'description' => esc_html__('Custom dashboard template', 'edd-customer-dashboard-pro'),
             'version' => '1.0.0',
-            'author' => 'EDD Customer Dashboard Pro',
+            'author' => esc_html__('EDD Customer Dashboard Pro', 'edd-customer-dashboard-pro'),
             'supports' => array('purchases', 'downloads', 'licenses', 'wishlist', 'analytics', 'support')
         );
     }
@@ -276,30 +280,30 @@ class EDDCDP_Admin {
         
         // EDD Pro Status
         $status['edd_pro'] = array(
-            'label' => __('EDD Pro', 'edd-customer-dashboard-pro'),
+            'label' => esc_html__('EDD Pro', 'edd-customer-dashboard-pro'),
             'status' => $this->is_edd_pro_active() ? 'active' : 'inactive',
-            'message' => $this->is_edd_pro_active() ? __('Easy Digital Downloads Pro is active', 'edd-customer-dashboard-pro') : __('Easy Digital Downloads Pro is not active', 'edd-customer-dashboard-pro')
+            'message' => $this->is_edd_pro_active() ? esc_html__('Easy Digital Downloads Pro is active', 'edd-customer-dashboard-pro') : esc_html__('Easy Digital Downloads Pro is not active', 'edd-customer-dashboard-pro')
         );
         
         // Software Licensing
         $status['licensing'] = array(
-            'label' => __('Software Licensing', 'edd-customer-dashboard-pro'),
+            'label' => esc_html__('Software Licensing', 'edd-customer-dashboard-pro'),
             'status' => (class_exists('EDD_Software_Licensing') && function_exists('edd_software_licensing')) ? 'active' : 'optional',
-            'message' => (class_exists('EDD_Software_Licensing') && function_exists('edd_software_licensing')) ? __('Software Licensing extension is active', 'edd-customer-dashboard-pro') : __('Software Licensing extension is not active (optional)', 'edd-customer-dashboard-pro')
+            'message' => (class_exists('EDD_Software_Licensing') && function_exists('edd_software_licensing')) ? esc_html__('Software Licensing extension is active', 'edd-customer-dashboard-pro') : esc_html__('Software Licensing extension is not active (optional)', 'edd-customer-dashboard-pro')
         );
         
         // Wish Lists
         $status['wishlist'] = array(
-            'label' => __('Wish Lists', 'edd-customer-dashboard-pro'),
+            'label' => esc_html__('Wish Lists', 'edd-customer-dashboard-pro'),
             'status' => function_exists('edd_wl_get_wish_list') ? 'active' : 'optional',
-            'message' => function_exists('edd_wl_get_wish_list') ? __('Wish Lists extension is active', 'edd-customer-dashboard-pro') : __('Wish Lists extension is not active (optional)', 'edd-customer-dashboard-pro')
+            'message' => function_exists('edd_wl_get_wish_list') ? esc_html__('Wish Lists extension is active', 'edd-customer-dashboard-pro') : esc_html__('Wish Lists extension is not active (optional)', 'edd-customer-dashboard-pro')
         );
         
         // Invoices
         $status['invoices'] = array(
-            'label' => __('Invoices', 'edd-customer-dashboard-pro'),
+            'label' => esc_html__('Invoices', 'edd-customer-dashboard-pro'),
             'status' => function_exists('edd_invoices_get_invoice_url') ? 'active' : 'optional',
-            'message' => function_exists('edd_invoices_get_invoice_url') ? __('Invoices extension is active', 'edd-customer-dashboard-pro') : __('Invoices extension is not active (optional)', 'edd-customer-dashboard-pro')
+            'message' => function_exists('edd_invoices_get_invoice_url') ? esc_html__('Invoices extension is active', 'edd-customer-dashboard-pro') : esc_html__('Invoices extension is not active (optional)', 'edd-customer-dashboard-pro')
         );
         
         return $status;
@@ -314,7 +318,7 @@ class EDDCDP_Admin {
         ?>
         
         <div class="wrap eddcdp-admin">
-            <h1><?php _e('EDD Customer Dashboard Pro', 'edd-customer-dashboard-pro'); ?></h1>
+            <h1><?php esc_html_e('EDD Customer Dashboard Pro', 'edd-customer-dashboard-pro'); ?></h1>
             
             <div class="eddcdp-admin-container">
                 <div class="eddcdp-admin-main">
@@ -322,48 +326,48 @@ class EDDCDP_Admin {
                         <?php settings_fields('eddcdp_settings_group'); ?>
                         
                         <div class="eddcdp-section">
-                            <h2><?php _e('General Settings', 'edd-customer-dashboard-pro'); ?></h2>
+                            <h2><?php esc_html_e('General Settings', 'edd-customer-dashboard-pro'); ?></h2>
                             
                             <div class="eddcdp-setting-row">
                                 <div class="eddcdp-setting-label">
-                                    <label><?php _e('Replace EDD Pages', 'edd-customer-dashboard-pro'); ?></label>
+                                    <label><?php esc_html_e('Replace EDD Pages', 'edd-customer-dashboard-pro'); ?></label>
                                 </div>
                                 <div class="eddcdp-setting-control">
                                     <label class="eddcdp-toggle">
                                         <input type="checkbox" name="eddcdp_settings[replace_edd_pages]" value="1" <?php checked($settings['replace_edd_pages']); ?>>
                                         <span class="eddcdp-toggle-slider"></span>
                                     </label>
-                                    <p class="description"><?php _e('Replace default EDD customer pages with Dashboard Pro', 'edd-customer-dashboard-pro'); ?></p>
+                                    <p class="description"><?php esc_html_e('Replace default EDD customer pages with Dashboard Pro', 'edd-customer-dashboard-pro'); ?></p>
                                 </div>
                             </div>
                             
                             <div class="eddcdp-setting-row">
                                 <div class="eddcdp-setting-label">
-                                    <label><?php _e('Fullscreen Mode', 'edd-customer-dashboard-pro'); ?></label>
+                                    <label><?php esc_html_e('Fullscreen Mode', 'edd-customer-dashboard-pro'); ?></label>
                                 </div>
                                 <div class="eddcdp-setting-control">
                                     <label class="eddcdp-toggle">
                                         <input type="checkbox" name="eddcdp_settings[fullscreen_mode]" value="1" <?php checked($settings['fullscreen_mode']); ?>>
                                         <span class="eddcdp-toggle-slider"></span>
                                     </label>
-                                    <p class="description"><?php _e('Enable automatic fullscreen dashboard mode', 'edd-customer-dashboard-pro'); ?></p>
+                                    <p class="description"><?php esc_html_e('Enable automatic fullscreen dashboard mode', 'edd-customer-dashboard-pro'); ?></p>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Dashboard Sections -->
                         <div class="eddcdp-section">
-                            <h2><?php _e('Dashboard Sections', 'edd-customer-dashboard-pro'); ?></h2>
-                            <p class="description"><?php _e('Enable or disable specific dashboard sections', 'edd-customer-dashboard-pro'); ?></p>
+                            <h2><?php esc_html_e('Dashboard Sections', 'edd-customer-dashboard-pro'); ?></h2>
+                            <p class="description"><?php esc_html_e('Enable or disable specific dashboard sections', 'edd-customer-dashboard-pro'); ?></p>
                             
                             <?php
                             $sections = array(
-                                'purchases' => __('Purchases', 'edd-customer-dashboard-pro'),
-                                'downloads' => __('Downloads', 'edd-customer-dashboard-pro'),
-                                'licenses' => __('Licenses', 'edd-customer-dashboard-pro'),
-                                'wishlist' => __('Wishlist', 'edd-customer-dashboard-pro'),
-                                'analytics' => __('Analytics', 'edd-customer-dashboard-pro'),
-                                'support' => __('Support', 'edd-customer-dashboard-pro')
+                                'purchases' => esc_html__('Purchases', 'edd-customer-dashboard-pro'),
+                                'downloads' => esc_html__('Downloads', 'edd-customer-dashboard-pro'),
+                                'licenses' => esc_html__('Licenses', 'edd-customer-dashboard-pro'),
+                                'wishlist' => esc_html__('Wishlist', 'edd-customer-dashboard-pro'),
+                                'analytics' => esc_html__('Analytics', 'edd-customer-dashboard-pro'),
+                                'support' => esc_html__('Support', 'edd-customer-dashboard-pro')
                             );
                             
                             foreach ($sections as $key => $label) :
@@ -384,7 +388,7 @@ class EDDCDP_Admin {
                         </div>
                         
                         <div class="eddcdp-submit-section">
-                            <?php submit_button(__('Save Settings', 'edd-customer-dashboard-pro'), 'primary', 'submit', false); ?>
+                            <?php submit_button(esc_html__('Save Settings', 'edd-customer-dashboard-pro'), 'primary', 'submit', false); ?>
                         </div>
                     </form>
                 </div>
@@ -392,22 +396,22 @@ class EDDCDP_Admin {
                 <!-- Sidebar -->
                 <div class="eddcdp-admin-sidebar">
                     <div class="eddcdp-sidebar-section">
-                        <h3><?php _e('How to Use', 'edd-customer-dashboard-pro'); ?></h3>
-                        <p><?php _e('Use this shortcode to display the dashboard:', 'edd-customer-dashboard-pro'); ?></p>
+                        <h3><?php esc_html_e('How to Use', 'edd-customer-dashboard-pro'); ?></h3>
+                        <p><?php esc_html_e('Use this shortcode to display the dashboard:', 'edd-customer-dashboard-pro'); ?></p>
                         <code>[edd_customer_dashboard_pro]</code>
                         
-                        <p style="margin-top: 15px;"><?php _e('Or create a page and add the shortcode in the content area.', 'edd-customer-dashboard-pro'); ?></p>
+                        <p style="margin-top: 15px;"><?php esc_html_e('Or create a page and add the shortcode in the content area.', 'edd-customer-dashboard-pro'); ?></p>
                     </div>
                     
                     <div class="eddcdp-sidebar-section">
-                        <h3><?php _e('Plugin Info', 'edd-customer-dashboard-pro'); ?></h3>
-                        <p><strong><?php _e('Version:', 'edd-customer-dashboard-pro'); ?></strong> <?php echo EDDCDP_VERSION; ?></p>
-                        <p><strong><?php _e('Active Template:', 'edd-customer-dashboard-pro'); ?></strong> <?php echo esc_html(ucfirst($settings['active_template'])); ?></p>
-                        <p><strong><?php _e('Available Templates:', 'edd-customer-dashboard-pro'); ?></strong> <?php echo count($templates); ?></p>
+                        <h3><?php esc_html_e('Plugin Info', 'edd-customer-dashboard-pro'); ?></h3>
+                        <p><strong><?php esc_html_e('Version:', 'edd-customer-dashboard-pro'); ?></strong> <?php echo esc_html(EDDCDP_VERSION); ?></p>
+                        <p><strong><?php esc_html_e('Active Template:', 'edd-customer-dashboard-pro'); ?></strong> <?php echo esc_html(ucfirst($settings['active_template'])); ?></p>
+                        <p><strong><?php esc_html_e('Available Templates:', 'edd-customer-dashboard-pro'); ?></strong> <?php echo esc_html(count($templates)); ?></p>
                     </div>
                     
                     <div class="eddcdp-sidebar-section">
-                        <h3><?php _e('System Status', 'edd-customer-dashboard-pro'); ?></h3>
+                        <h3><?php esc_html_e('System Status', 'edd-customer-dashboard-pro'); ?></h3>
                         <?php
                         $system_status = $this->get_system_status();
                         foreach ($system_status as $item) : ?>
@@ -422,8 +426,8 @@ class EDDCDP_Admin {
             
             <!-- Template Selection - Full Width Section -->
             <div class="eddcdp-section eddcdp-template-selection-section">
-                <h2><?php _e('Template Selection', 'edd-customer-dashboard-pro'); ?></h2>
-                <p class="description"><?php _e('Choose and configure your dashboard template.', 'edd-customer-dashboard-pro'); ?></p>
+                <h2><?php esc_html_e('Template Selection', 'edd-customer-dashboard-pro'); ?></h2>
+                <p class="description"><?php esc_html_e('Choose and configure your dashboard template.', 'edd-customer-dashboard-pro'); ?></p>
                 
                 <div class="eddcdp-templates-grid eddcdp-templates-three-column">
                     <?php foreach ($templates as $template_key => $template) : 
@@ -439,17 +443,21 @@ class EDDCDP_Admin {
                             <h3><?php echo esc_html($template['name']); ?></h3>
                             <p><?php echo esc_html($template['description']); ?></p>
                             <div class="eddcdp-template-meta">
-                                <span class="version"><?php printf(__('Version: %s', 'edd-customer-dashboard-pro'), esc_html($template['version'])); ?></span>
-                                <span class="author"><?php printf(__('by %s', 'edd-customer-dashboard-pro'), esc_html($template['author'])); ?></span>
+                                <span class="version"><?php 
+                                /* translators: %s: Template version number */
+                                printf(esc_html__('Version: %s', 'edd-customer-dashboard-pro'), esc_html($template['version'])); ?></span>
+                                <span class="author"><?php 
+                                /* translators: %s: Template author name */
+                                printf(esc_html__('by %s', 'edd-customer-dashboard-pro'), esc_html($template['author'])); ?></span>
                             </div>
                         </div>
                         <div class="eddcdp-template-actions">
                             <?php if ($is_active) : ?>
-                                <span class="eddcdp-template-status active">✓ <?php _e('Active', 'edd-customer-dashboard-pro'); ?></span>
+                                <span class="eddcdp-template-status active">✓ <?php esc_html_e('Active', 'edd-customer-dashboard-pro'); ?></span>
                             <?php else : ?>
-                                <a href="<?php echo wp_nonce_url(admin_url('edit.php?post_type=download&page=eddcdp-settings&action=activate_template&template=' . $template_key), 'eddcdp_activate_template'); ?>" 
+                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('edit.php?post_type=download&page=eddcdp-settings&action=activate_template&template=' . $template_key), 'eddcdp_activate_template')); ?>" 
                                    class="button button-primary">
-                                    <?php _e('Activate', 'edd-customer-dashboard-pro'); ?>
+                                    <?php esc_html_e('Activate', 'edd-customer-dashboard-pro'); ?>
                                 </a>
                             <?php endif; ?>
                         </div>
@@ -472,30 +480,34 @@ class EDDCDP_Admin {
         }
         
         // Show settings saved success message
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         if (isset($_GET['settings-updated']) && $_GET['settings-updated'] == 'true') {
             echo '<div class="notice notice-success is-dismissible">';
-            echo '<p>' . __('Settings saved successfully!', 'edd-customer-dashboard-pro') . '</p>';
+            echo '<p>' . esc_html__('Settings saved successfully!', 'edd-customer-dashboard-pro') . '</p>';
             echo '</div>';
         }
         
         // Show template activation success
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         if (isset($_GET['template_activated'])) {
             echo '<div class="notice notice-success is-dismissible">';
-            echo '<p>' . __('Template activated successfully!', 'edd-customer-dashboard-pro') . '</p>';
+            echo '<p>' . esc_html__('Template activated successfully!', 'edd-customer-dashboard-pro') . '</p>';
             echo '</div>';
         }
         
         // Check EDD version
         if (defined('EDD_VERSION') && version_compare(EDD_VERSION, '3.0.0', '<')) {
             echo '<div class="notice notice-warning">';
-            echo '<p>' . sprintf(__('EDD Customer Dashboard Pro works best with Easy Digital Downloads 3.0 or higher. You are currently running version %s.', 'edd-customer-dashboard-pro'), EDD_VERSION) . '</p>';
+            /* translators: %s: Current EDD version */
+            echo '<p>' . sprintf(esc_html__('EDD Customer Dashboard Pro works best with Easy Digital Downloads 3.0 or higher. You are currently running version %s.', 'edd-customer-dashboard-pro'), esc_html(EDD_VERSION)) . '</p>';
             echo '</div>';
         }
         
         // Check PHP version
         if (version_compare(PHP_VERSION, '7.4', '<')) {
             echo '<div class="notice notice-error">';
-            echo '<p>' . sprintf(__('EDD Customer Dashboard Pro requires PHP 7.4 or higher. You are currently running version %s.', 'edd-customer-dashboard-pro'), PHP_VERSION) . '</p>';
+            /* translators: %s: Current PHP version */
+            echo '<p>' . sprintf(esc_html__('EDD Customer Dashboard Pro requires PHP 7.4 or higher. You are currently running version %s.', 'edd-customer-dashboard-pro'), esc_html(PHP_VERSION)) . '</p>';
             echo '</div>';
         }
     }

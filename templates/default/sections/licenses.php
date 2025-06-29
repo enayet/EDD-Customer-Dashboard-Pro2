@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
 // Check if EDD Software Licensing is active
 if (!class_exists('EDD_Software_Licensing') || !function_exists('edd_software_licensing')) {
     echo '<div class="bg-yellow-50/80 rounded-2xl p-6 border border-yellow-200/50">';
-    echo '<p class="text-yellow-800">' . __('Software Licensing extension is not active.', 'edd-customer-dashboard-pro') . '</p>';
+    echo '<p class="text-yellow-800">' . esc_html__('Software Licensing extension is not active.', 'edd-customer-dashboard-pro') . '</p>';
     echo '</div>';
     return;
 }
@@ -22,7 +22,7 @@ $customer = edd_get_customer_by('email', $current_user->user_email);
 
 if (!$customer) {
     echo '<div class="bg-yellow-50/80 rounded-2xl p-6 border border-yellow-200/50">';
-    echo '<p class="text-yellow-800">' . __('Customer data not found.', 'edd-customer-dashboard-pro') . '</p>';
+    echo '<p class="text-yellow-800">' . esc_html__('Customer data not found.', 'edd-customer-dashboard-pro') . '</p>';
     echo '</div>';
     return;
 }
@@ -37,7 +37,7 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
 ?>
 
 <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-    🔑 <?php _e('License Management', 'edd-customer-dashboard-pro'); ?>
+    🔑 <?php esc_html_e('License Management', 'edd-customer-dashboard-pro'); ?>
 </h2>
 
 <?php if ($licenses) : ?>
@@ -57,7 +57,7 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
         $activation_limit_reached = ($activation_limit > 0 && $activation_count >= $activation_limit);
         
         // Get price name if available
-        $price_name = __('Standard', 'edd-customer-dashboard-pro');
+        $price_name = esc_html__('Standard', 'edd-customer-dashboard-pro');
         if (!empty($license->price_id) && function_exists('edd_get_price_option_name')) {
             $price_option = edd_get_price_option_name($download_id, $license->price_id);
             if ($price_option) {
@@ -67,55 +67,57 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
     ?>
     
     <!-- License Item -->
-    <div class="<?php echo $license_info['container_class']; ?> rounded-2xl p-6 border">
+    <div class="<?php echo esc_attr($license_info['container_class']); ?> rounded-2xl p-6 border">
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
             <h3 class="text-xl font-semibold text-gray-800"><?php echo esc_html($download_name); ?></h3>
-            <span class="<?php echo $license_info['badge_class']; ?> px-4 py-2 rounded-full text-sm font-medium">
-                <?php echo $license_info['icon'] . ' ' . $license_info['text']; ?>
+            <span class="<?php echo esc_attr($license_info['badge_class']); ?> px-4 py-2 rounded-full text-sm font-medium">
+                <?php echo esc_html($license_info['icon'] . ' ' . $license_info['text']); ?>
             </span>
         </div>
         
         <div class="bg-white/80 rounded-xl p-6">
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2"><?php _e('License Key:', 'edd-customer-dashboard-pro'); ?></label>
+                <label class="block text-sm font-medium text-gray-700 mb-2"><?php esc_html_e('License Key:', 'edd-customer-dashboard-pro'); ?></label>
                 <div 
                     onclick="copyToClipboard('<?php echo esc_js($license->license_key); ?>')"
                     class="bg-gray-100 p-3 rounded-lg font-mono text-sm cursor-pointer hover:bg-gray-200 transition-colors border break-all">
                     <?php echo esc_html($license->license_key); ?>
                 </div>
-                <p class="text-xs text-gray-500 mt-1"><?php _e('Click to copy', 'edd-customer-dashboard-pro'); ?></p>
+                <p class="text-xs text-gray-500 mt-1"><?php esc_html_e('Click to copy', 'edd-customer-dashboard-pro'); ?></p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div>
                     <p class="text-sm text-gray-600">
-                        <strong><?php _e('Purchase Date:', 'edd-customer-dashboard-pro'); ?></strong> 
-                        <?php echo date_i18n(get_option('date_format'), strtotime($license->date_created)); ?>
+                        <strong><?php esc_html_e('Purchase Date:', 'edd-customer-dashboard-pro'); ?></strong> 
+                        <?php echo esc_html(date_i18n(get_option('date_format'), strtotime($license->date_created))); ?>
                     </p>
                     <p class="text-sm text-gray-600">
-                        <strong><?php _e('Expires:', 'edd-customer-dashboard-pro'); ?></strong> 
+                        <strong><?php esc_html_e('Expires:', 'edd-customer-dashboard-pro'); ?></strong> 
                         <?php 
                         if (!empty($license->expiration) && $license->expiration !== '0000-00-00 00:00:00') {
-                            echo date_i18n(get_option('date_format'), strtotime($license->expiration));
+                            echo esc_html(date_i18n(get_option('date_format'), strtotime($license->expiration)));
                         } else {
-                            _e('Never', 'edd-customer-dashboard-pro');
+                            esc_html_e('Never', 'edd-customer-dashboard-pro');
                         }
                         ?>
                     </p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600">
-                        <strong><?php _e('Activations:', 'edd-customer-dashboard-pro'); ?></strong> 
+                        <strong><?php esc_html_e('Activations:', 'edd-customer-dashboard-pro'); ?></strong> 
                         <?php 
                         if ($activation_limit > 0) {
-                            echo $activation_count . ' ' . __('of', 'edd-customer-dashboard-pro') . ' ' . $activation_limit . ' ' . __('sites', 'edd-customer-dashboard-pro');
+                            /* translators: %1$d: current activations, %2$d: activation limit */
+                            printf(esc_html__('%1$d of %2$d sites', 'edd-customer-dashboard-pro'), esc_html(number_format_i18n($activation_count)), esc_html(number_format_i18n($activation_limit)));
                         } else {
-                            echo $activation_count . ' ' . __('of Unlimited sites', 'edd-customer-dashboard-pro');
+                            /* translators: %d: current activations */
+                            printf(esc_html__('%d of Unlimited sites', 'edd-customer-dashboard-pro'), esc_html(number_format_i18n($activation_count)));
                         }
                         ?>
                     </p>
                     <p class="text-sm text-gray-600">
-                        <strong><?php _e('License Type:', 'edd-customer-dashboard-pro'); ?></strong> 
+                        <strong><?php esc_html_e('License Type:', 'edd-customer-dashboard-pro'); ?></strong> 
                         <?php echo esc_html($price_name); ?>
                     </p>
                 </div>
@@ -123,7 +125,7 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
             
             <!-- Site Management -->
             <div class="border-t pt-4">
-                <h4 class="font-medium text-gray-800 mb-3"><?php _e('Manage Sites', 'edd-customer-dashboard-pro'); ?></h4>
+                <h4 class="font-medium text-gray-800 mb-3"><?php esc_html_e('Manage Sites', 'edd-customer-dashboard-pro'); ?></h4>
                 
                 <?php if ($license_info['can_activate'] && !$activation_limit_reached) : ?>
                 <!-- Add Site Form (Same as order-licenses.php) -->
@@ -146,10 +148,10 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
                 <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
                     <p class="text-gray-700 text-sm">
                         <?php 
-                        if ($license_info['text'] === 'Disabled') {
-                            echo '🚫 ' . __('This license has been disabled and cannot be used to activate sites.', 'edd-customer-dashboard-pro');
-                        } elseif ($license_info['text'] === 'Expired') {
-                            echo '⏰ ' . __('This license has expired and cannot be used to activate new sites. Please renew your license.', 'edd-customer-dashboard-pro');
+                        if ($license_info['text'] === esc_html__('Disabled', 'edd-customer-dashboard-pro')) {
+                            echo '🚫 ' . esc_html__('This license has been disabled and cannot be used to activate sites.', 'edd-customer-dashboard-pro');
+                        } elseif ($license_info['text'] === esc_html__('Expired', 'edd-customer-dashboard-pro')) {
+                            echo '⏰ ' . esc_html__('This license has expired and cannot be used to activate new sites. Please renew your license.', 'edd-customer-dashboard-pro');
                         }
                         ?>
                     </p>
@@ -158,19 +160,19 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
                 <?php elseif ($activation_limit_reached) : ?>
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                     <p class="text-blue-800 text-sm">
-                        🔒 <?php _e('Activation limit reached. Deactivate a site first or upgrade your license.', 'edd-customer-dashboard-pro'); ?>
+                        🔒 <?php esc_html_e('Activation limit reached. Deactivate a site first or upgrade your license.', 'edd-customer-dashboard-pro'); ?>
                     </p>
                 </div>
                 <?php endif; ?>
                 
                 <?php if (!empty($active_sites)) : ?>
                 <div class="space-y-2 mb-4">
-                    <h5 class="font-medium text-gray-800"><?php _e('Active Sites', 'edd-customer-dashboard-pro'); ?></h5>
+                    <h5 class="font-medium text-gray-800"><?php esc_html_e('Active Sites', 'edd-customer-dashboard-pro'); ?></h5>
                     <?php foreach ($active_sites as $site) : ?>
                     <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
                         <span class="text-sm break-all flex-1 mr-2"><?php echo esc_url($site->site_name); ?></span>
                         <a href="#" 
-                        onclick="setLicenseTabFlag(); showDeactivateModal('<?php echo esc_js($site->site_name); ?>', '<?php echo wp_nonce_url(
+                        onclick="setLicenseTabFlag(); showDeactivateModal('<?php echo esc_js($site->site_name); ?>', '<?php echo esc_url(wp_nonce_url(
                             add_query_arg(array(
                                 'action' => 'manage_licenses',
                                 'payment_id' => '', // Not needed for main licenses
@@ -180,29 +182,29 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
                                 'license' => $license->ID
                             )), 
                             'edd_deactivate_site_nonce'
-                        ); ?>'); return false;"
+                        )); ?>'); return false;"
                         class="text-red-600 hover:text-red-800 text-sm font-medium px-3 py-1 rounded hover:bg-red-50 transition-colors">
-                            🔓 <?php _e('Deactivate', 'edd-customer-dashboard-pro'); ?>
+                            🔓 <?php esc_html_e('Deactivate', 'edd-customer-dashboard-pro'); ?>
                         </a>
                     </div>
                     <?php endforeach; ?>
                 </div>
                 <?php else : ?>
-                <p class="text-gray-500 italic text-sm mb-4"><?php _e('No sites activated yet.', 'edd-customer-dashboard-pro'); ?></p>
+                <p class="text-gray-500 italic text-sm mb-4"><?php esc_html_e('No sites activated yet.', 'edd-customer-dashboard-pro'); ?></p>
                 <?php endif; ?>
             </div>
             
             <div class="flex flex-wrap gap-3 mt-6 pt-4 border-t">
-                <?php if ($license_info['text'] === 'Expired') : ?>
-                <a href="<?php echo edd_get_checkout_uri(); ?>?edd_action=purchase_renewal&license_id=<?php echo $license->ID; ?>" 
+                <?php if ($license_info['text'] === esc_html__('Expired', 'edd-customer-dashboard-pro')) : ?>
+                <a href="<?php echo esc_url(edd_get_checkout_uri()); ?>?edd_action=purchase_renewal&license_id=<?php echo esc_attr($license->ID); ?>" 
                    class="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-2 rounded-xl hover:shadow-lg transition-all duration-300 text-decoration-none">
-                    🔄 <?php _e('Renew License', 'edd-customer-dashboard-pro'); ?>
+                    🔄 <?php esc_html_e('Renew License', 'edd-customer-dashboard-pro'); ?>
                 </a>
                 <?php endif; ?>
                 
-                <a href="<?php echo get_permalink($license->download_id); ?>" 
+                <a href="<?php echo esc_url(get_permalink($license->download_id)); ?>" 
                    class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-xl hover:shadow-lg transition-all duration-300 text-decoration-none">
-                    ⬆️ <?php _e('Upgrade', 'edd-customer-dashboard-pro'); ?>
+                    ⬆️ <?php esc_html_e('Upgrade', 'edd-customer-dashboard-pro'); ?>
                 </a>
             </div>
         </div>
@@ -216,10 +218,10 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
     <div class="w-24 h-24 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white text-4xl mx-auto mb-6">
         🔑
     </div>
-    <h3 class="text-2xl font-bold text-gray-800 mb-3"><?php _e('No Licenses Found', 'edd-customer-dashboard-pro'); ?></h3>
-    <p class="text-gray-600 mb-6"><?php _e('You don\'t have any software licenses yet. Purchase a licensed product to get started!', 'edd-customer-dashboard-pro'); ?></p>
+    <h3 class="text-2xl font-bold text-gray-800 mb-3"><?php esc_html_e('No Licenses Found', 'edd-customer-dashboard-pro'); ?></h3>
+    <p class="text-gray-600 mb-6"><?php esc_html_e('You don\'t have any software licenses yet. Purchase a licensed product to get started!', 'edd-customer-dashboard-pro'); ?></p>
     <button onclick="window.location.href='<?php echo esc_url(home_url('/downloads/')); ?>'" class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
-        🛒 <?php _e('Browse Licensed Products', 'edd-customer-dashboard-pro'); ?>
+        🛒 <?php esc_html_e('Browse Licensed Products', 'edd-customer-dashboard-pro'); ?>
     </button>
 </div>
 <?php endif; ?>
@@ -231,26 +233,26 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
             <div class="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
                 <span class="text-2xl">🔓</span>
             </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-2"><?php _e('Deactivate Site License', 'edd-customer-dashboard-pro'); ?></h3>
+            <h3 class="text-xl font-bold text-gray-800 mb-2"><?php esc_html_e('Deactivate Site License', 'edd-customer-dashboard-pro'); ?></h3>
             <p class="text-gray-600 mb-6">
-                <?php _e('Are you sure you want to deactivate the license for:', 'edd-customer-dashboard-pro'); ?>
+                <?php esc_html_e('Are you sure you want to deactivate the license for:', 'edd-customer-dashboard-pro'); ?>
                 <br><strong id="modalSiteName" class="text-gray-800"></strong>
             </p>
             <div class="flex gap-3">
                 <button onclick="closeDeactivateModal()" 
                         class="flex-1 bg-gray-100 text-gray-700 px-4 py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors">
-                    <?php _e('Cancel', 'edd-customer-dashboard-pro'); ?>
+                    <?php esc_html_e('Cancel', 'edd-customer-dashboard-pro'); ?>
                 </button>
                 <button onclick="confirmDeactivation()" 
                         class="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
-                    <?php _e('Deactivate', 'edd-customer-dashboard-pro'); ?>
+                    <?php esc_html_e('Deactivate', 'edd-customer-dashboard-pro'); ?>
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<script src="<?php echo EDDCDP_PLUGIN_URL; ?>templates/default/js/license-management.js"></script>
+<script src="<?php echo esc_url(EDDCDP_PLUGIN_URL); ?>templates/default/js/license-management.js"></script>
 
 <script>
 // Set flag when license forms are submitted from main licenses tab

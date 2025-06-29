@@ -135,7 +135,7 @@ class EDDCDP_Shortcodes {
     public function dashboard_shortcode($atts, $content = '', $tag = '') {
         // Prevent multiple renders on same page
         if ($this->rendered) {
-            return '<div class="eddcdp-notice">' . __('Dashboard can only be displayed once per page.', 'edd-customer-dashboard-pro') . '</div>';
+            return '<div class="eddcdp-notice">' . esc_html__('Dashboard can only be displayed once per page.', 'edd-customer-dashboard-pro') . '</div>';
         }
         
         // Check if user is logged in
@@ -248,18 +248,18 @@ class EDDCDP_Shortcodes {
         ?>
         <div class="eddcdp-login-required">
             <div class="eddcdp-login-box">
-                <h3><?php _e('Customer Dashboard', 'edd-customer-dashboard-pro'); ?></h3>
-                <p><?php _e('Please log in to access your customer dashboard.', 'edd-customer-dashboard-pro'); ?></p>
+                <h3><?php esc_html_e('Customer Dashboard', 'edd-customer-dashboard-pro'); ?></h3>
+                <p><?php esc_html_e('Please log in to access your customer dashboard.', 'edd-customer-dashboard-pro'); ?></p>
                 
                 <?php
                 // Use WordPress native login form
                 $login_args = array(
                     'redirect' => get_permalink(),
                     'form_id' => 'eddcdp-loginform',
-                    'label_username' => __('Username or Email', 'edd-customer-dashboard-pro'),
-                    'label_password' => __('Password', 'edd-customer-dashboard-pro'),
-                    'label_remember' => __('Remember Me', 'edd-customer-dashboard-pro'),
-                    'label_log_in' => __('Log In', 'edd-customer-dashboard-pro'),
+                    'label_username' => esc_html__('Username or Email', 'edd-customer-dashboard-pro'),
+                    'label_password' => esc_html__('Password', 'edd-customer-dashboard-pro'),
+                    'label_remember' => esc_html__('Remember Me', 'edd-customer-dashboard-pro'),
+                    'label_log_in' => esc_html__('Log In', 'edd-customer-dashboard-pro'),
                     'remember' => true
                 );
                 
@@ -267,7 +267,7 @@ class EDDCDP_Shortcodes {
                     wp_login_form($login_args);
                 } else {
                     $login_url = wp_login_url(get_permalink());
-                    echo '<p><a href="' . esc_url($login_url) . '" class="eddcdp-login-link">' . __('Log In', 'edd-customer-dashboard-pro') . '</a></p>';
+                    echo '<p><a href="' . esc_url($login_url) . '" class="eddcdp-login-link">' . esc_html__('Log In', 'edd-customer-dashboard-pro') . '</a></p>';
                 }
                 ?>
                 
@@ -275,14 +275,14 @@ class EDDCDP_Shortcodes {
                     <?php if (get_option('users_can_register')) : ?>
                         <p>
                             <a href="<?php echo esc_url(wp_registration_url()); ?>">
-                                <?php _e('Create an account', 'edd-customer-dashboard-pro'); ?>
+                                <?php esc_html_e('Create an account', 'edd-customer-dashboard-pro'); ?>
                             </a>
                         </p>
                     <?php endif; ?>
                     
                     <p>
                         <a href="<?php echo esc_url(wp_lostpassword_url(get_permalink())); ?>">
-                            <?php _e('Lost your password?', 'edd-customer-dashboard-pro'); ?>
+                            <?php esc_html_e('Lost your password?', 'edd-customer-dashboard-pro'); ?>
                         </a>
                     </p>
                 </div>
@@ -346,7 +346,7 @@ class EDDCDP_Shortcodes {
      */
     private function render_access_denied() {
         return '<div class="eddcdp-access-denied">' . 
-               '<p>' . __('You do not have permission to access this dashboard.', 'edd-customer-dashboard-pro') . '</p>' .
+               '<p>' . esc_html__('You do not have permission to access this dashboard.', 'edd-customer-dashboard-pro') . '</p>' .
                '</div>';
     }
     
@@ -356,14 +356,13 @@ class EDDCDP_Shortcodes {
     private function render_template_error() {
         if (current_user_can('manage_options')) {
             return '<div class="eddcdp-error">' .
-                   '<p>' . __('Dashboard template could not be loaded. Please check your template settings.', 'edd-customer-dashboard-pro') . '</p>' .
-                   '<p><a href="' . admin_url('edit.php?post_type=download&page=eddcdp-settings') . '">' . __('Go to Settings', 'edd-customer-dashboard-pro') . '</a></p>' .
+                   '<p>' . esc_html__('Dashboard template could not be loaded. Please check your template settings.', 'edd-customer-dashboard-pro') . '</p>' .
+                   '<p><a href="' . esc_url(admin_url('edit.php?post_type=download&page=eddcdp-settings')) . '">' . esc_html__('Go to Settings', 'edd-customer-dashboard-pro') . '</a></p>' .
                    '</div>';
         }
         
         return '<div class="eddcdp-error">' .
-               '<p>' . __('Dashboard is temporarily unavailable. Please try again later.', 'edd-customer-dashboard-pro') . '</p>' .
+               '<p>' . esc_html__('Dashboard is temporarily unavailable. Please try again later.', 'edd-customer-dashboard-pro') . '</p>' .
                '</div>';
     }
-
 }

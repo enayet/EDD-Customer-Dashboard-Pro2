@@ -44,14 +44,14 @@ class EDDCDP_Templates {
         $template_path = $this->get_template_path($template_name);
         
         if (!$template_path) {
-            $this->render_error(__('Dashboard template not found.', 'edd-customer-dashboard-pro'));
+            $this->render_error(esc_html__('Dashboard template not found.', 'edd-customer-dashboard-pro'));
             return false;
         }
         
         $dashboard_file = $template_path . '/dashboard.php';
         
         if (!file_exists($dashboard_file)) {
-            $this->render_error(__('Dashboard template file is missing.', 'edd-customer-dashboard-pro'));
+            $this->render_error(esc_html__('Dashboard template file is missing.', 'edd-customer-dashboard-pro'));
             return false;
         }
         
@@ -170,7 +170,7 @@ class EDDCDP_Templates {
             if ($config) {
                 if ($is_theme) {
                     $config['source'] = 'theme';
-                    $config['name'] .= ' (Theme)';
+                    $config['name'] .= ' ' . esc_html__('(Theme)', 'edd-customer-dashboard-pro');
                 }
                 $templates[$template_dir] = $config;
             }
@@ -201,10 +201,10 @@ class EDDCDP_Templates {
      */
     private function get_default_template_config($template_name = '') {
         return array(
-            'name' => !empty($template_name) ? ucfirst($template_name) . ' Template' : 'Unknown Template',
-            'description' => 'Custom dashboard template',
+            'name' => !empty($template_name) ? ucfirst($template_name) . ' ' . esc_html__('Template', 'edd-customer-dashboard-pro') : esc_html__('Unknown Template', 'edd-customer-dashboard-pro'),
+            'description' => esc_html__('Custom dashboard template', 'edd-customer-dashboard-pro'),
             'version' => '1.0.0',
-            'author' => 'EDD Customer Dashboard Pro',
+            'author' => esc_html__('EDD Customer Dashboard Pro', 'edd-customer-dashboard-pro'),
             'supports' => array('purchases', 'downloads', 'licenses', 'wishlist', 'analytics', 'support'),
             'requirements' => array(
                 'edd_version' => '3.0.0',
@@ -259,7 +259,7 @@ class EDDCDP_Templates {
             );
             
             // Localize script
-            wp_localize_script('eddcdp-template-' . $template_name, 'edd-customer-dashboard-pro', array(
+            wp_localize_script('eddcdp-template-' . $template_name, 'eddcdp', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('eddcdp_ajax_nonce'),
                 'strings' => $this->get_js_strings()
@@ -342,16 +342,16 @@ class EDDCDP_Templates {
      */
     private function get_js_strings() {
         return array(
-            'download_success' => __('Download started successfully!', 'edd-customer-dashboard-pro'),
-            'license_copied' => __('License key copied to clipboard!', 'edd-customer-dashboard-pro'),
-            'copy_failed' => __('Failed to copy to clipboard.', 'edd-customer-dashboard-pro'),
-            'site_url_required' => __('Please enter a site URL.', 'edd-customer-dashboard-pro'),
-            'activation_success' => __('Site activated successfully!', 'edd-customer-dashboard-pro'),
-            'deactivation_success' => __('Site deactivated successfully!', 'edd-customer-dashboard-pro'),
-            'confirm_deactivate' => __('Are you sure you want to deactivate this site?', 'edd-customer-dashboard-pro'),
-            'confirm_remove_wishlist' => __('Are you sure you want to remove this item from your wishlist?', 'edd-customer-dashboard-pro'),
-            'cart_success' => __('Added to cart successfully!', 'edd-customer-dashboard-pro'),
-            'general_error' => __('An error occurred. Please try again.', 'edd-customer-dashboard-pro')
+            'download_success' => esc_html__('Download started successfully!', 'edd-customer-dashboard-pro'),
+            'license_copied' => esc_html__('License key copied to clipboard!', 'edd-customer-dashboard-pro'),
+            'copy_failed' => esc_html__('Failed to copy to clipboard.', 'edd-customer-dashboard-pro'),
+            'site_url_required' => esc_html__('Please enter a site URL.', 'edd-customer-dashboard-pro'),
+            'activation_success' => esc_html__('Site activated successfully!', 'edd-customer-dashboard-pro'),
+            'deactivation_success' => esc_html__('Site deactivated successfully!', 'edd-customer-dashboard-pro'),
+            'confirm_deactivate' => esc_html__('Are you sure you want to deactivate this site?', 'edd-customer-dashboard-pro'),
+            'confirm_remove_wishlist' => esc_html__('Are you sure you want to remove this item from your wishlist?', 'edd-customer-dashboard-pro'),
+            'cart_success' => esc_html__('Added to cart successfully!', 'edd-customer-dashboard-pro'),
+            'general_error' => esc_html__('An error occurred. Please try again.', 'edd-customer-dashboard-pro')
         );
     }
     
@@ -371,6 +371,4 @@ class EDDCDP_Templates {
         delete_transient('eddcdp_available_templates');
         $this->template_cache = array();
     }
-    
-
 }

@@ -17,12 +17,12 @@ function dashboard() {
         newSiteUrl: '',
         
         tabs: [
-            { id: 'purchases', label: '📦 <?php _e('Purchases', 'edd-customer-dashboard-pro'); ?>' },
-            { id: 'downloads', label: '⬇️ <?php _e('Downloads', 'edd-customer-dashboard-pro'); ?>' },
-            { id: 'licenses', label: '🔑 <?php _e('Licenses', 'edd-customer-dashboard-pro'); ?>' },
-            { id: 'wishlist', label: '❤️ <?php _e('Wishlist', 'edd-customer-dashboard-pro'); ?>' },
-            { id: 'analytics', label: '📊 <?php _e('Analytics', 'edd-customer-dashboard-pro'); ?>' },
-            { id: 'support', label: '💬 <?php _e('Support', 'edd-customer-dashboard-pro'); ?>' }
+            { id: 'purchases', label: '📦 <?php esc_html_e('Purchases', 'edd-customer-dashboard-pro'); ?>' },
+            { id: 'downloads', label: '⬇️ <?php esc_html_e('Downloads', 'edd-customer-dashboard-pro'); ?>' },
+            { id: 'licenses', label: '🔑 <?php esc_html_e('Licenses', 'edd-customer-dashboard-pro'); ?>' },
+            { id: 'wishlist', label: '❤️ <?php esc_html_e('Wishlist', 'edd-customer-dashboard-pro'); ?>' },
+            { id: 'analytics', label: '📊 <?php esc_html_e('Analytics', 'edd-customer-dashboard-pro'); ?>' },
+            { id: 'support', label: '💬 <?php esc_html_e('Support', 'edd-customer-dashboard-pro'); ?>' }
         ],
         
         downloadFile(productId) {

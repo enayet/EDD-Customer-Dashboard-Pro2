@@ -169,7 +169,8 @@ $public_wishlist_urls = $wishlist_handler->get_public_wishlist_urls();
 function copyToClipboard(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
-            showNotification('<?php esc_js_e('Link copied to clipboard!', 'edd-customer-dashboard-pro'); ?>', 'success');
+            showNotification('Link copied to clipboard!', 'success');
+            
         }).catch(() => {
             fallbackCopy(text);
         });
@@ -188,9 +189,9 @@ function fallbackCopy(text) {
     
     try {
         document.execCommand('copy');
-        showNotification('<?php esc_js_e('Link copied to clipboard!', 'edd-customer-dashboard-pro'); ?>', 'success');
+        showNotification('Link copied to clipboard!', 'success');
     } catch (err) {
-        showNotification('<?php esc_js_e('Failed to copy link.', 'edd-customer-dashboard-pro'); ?>', 'error');
+        showNotification('Failed to copy link.', 'error');
     }
     
     document.body.removeChild(textArea);

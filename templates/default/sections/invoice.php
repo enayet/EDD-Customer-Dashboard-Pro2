@@ -33,14 +33,20 @@ if (isset($_GET['eddcdp_invoice_form']) && isset($_GET['payment_id'])) :
             </a>
 
             <div class="text-sm text-gray-600">
-                <?php printf(__('Update Invoice for Order #%s', 'edd-customer-dashboard-pro'), $order->get_number()); ?>
+                <?php 
+                /* translators: %s: Order number */
+                printf(__('Update Invoice for Order #%s', 'edd-customer-dashboard-pro'), $order->get_number()); 
+                ?>
             </div>
         </div>
 
         <!-- Invoice Form Header -->
         <div class="bg-white/80 backdrop-blur-xl rounded-2xl p-6 mb-6 shadow-lg border border-white/20">
             <h2 class="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-                📄 <?php printf(__('Update Invoice Details - Order #%s', 'edd-customer-dashboard-pro'), $order->get_number()); ?>
+                📄 <?php 
+                /* translators: %s: Order number */
+                printf(__('Update Invoice Details - Order #%s', 'edd-customer-dashboard-pro'), $order->get_number()); 
+                ?>
             </h2>
             <p class="text-gray-600">
                 <?php _e('Update your billing details and generate a new invoice', 'edd-customer-dashboard-pro'); ?>

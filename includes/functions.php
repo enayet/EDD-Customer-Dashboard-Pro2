@@ -187,15 +187,13 @@ function eddcdp_sanitize_license_url($url) {
 function eddcdp_format_activation_count($activation_count, $activation_limit) {
     if ($activation_limit > 0) {
         /* translators: %1$d: current activation count, %2$d: activation limit */
-        return sprintf(
-            esc_html__('%1$d of %2$d sites', 'edd-customer-dashboard-pro'),
+        return sprintf(esc_html__('%1$d of %2$d sites', 'edd-customer-dashboard-pro'),
             $activation_count,
             $activation_limit
         );
     } else {
         /* translators: %d: current activation count */
-        return sprintf(
-            esc_html__('%d of unlimited sites', 'edd-customer-dashboard-pro'),
+        return sprintf(esc_html__('%d of unlimited sites', 'edd-customer-dashboard-pro'),
             $activation_count
         );
     }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Header - Updated with Fullscreen Exit
+ * Template Header - Proper Asset Loading
  */
 
 // Prevent direct access
@@ -11,16 +11,12 @@ if (!defined('ABSPATH')) {
 // Check if we're in fullscreen mode
 $is_fullscreen = defined('EDDCDP_IS_FULLSCREEN') && EDDCDP_IS_FULLSCREEN;
 
-
-add_action('wp_enqueue_scripts', 'enqueue_tailwind_cdn', 100);
-
-function enqueue_tailwind_cdn() {
-    wp_enqueue_script('tailwindcdn', 'https://cdn.tailwindcss.com', [], null, false);
-    wp_enqueue_script('alpinecdn', 'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js', [], null, true);
-}
+// Get template info
+$template_name = 'default';
+$template_url = EDDCDP_PLUGIN_URL . 'templates/' . $template_name . '/';
 
 if ($is_fullscreen) {
-    // Fullscreen mode - complete HTML
+    // Fullscreen mode - complete HTML with direct asset loading
     ?>
     <!DOCTYPE html>
     <html <?php language_attributes(); ?>>
@@ -28,76 +24,95 @@ if ($is_fullscreen) {
         <meta charset="<?php bloginfo('charset'); ?>">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title><?php esc_html_e('Customer Dashboard', 'edd-customer-dashboard-pro'); ?> - <?php bloginfo('name'); ?></title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        
+        <!-- Framework CSS (Tailwind) -->
+        <link rel="stylesheet" href="<?php echo esc_url($template_url . 'assets/framework.css'); ?>?v=<?php echo esc_attr(EDDCDP_VERSION); ?>">
+        
+        <!-- Template CSS -->
+        <link rel="stylesheet" href="<?php echo esc_url($template_url . 'style.css'); ?>?v=<?php echo esc_attr(EDDCDP_VERSION); ?>">
+        
+        <!-- Alpine.js -->
+        <script defer src="<?php echo esc_url($template_url . 'assets/alpine.min.js'); ?>?v=<?php echo esc_attr(EDDCDP_VERSION); ?>"></script>
+        
+        <!-- Tailwind Config (after framework loads) -->
         <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        animation: {
-                            'fade-in': 'fadeIn 0.5s ease-in-out',
-                            'slide-up': 'slideUp 0.4s ease-out',
-                            'pulse-slow': 'pulse 3s infinite',
-                        },
-                        keyframes: {
-                            fadeIn: {
-                                '0%': { opacity: '0', transform: 'translateY(10px)' },
-                                '100%': { opacity: '1', transform: 'translateY(0)' }
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof tailwind !== 'undefined') {
+                tailwind.config = {
+                    theme: {
+                        extend: {
+                            animation: {
+                                'fade-in': 'fadeIn 0.5s ease-in-out',
+                                'slide-up': 'slideUp 0.4s ease-out'
                             },
-                            slideUp: {
-                                '0%': { opacity: '0', transform: 'translateY(20px)' },
-                                '100%': { opacity: '1', transform: 'translateY(0)' }
+                            keyframes: {
+                                fadeIn: {
+                                    '0%': { opacity: '0', transform: 'translateY(10px)' },
+                                    '100%': { opacity: '1', transform: 'translateY(0)' }
+                                },
+                                slideUp: {
+                                    '0%': { opacity: '0', transform: 'translateY(20px)' },
+                                    '100%': { opacity: '1', transform: 'translateY(0)' }
+                                }
                             }
                         }
                     }
                 }
             }
+        });
         </script>
-        <?php 
-        // Enqueue template CSS
-        $settings = get_option('eddcdp_settings', array());
-        $active_template = isset($settings['active_template']) ? $settings['active_template'] : 'default';
-        $template_css = EDDCDP_PLUGIN_URL . 'templates/' . $active_template . '/style.css';
-        if (file_exists(EDDCDP_PLUGIN_DIR . 'templates/' . $active_template . '/style.css')) :
-        ?>
-        <link rel="stylesheet" href="<?php echo $template_css; ?>?v=<?php echo EDDCDP_VERSION; ?>">
-        <?php endif; ?>
     </head>
     <body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen eddcdp-fullscreen-mode">
         
         <!-- Fullscreen Exit Button -->
-        <?php EDDCDP_Fullscreen_Helper::render_exit_button(); ?>
+        <a href="<?php echo esc_url(wp_get_referer() ?: home_url('/')); ?>" 
+           class="eddcdp-fullscreen-exit">
+            <?php esc_html_e('← Exit Dashboard', 'edd-customer-dashboard-pro'); ?>
+        </a>
         
     <?php
 } else {
-    // Embedded mode - just scripts, styles, and wrapper
+    // Embedded mode - Output assets directly since wp_enqueue_scripts already fired
     ?>
-
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Framework CSS (Tailwind) -->
+<!--    <link rel="stylesheet" href="<?php echo esc_url($template_url . 'assets/framework.css'); ?>?v=<?php echo esc_attr(EDDCDP_VERSION); ?>">-->
+        <script src="https://cdn.tailwindcss.com/"></script>
+    <!-- Template CSS -->
+    <link rel="stylesheet" href="<?php echo esc_url($template_url . 'style.css'); ?>?v=<?php echo esc_attr(EDDCDP_VERSION); ?>">
+    
+    <!-- Alpine.js -->
+    <script defer src="<?php echo esc_url($template_url . 'assets/alpine.min.js'); ?>?v=<?php echo esc_attr(EDDCDP_VERSION); ?>"></script>
+    
+    <!-- Tailwind Config (wait for framework to load) -->
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    animation: {
-                        'fade-in': 'fadeIn 0.5s ease-in-out',
-                        'slide-up': 'slideUp 0.4s ease-out',
-                        'pulse-slow': 'pulse 3s infinite',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(10px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' }
-                        },
-                        slideUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wait a bit for Tailwind to load
+        setTimeout(function() {
+            if (typeof tailwind !== 'undefined') {
+                tailwind.config = {
+                    theme: {
+                        extend: {
+                            animation: {
+                                'fade-in': 'fadeIn 0.5s ease-in-out',
+                                'slide-up': 'slideUp 0.4s ease-out'
+                            },
+                            keyframes: {
+                                fadeIn: {
+                                    '0%': { opacity: '0', transform: 'translateY(10px)' },
+                                    '100%': { opacity: '1', transform: 'translateY(0)' }
+                                },
+                                slideUp: {
+                                    '0%': { opacity: '0', transform: 'translateY(20px)' },
+                                    '100%': { opacity: '1', transform: 'translateY(0)' }
+                                }
+                            }
                         }
                     }
                 }
             }
-        }
+        }, 100);
+    });
     </script>
     
     <div class="eddcdp-dashboard-wrapper">

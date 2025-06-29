@@ -116,7 +116,7 @@ $is_fullscreen = defined('EDDCDP_IS_FULLSCREEN') && EDDCDP_IS_FULLSCREEN;
 </div>
 
 <!-- Dashboard JavaScript -->
-<?php include 'sections/script.php'; ?>
+<?php //include 'sections/script.php'; ?>
 
 <script>
 // Simplified Alpine.js dashboard component

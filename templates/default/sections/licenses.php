@@ -252,7 +252,7 @@ $licenses = edd_software_licensing()->licenses_db->get_licenses(array(
     </div>
 </div>
 
-<script src="<?php echo esc_url(EDDCDP_PLUGIN_URL); ?>templates/default/js/license-management.js"></script>
+<script src="<?php echo esc_url(EDDCDP_PLUGIN_URL); ?>templates/default/assets/license-management.js"></script>
 
 <script>
 // Set flag when license forms are submitted from main licenses tab

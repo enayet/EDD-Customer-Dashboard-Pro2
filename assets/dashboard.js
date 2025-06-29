@@ -3,7 +3,7 @@
  */
 
 // Alpine.js dashboard component
-function dashboard() {
+function dashboard2() {
     return {
         activeTab: 'purchases',
         downloading: null,

@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('EDDCDP_VERSION', '1.0.7');
+define('EDDCDP_VERSION', '1.0.8');
 define('EDDCDP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('EDDCDP_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('EDDCDP_PLUGIN_FILE', __FILE__);
@@ -158,7 +158,7 @@ final class EDD_Customer_Dashboard_Pro {
         // Enqueue common styles
         wp_enqueue_style(
             'eddcdp-common',
-            EDDCDP_PLUGIN_URL . 'assets/css/common.css',
+            EDDCDP_PLUGIN_URL . 'assets/css/admin.css',
             array(),
             EDDCDP_VERSION
         );
@@ -166,7 +166,7 @@ final class EDD_Customer_Dashboard_Pro {
         // Enqueue common scripts
         wp_enqueue_script(
             'eddcdp-common',
-            EDDCDP_PLUGIN_URL . 'assets/js/common.js',
+            EDDCDP_PLUGIN_URL . 'assets/dashboard.js',
             array('jquery'),
             EDDCDP_VERSION,
             true

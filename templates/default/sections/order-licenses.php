@@ -275,4 +275,4 @@ if (empty($order_licenses)) {
     </div>
 </div>
 
-<script src="<?php echo esc_url(EDDCDP_PLUGIN_URL); ?>templates/default/js/license-management.js"></script>
+<script src="<?php echo esc_url(EDDCDP_PLUGIN_URL); ?>templates/default/assets/license-management.js"></script>

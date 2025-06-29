@@ -11,6 +11,14 @@ if (!defined('ABSPATH')) {
 // Check if we're in fullscreen mode
 $is_fullscreen = defined('EDDCDP_IS_FULLSCREEN') && EDDCDP_IS_FULLSCREEN;
 
+
+add_action('wp_enqueue_scripts', 'enqueue_tailwind_cdn', 100);
+
+function enqueue_tailwind_cdn() {
+    wp_enqueue_script('tailwindcdn', 'https://cdn.tailwindcss.com', [], null, false);
+    wp_enqueue_script('alpinecdn', 'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js', [], null, true);
+}
+
 if ($is_fullscreen) {
     // Fullscreen mode - complete HTML
     ?>
@@ -19,7 +27,7 @@ if ($is_fullscreen) {
     <head>
         <meta charset="<?php bloginfo('charset'); ?>">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title><?php _e('Customer Dashboard', 'eddcdp'); ?> - <?php bloginfo('name'); ?></title>
+        <title><?php _e('Customer Dashboard', 'edd-customer-dashboard-pro'); ?> - <?php bloginfo('name'); ?></title>
         <script src="https://cdn.tailwindcss.com"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
         <script>
@@ -64,45 +72,7 @@ if ($is_fullscreen) {
 } else {
     // Embedded mode - just scripts, styles, and wrapper
     ?>
-    <style>
-    /* Enhanced WordPress override styles for embedded mode */
-    .eddcdp-dashboard-wrapper,
-    .eddcdp-dashboard-wrapper * {
-        max-width: none !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-    
-    .eddcdp-dashboard-wrapper .is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
-        max-width: none !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-    
-    /* Typography reset for embedded mode */
-    .eddcdp-dashboard h1,
-    .eddcdp-dashboard h2,
-    .eddcdp-dashboard h3,
-    .eddcdp-dashboard h4,
-    .eddcdp-dashboard h5,
-    .eddcdp-dashboard h6 {
-        font-family: inherit !important;
-        font-weight: inherit !important;
-        line-height: inherit !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        color: inherit !important;
-    }
-    
-    .eddcdp-dashboard p,
-    .eddcdp-dashboard span,
-    .eddcdp-dashboard div {
-        font-family: inherit !important;
-        line-height: inherit !important;
-        margin: 0 !important;
-        color: inherit !important;
-    }
-    </style>
+
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>

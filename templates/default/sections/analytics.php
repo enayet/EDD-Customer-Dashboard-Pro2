@@ -14,7 +14,7 @@ $customer = edd_get_customer_by('email', $current_user->user_email);
 
 if (!$customer) {
     echo '<div class="bg-yellow-50/80 rounded-2xl p-6 border border-yellow-200/50">';
-    echo '<p class="text-yellow-800">' . __('Customer data not found.', 'eddcdp') . '</p>';
+    echo '<p class="text-yellow-800">' . __('Customer data not found.', 'edd-customer-dashboard-pro') . '</p>';
     echo '</div>';
     return;
 }
@@ -76,7 +76,7 @@ if ($first_order) {
 ?>
 
 <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-    📊 <?php _e('Purchase Analytics', 'eddcdp'); ?>
+    📊 <?php _e('Purchase Analytics', 'edd-customer-dashboard-pro'); ?>
 </h2>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -84,7 +84,7 @@ if ($first_order) {
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-3xl font-bold mb-1"><?php echo edd_currency_filter(edd_format_amount($total_spent)); ?></p>
-                <p class="text-green-100 font-medium"><?php _e('Total Spent', 'eddcdp'); ?></p>
+                <p class="text-green-100 font-medium"><?php _e('Total Spent', 'edd-customer-dashboard-pro'); ?></p>
             </div>
             <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl">
                 💰
@@ -96,7 +96,7 @@ if ($first_order) {
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-3xl font-bold mb-1"><?php echo $avg_downloads_per_product; ?></p>
-                <p class="text-blue-100 font-medium"><?php _e('Avg Downloads/Product', 'eddcdp'); ?></p>
+                <p class="text-blue-100 font-medium"><?php _e('Avg Downloads/Product', 'edd-customer-dashboard-pro'); ?></p>
             </div>
             <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl">
                 📈
@@ -108,12 +108,12 @@ if ($first_order) {
 <!-- Spending Overview -->
 <?php if (!empty($monthly_spending)) : ?>
 <div class="bg-gray-50/80 rounded-2xl p-6 border border-gray-200/50 mb-8">
-    <h3 class="text-lg font-semibold text-gray-800 mb-4"><?php _e('Spending Overview', 'eddcdp'); ?></h3>
+    <h3 class="text-lg font-semibold text-gray-800 mb-4"><?php _e('Spending Overview', 'edd-customer-dashboard-pro'); ?></h3>
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Monthly Spending -->
         <div>
-            <h4 class="text-md font-medium text-gray-700 mb-3"><?php _e('Recent Monthly Spending', 'eddcdp'); ?></h4>
+            <h4 class="text-md font-medium text-gray-700 mb-3"><?php _e('Recent Monthly Spending', 'edd-customer-dashboard-pro'); ?></h4>
             <div class="space-y-2">
                 <?php 
                 $recent_months = array_slice($monthly_spending, -6, 6, true);
@@ -130,7 +130,7 @@ if ($first_order) {
         
         <!-- Yearly Spending -->
         <div>
-            <h4 class="text-md font-medium text-gray-700 mb-3"><?php _e('Yearly Totals', 'eddcdp'); ?></h4>
+            <h4 class="text-md font-medium text-gray-700 mb-3"><?php _e('Yearly Totals', 'edd-customer-dashboard-pro'); ?></h4>
             <div class="space-y-2">
                 <?php foreach ($yearly_spending as $year => $amount) : ?>
                 <div class="flex justify-between items-center bg-white p-3 rounded-lg">
@@ -146,29 +146,29 @@ if ($first_order) {
 
 <!-- Quick Stats -->
 <div class="bg-gray-50/80 rounded-2xl p-6 border border-gray-200/50 mb-8">
-    <h3 class="text-lg font-semibold text-gray-800 mb-4"><?php _e('Quick Stats', 'eddcdp'); ?></h3>
+    <h3 class="text-lg font-semibold text-gray-800 mb-4"><?php _e('Quick Stats', 'edd-customer-dashboard-pro'); ?></h3>
     
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="text-center">
             <div class="text-2xl font-bold text-gray-800"><?php echo $total_purchases; ?></div>
-            <div class="text-sm text-gray-600"><?php _e('Orders', 'eddcdp'); ?></div>
+            <div class="text-sm text-gray-600"><?php _e('Orders', 'edd-customer-dashboard-pro'); ?></div>
         </div>
         
         <div class="text-center">
             <div class="text-2xl font-bold text-gray-800"><?php echo $total_downloads; ?></div>
-            <div class="text-sm text-gray-600"><?php _e('Downloads', 'eddcdp'); ?></div>
+            <div class="text-sm text-gray-600"><?php _e('Downloads', 'edd-customer-dashboard-pro'); ?></div>
         </div>
         
         <div class="text-center">
             <div class="text-2xl font-bold text-gray-800">
                 <?php echo $total_purchases > 0 ? edd_currency_filter(edd_format_amount($total_spent / $total_purchases)) : edd_currency_filter('0'); ?>
             </div>
-            <div class="text-sm text-gray-600"><?php _e('Avg Order', 'eddcdp'); ?></div>
+            <div class="text-sm text-gray-600"><?php _e('Avg Order', 'edd-customer-dashboard-pro'); ?></div>
         </div>
         
         <div class="text-center">
             <div class="text-2xl font-bold text-gray-800"><?php echo $days_active; ?></div>
-            <div class="text-sm text-gray-600"><?php _e('Days Active', 'eddcdp'); ?></div>
+            <div class="text-sm text-gray-600"><?php _e('Days Active', 'edd-customer-dashboard-pro'); ?></div>
         </div>
     </div>
 </div>

@@ -29,27 +29,27 @@ if (isset($_GET['eddcdp_invoice_form']) && isset($_GET['payment_id'])) :
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <a href="<?php echo remove_query_arg(array('eddcdp_invoice_form', 'payment_id', 'invoice')); ?>" 
                class="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium">
-                ← <?php _e('Back to Dashboard', 'eddcdp'); ?>
+                ← <?php _e('Back to Dashboard', 'edd-customer-dashboard-pro'); ?>
             </a>
 
             <div class="text-sm text-gray-600">
-                <?php printf(__('Update Invoice for Order #%s', 'eddcdp'), $order->get_number()); ?>
+                <?php printf(__('Update Invoice for Order #%s', 'edd-customer-dashboard-pro'), $order->get_number()); ?>
             </div>
         </div>
 
         <!-- Invoice Form Header -->
         <div class="bg-white/80 backdrop-blur-xl rounded-2xl p-6 mb-6 shadow-lg border border-white/20">
             <h2 class="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-                📄 <?php printf(__('Update Invoice Details - Order #%s', 'eddcdp'), $order->get_number()); ?>
+                📄 <?php printf(__('Update Invoice Details - Order #%s', 'edd-customer-dashboard-pro'), $order->get_number()); ?>
             </h2>
             <p class="text-gray-600">
-                <?php _e('Update your billing details and generate a new invoice', 'eddcdp'); ?>
+                <?php _e('Update your billing details and generate a new invoice', 'edd-customer-dashboard-pro'); ?>
             </p>
         </div>
 
         <!-- Invoice Form Section -->
         <div class="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/20">
-            <h3 class="text-xl font-semibold text-gray-800 mb-6"><?php _e('Billing Information', 'eddcdp'); ?></h3>
+            <h3 class="text-xl font-semibold text-gray-800 mb-6"><?php _e('Billing Information', 'edd-customer-dashboard-pro'); ?></h3>
 
             <?php
 
@@ -68,12 +68,12 @@ if (isset($_GET['eddcdp_invoice_form']) && isset($_GET['payment_id'])) :
 <!-- Invalid Invoice Access -->
 <div class="p-8">
     <div class="bg-red-50/80 rounded-2xl p-6 border border-red-200/50">
-        <h3 class="text-lg font-semibold text-red-800 mb-2"><?php _e('Access Denied', 'eddcdp'); ?></h3>
-        <p class="text-red-700"><?php _e('You do not have permission to view this invoice or the invoice is invalid.', 'eddcdp'); ?></p>
+        <h3 class="text-lg font-semibold text-red-800 mb-2"><?php _e('Access Denied', 'edd-customer-dashboard-pro'); ?></h3>
+        <p class="text-red-700"><?php _e('You do not have permission to view this invoice or the invoice is invalid.', 'edd-customer-dashboard-pro'); ?></p>
         <div class="mt-4">
             <a href="<?php echo remove_query_arg(array('eddcdp_invoice_form', 'payment_id')); ?>" 
                class="text-indigo-600 hover:text-indigo-800 font-medium">
-                ← <?php _e('Back to Dashboard', 'eddcdp'); ?>
+                ← <?php _e('Back to Dashboard', 'edd-customer-dashboard-pro'); ?>
             </a>
         </div>
     </div>

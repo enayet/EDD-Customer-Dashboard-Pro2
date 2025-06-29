@@ -5,7 +5,7 @@
  * Description: Custom dashboard templates for Easy Digital Downloads customer area
  * Version: 1.0.0
  * Author: Your Name
- * Text Domain: eddcdp
+ * Text Domain: edd-customer-dashboard-pro
  * Requires at least: 5.0
  * Requires PHP: 7.4
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('EDDCDP_VERSION', '1.0.5');
+define('EDDCDP_VERSION', '1.0.7');
 define('EDDCDP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('EDDCDP_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('EDDCDP_PLUGIN_FILE', __FILE__);
@@ -71,18 +71,18 @@ final class EDD_Customer_Dashboard_Pro {
         
         // Check PHP version
         if (version_compare(PHP_VERSION, '7.4', '<')) {
-            $errors[] = sprintf(__('EDD Customer Dashboard Pro requires PHP 7.4 or higher. You are running version %s.', 'eddcdp'), PHP_VERSION);
+            $errors[] = sprintf(__('EDD Customer Dashboard Pro requires PHP 7.4 or higher. You are running version %s.', 'edd-customer-dashboard-pro'), PHP_VERSION);
         }
         
         // Check WordPress version
         global $wp_version;
         if (version_compare($wp_version, '5.0', '<')) {
-            $errors[] = sprintf(__('EDD Customer Dashboard Pro requires WordPress 5.0 or higher. You are running version %s.', 'eddcdp'), $wp_version);
+            $errors[] = sprintf(__('EDD Customer Dashboard Pro requires WordPress 5.0 or higher. You are running version %s.', 'edd-customer-dashboard-pro'), $wp_version);
         }
         
         // Check EDD version
         if (defined('EDD_VERSION') && version_compare(EDD_VERSION, '2.8', '<')) {
-            $errors[] = sprintf(__('EDD Customer Dashboard Pro requires Easy Digital Downloads 2.8 or higher. You are running version %s.', 'eddcdp'), EDD_VERSION);
+            $errors[] = sprintf(__('EDD Customer Dashboard Pro requires Easy Digital Downloads 2.8 or higher. You are running version %s.', 'edd-customer-dashboard-pro'), EDD_VERSION);
         }
         
         if (!empty($errors)) {
@@ -98,7 +98,7 @@ final class EDD_Customer_Dashboard_Pro {
     }
     
     private function load_textdomain() {
-        load_plugin_textdomain('eddcdp', false, dirname(plugin_basename(__FILE__)) . '/languages/');
+        load_plugin_textdomain('edd-customer-dashboard-pro', false, dirname(plugin_basename(__FILE__)) . '/languages/');
     }
     
     private function includes() {
@@ -118,7 +118,7 @@ final class EDD_Customer_Dashboard_Pro {
             if (file_exists($file_path)) {
                 require_once $file_path;
             } else {
-                wp_die(sprintf(__('Required file missing: %s', 'eddcdp'), $file));
+                wp_die(sprintf(__('Required file missing: %s', 'edd-customer-dashboard-pro'), $file));
             }
         }
     }
@@ -169,15 +169,15 @@ final class EDD_Customer_Dashboard_Pro {
         );
         
         // Localize script
-        wp_localize_script('eddcdp-common', 'eddcdp', array(
+        wp_localize_script('eddcdp-common', 'edd-customer-dashboard-pro', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('eddcdp_ajax_nonce'),
             'is_user_logged_in' => is_user_logged_in(),
             'checkout_url' => edd_get_checkout_uri(),
             'strings' => array(
-                'loading' => __('Loading...', 'eddcdp'),
-                'error' => __('An error occurred. Please try again.', 'eddcdp'),
-                'success' => __('Success!', 'eddcdp')
+                'loading' => __('Loading...', 'edd-customer-dashboard-pro'),
+                'error' => __('An error occurred. Please try again.', 'edd-customer-dashboard-pro'),
+                'success' => __('Success!', 'edd-customer-dashboard-pro')
             )
         ));
     }
@@ -235,7 +235,7 @@ final class EDD_Customer_Dashboard_Pro {
     }
     
     public function plugin_action_links($links) {
-        $settings_link = '<a href="' . admin_url('edit.php?post_type=download&page=eddcdp-settings') . '">' . __('Settings', 'eddcdp') . '</a>';
+        $settings_link = '<a href="' . admin_url('edit.php?post_type=download&page=eddcdp-settings') . '">' . __('Settings', 'edd-customer-dashboard-pro') . '</a>';
         array_unshift($links, $settings_link);
         return $links;
     }
@@ -243,7 +243,7 @@ final class EDD_Customer_Dashboard_Pro {
     public function activate() {
         // Check requirements on activation
         if (!$this->is_edd_active()) {
-            wp_die(__('EDD Customer Dashboard Pro requires Easy Digital Downloads to be installed and active.', 'eddcdp'));
+            wp_die(__('EDD Customer Dashboard Pro requires Easy Digital Downloads to be installed and active.', 'edd-customer-dashboard-pro'));
         }
         
         // Create default settings
@@ -293,10 +293,10 @@ final class EDD_Customer_Dashboard_Pro {
     
     public function edd_missing_notice() {
         echo '<div class="notice notice-error">';
-        echo '<p><strong>' . __('EDD Customer Dashboard Pro', 'eddcdp') . '</strong></p>';
-        echo '<p>' . __('This plugin requires Easy Digital Downloads to be installed and active.', 'eddcdp') . '</p>';
+        echo '<p><strong>' . __('EDD Customer Dashboard Pro', 'edd-customer-dashboard-pro') . '</strong></p>';
+        echo '<p>' . __('This plugin requires Easy Digital Downloads to be installed and active.', 'edd-customer-dashboard-pro') . '</p>';
         if (current_user_can('install_plugins')) {
-            echo '<p><a href="' . admin_url('plugin-install.php?s=easy+digital+downloads&tab=search&type=term') . '" class="button button-primary">' . __('Install Easy Digital Downloads', 'eddcdp') . '</a></p>';
+            echo '<p><a href="' . admin_url('plugin-install.php?s=easy+digital+downloads&tab=search&type=term') . '" class="button button-primary">' . __('Install Easy Digital Downloads', 'edd-customer-dashboard-pro') . '</a></p>';
         }
         echo '</div>';
     }

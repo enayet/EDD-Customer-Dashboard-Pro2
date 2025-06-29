@@ -126,22 +126,22 @@ function dashboard() {
         
         tabs: [
             <?php if (!empty($enabled_sections['purchases'])) : ?>
-            { id: 'purchases', label: '📦 <?php _e('Purchases', 'eddcdp'); ?>' },
+            { id: 'purchases', label: '📦 <?php _e('Purchases', 'edd-customer-dashboard-pro'); ?>' },
             <?php endif; ?>
             <?php if (!empty($enabled_sections['downloads'])) : ?>
-            { id: 'downloads', label: '⬇️ <?php _e('Downloads', 'eddcdp'); ?>' },
+            { id: 'downloads', label: '⬇️ <?php _e('Downloads', 'edd-customer-dashboard-pro'); ?>' },
             <?php endif; ?>
             <?php if (!empty($enabled_sections['licenses'])) : ?>
-            { id: 'licenses', label: '🔑 <?php _e('Licenses', 'eddcdp'); ?>' },
+            { id: 'licenses', label: '🔑 <?php _e('Licenses', 'edd-customer-dashboard-pro'); ?>' },
             <?php endif; ?>
             <?php if (!empty($enabled_sections['wishlist'])) : ?>
-            { id: 'wishlist', label: '❤️ <?php _e('Wishlist', 'eddcdp'); ?>' },
+            { id: 'wishlist', label: '❤️ <?php _e('Wishlist', 'edd-customer-dashboard-pro'); ?>' },
             <?php endif; ?>
             <?php if (!empty($enabled_sections['analytics'])) : ?>
-            { id: 'analytics', label: '📊 <?php _e('Reports', 'eddcdp'); ?>' },
+            { id: 'analytics', label: '📊 <?php _e('Reports', 'edd-customer-dashboard-pro'); ?>' },
             <?php endif; ?>
             <?php if (!empty($enabled_sections['support'])) : ?>
-            { id: 'support', label: '💬 <?php _e('Support', 'eddcdp'); ?>' }
+            { id: 'support', label: '💬 <?php _e('Support', 'edd-customer-dashboard-pro'); ?>' }
             <?php endif; ?>
         ].filter(tab => tab),
         

@@ -126,21 +126,21 @@ function eddcdp_format_license_status($license) {
     if ($status === 'active' && !$is_expired) {
         return array(
             'status' => 'active',
-            'text' => __('Active', 'eddcdp'),
+            'text' => __('Active', 'edd-customer-dashboard-pro'),
             'icon' => '✅',
             'class' => 'text-green-600'
         );
     } elseif ($is_expired) {
         return array(
             'status' => 'expired',
-            'text' => __('Expired', 'eddcdp'),
+            'text' => __('Expired', 'edd-customer-dashboard-pro'),
             'icon' => '⏰',
             'class' => 'text-red-600'
         );
     } else {
         return array(
             'status' => 'inactive',
-            'text' => __('Inactive', 'eddcdp'),
+            'text' => __('Inactive', 'edd-customer-dashboard-pro'),
             'icon' => '❌',
             'class' => 'text-gray-600'
         );
@@ -187,13 +187,13 @@ function eddcdp_sanitize_license_url($url) {
 function eddcdp_format_activation_count($activation_count, $activation_limit) {
     if ($activation_limit > 0) {
         return sprintf(
-            __('%d of %d sites', 'eddcdp'),
+            __('%d of %d sites', 'edd-customer-dashboard-pro'),
             $activation_count,
             $activation_limit
         );
     } else {
         return sprintf(
-            __('%d of unlimited sites', 'eddcdp'),
+            __('%d of unlimited sites', 'edd-customer-dashboard-pro'),
             $activation_count
         );
     }
@@ -417,7 +417,7 @@ function eddcdp_get_license_status_info($license) {
         return array(
             'container_class' => 'bg-gray-50/50 border-gray-200/50',
             'badge_class' => 'bg-gray-100 text-gray-800',
-            'text' => __('Disabled', 'eddcdp'),
+            'text' => __('Disabled', 'edd-customer-dashboard-pro'),
             'icon' => '🚫',
             'can_activate' => false
         );
@@ -425,7 +425,7 @@ function eddcdp_get_license_status_info($license) {
         return array(
             'container_class' => 'bg-red-50/50 border-red-200/50',
             'badge_class' => 'bg-red-100 text-red-800',
-            'text' => __('Expired', 'eddcdp'),
+            'text' => __('Expired', 'edd-customer-dashboard-pro'),
             'icon' => '⏰',
             'can_activate' => false
         );
@@ -433,7 +433,7 @@ function eddcdp_get_license_status_info($license) {
         return array(
             'container_class' => 'bg-green-50/50 border-green-200/50',
             'badge_class' => 'bg-green-100 text-green-800',
-            'text' => __('Active', 'eddcdp'),
+            'text' => __('Active', 'edd-customer-dashboard-pro'),
             'icon' => '✅',
             'can_activate' => true
         );
@@ -441,7 +441,7 @@ function eddcdp_get_license_status_info($license) {
         return array(
             'container_class' => 'bg-gray-50/50 border-gray-200/50',
             'badge_class' => 'bg-gray-100 text-red-600',
-            'text' => __('Inactive', 'eddcdp'),
+            'text' => __('Inactive', 'edd-customer-dashboard-pro'),
             'icon' => '⚪',
             'can_activate' => true
         );

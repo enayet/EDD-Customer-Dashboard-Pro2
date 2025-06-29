@@ -78,8 +78,8 @@ class EDDCDP_Fullscreen_Helper {
         ?>
         <a href="<?php echo esc_url($exit_url); ?>" 
            class="eddcdp-fullscreen-exit"
-           title="<?php esc_attr_e('Exit Fullscreen Dashboard', 'eddcdp'); ?>">
-            <?php _e('Exit Dashboard', 'eddcdp'); ?>
+           title="<?php esc_attr_e('Exit Fullscreen Dashboard', 'edd-customer-dashboard-pro'); ?>">
+            <?php _e('Exit Dashboard', 'edd-customer-dashboard-pro'); ?>
         </a>
         <?php
     }

@@ -25,7 +25,7 @@ $invoices_active = function_exists('edd_invoices_get_invoice_url');
 ?>
 
 <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-    📦 <?php _e('Your Orders & Purchases', 'eddcdp'); ?>
+    📦 <?php _e('Your Orders & Purchases', 'edd-customer-dashboard-pro'); ?>
 </h2>
 
 <?php if ($orders) : ?>
@@ -61,11 +61,11 @@ $invoices_active = function_exists('edd_invoices_get_invoice_url');
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
             <div>
                 <h3 class="text-xl font-semibold text-gray-800 mb-2">
-                    <?php printf(__('Order #%s', 'eddcdp'), $order_number); ?>
+                    <?php printf(__('Order #%s', 'edd-customer-dashboard-pro'), $order_number); ?>
                 </h3>
                 <div class="flex flex-wrap gap-4 text-sm text-gray-600">
                     <span class="flex items-center gap-1">
-                        📋 <?php printf(__('Order #%s', 'eddcdp'), $order_number); ?>
+                        📋 <?php printf(__('Order #%s', 'edd-customer-dashboard-pro'), $order_number); ?>
                     </span>
                     <span class="flex items-center gap-1">
                         📅 <?php echo $order_details->format_order_date($order->date_created, get_option('date_format')); ?>
@@ -75,7 +75,7 @@ $invoices_active = function_exists('edd_invoices_get_invoice_url');
                     </span>
                     <?php if ($license_count > 0) : ?>
                     <span class="flex items-center gap-1">
-                        🔑 <?php printf(_n('%d License', '%d Licenses', $license_count, 'eddcdp'), $license_count); ?>
+                        🔑 <?php printf(_n('%d License', '%d Licenses', $license_count, 'edd-customer-dashboard-pro'), $license_count); ?>
                     </span>
                     <?php endif; ?>
                 </div>
@@ -100,13 +100,13 @@ $invoices_active = function_exists('edd_invoices_get_invoice_url');
                         <p class="text-sm text-gray-500 mt-1">
                             <?php 
                             $file_count = count($download_files);
-                            printf(_n('%d file available', '%d files available', $file_count, 'eddcdp'), $file_count);
+                            printf(_n('%d file available', '%d files available', $file_count, 'edd-customer-dashboard-pro'), $file_count);
                             ?>
                         </p>
                     <?php endif; ?>
                     
                     <div class="text-sm text-gray-600 mt-1">
-                        <?php printf(__('Quantity: %d × %s', 'eddcdp'), $item->quantity, eddcdp_format_price($item->amount)); ?>
+                        <?php printf(__('Quantity: %d × %s', 'edd-customer-dashboard-pro'), $item->quantity, eddcdp_format_price($item->amount)); ?>
                     </div>
                 </div>
                 
@@ -116,19 +116,19 @@ $invoices_active = function_exists('edd_invoices_get_invoice_url');
                         <!-- Single file - direct download button -->
                         <a href="<?php echo esc_url($download_files[0]['url']); ?>" 
                            class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-xl font-medium hover:shadow-lg transition-all duration-300 flex items-center gap-2 text-decoration-none">
-                            🔽 <?php _e('Download', 'eddcdp'); ?>
+                            🔽 <?php _e('Download', 'edd-customer-dashboard-pro'); ?>
                         </a>
                     <?php else : ?>
                         <!-- Multiple files - dropdown or link to details -->
                         <a href="<?php echo $order_details->get_order_details_url($order->id, get_permalink()); ?>" 
                            class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-xl font-medium hover:shadow-lg transition-all duration-300 flex items-center gap-2 text-decoration-none">
-                            🔽 <?php printf(__('Download (%d)', 'eddcdp'), count($download_files)); ?>
+                            🔽 <?php printf(__('Download (%d)', 'edd-customer-dashboard-pro'), count($download_files)); ?>
                         </a>
                     <?php endif; ?>
                 </div>
                 <?php else : ?>
                 <div class="text-sm text-gray-500 italic">
-                    <?php _e('No downloadable files', 'eddcdp'); ?>
+                    <?php _e('No downloadable files', 'edd-customer-dashboard-pro'); ?>
                 </div>
                 <?php endif; ?>
             </div>
@@ -141,11 +141,11 @@ $invoices_active = function_exists('edd_invoices_get_invoice_url');
                 <span class="text-sm">
                     <?php 
                     if ($status === 'pending') {
-                        _e('Order is pending payment. Downloads will be available once payment is complete.', 'eddcdp');
+                        _e('Order is pending payment. Downloads will be available once payment is complete.', 'edd-customer-dashboard-pro');
                     } elseif ($status === 'processing') {
-                        _e('Order is being processed. Downloads will be available shortly.', 'eddcdp');
+                        _e('Order is being processed. Downloads will be available shortly.', 'edd-customer-dashboard-pro');
                     } else {
-                        _e('Downloads will be available once your order is complete.', 'eddcdp');
+                        _e('Downloads will be available once your order is complete.', 'edd-customer-dashboard-pro');
                     }
                     ?>
                 </span>
@@ -157,7 +157,7 @@ $invoices_active = function_exists('edd_invoices_get_invoice_url');
             <!-- Order Details Button -->
             <a href="<?php echo $order_details->get_order_details_url($order->id, get_permalink()); ?>" 
                class="bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 text-decoration-none">
-                📋 <?php _e('Details', 'eddcdp'); ?>
+                📋 <?php _e('Details', 'edd-customer-dashboard-pro'); ?>
             </a>
             
             <!-- Invoice Button (only if EDD Invoices is active and order has invoice) -->
@@ -166,7 +166,7 @@ $invoices_active = function_exists('edd_invoices_get_invoice_url');
             ?>
             <a href="<?php echo esc_url($invoice_url); ?>" 
                class="bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 text-decoration-none">
-                📄 <?php _e('Invoice', 'eddcdp'); ?>
+                📄 <?php _e('Invoice', 'edd-customer-dashboard-pro'); ?>
             </a>
             <?php endif; ?>
             
@@ -174,7 +174,7 @@ $invoices_active = function_exists('edd_invoices_get_invoice_url');
             <?php if ($has_licenses) : ?>
             <a href="<?php echo $order_details->get_order_licenses_url($order->id, get_permalink()); ?>" 
                class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center gap-2 text-decoration-none">
-                🔑 <?php printf(_n('%d License', '%d Licenses', $license_count, 'eddcdp'), $license_count); ?>
+                🔑 <?php printf(_n('%d License', '%d Licenses', $license_count, 'edd-customer-dashboard-pro'), $license_count); ?>
             </a>
             <?php endif; ?>
             
@@ -191,7 +191,7 @@ $invoices_active = function_exists('edd_invoices_get_invoice_url');
 <div class="text-center mt-8">
     <button onclick="loadMoreOrders()" 
             class="bg-white text-gray-600 border border-gray-300 px-6 py-3 rounded-xl hover:bg-gray-50 transition-colors">
-        <?php _e('Load More Orders', 'eddcdp'); ?>
+        <?php _e('Load More Orders', 'edd-customer-dashboard-pro'); ?>
     </button>
 </div>
 <?php endif; ?>
@@ -201,18 +201,18 @@ $invoices_active = function_exists('edd_invoices_get_invoice_url');
     <div class="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-4xl mx-auto mb-6">
         📦
     </div>
-    <h3 class="text-2xl font-bold text-gray-800 mb-3"><?php _e('No Purchases Yet', 'eddcdp'); ?></h3>
-    <p class="text-gray-600 mb-6"><?php _e('You haven\'t made any purchases yet. Start exploring our products!', 'eddcdp'); ?></p>
+    <h3 class="text-2xl font-bold text-gray-800 mb-3"><?php _e('No Purchases Yet', 'edd-customer-dashboard-pro'); ?></h3>
+    <p class="text-gray-600 mb-6"><?php _e('You haven\'t made any purchases yet. Start exploring our products!', 'edd-customer-dashboard-pro'); ?></p>
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
         <button onclick="window.location.href='<?php echo esc_url(home_url('/downloads/')); ?>'" 
                 class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
-            🛒 <?php _e('Browse Products', 'eddcdp'); ?>
+            🛒 <?php _e('Browse Products', 'edd-customer-dashboard-pro'); ?>
         </button>
         
         <?php if (function_exists('edd_wl_get_wish_list')) : ?>
         <button onclick="showLicensesTab ? showLicensesTab() : (window.location.hash = 'wishlist')" 
                 class="bg-white text-gray-600 border border-gray-300 px-6 py-3 rounded-xl hover:bg-gray-50 transition-colors">
-            ❤️ <?php _e('View Wishlist', 'eddcdp'); ?>
+            ❤️ <?php _e('View Wishlist', 'edd-customer-dashboard-pro'); ?>
         </button>
         <?php endif; ?>
     </div>
@@ -222,7 +222,7 @@ $invoices_active = function_exists('edd_invoices_get_invoice_url');
 <script>
 // Simple reorder functionality
 function reorderItems(orderId) {
-    if (confirm('<?php _e('Add all items from this order to your cart?', 'eddcdp'); ?>')) {
+    if (confirm('<?php _e('Add all items from this order to your cart?', 'edd-customer-dashboard-pro'); ?>')) {
         // Simple redirect to avoid AJAX complexity
         window.location.href = '<?php echo admin_url('admin-ajax.php'); ?>?action=eddcdp_reorder&order_id=' + orderId + '&redirect=' + encodeURIComponent(window.location.href);
     }

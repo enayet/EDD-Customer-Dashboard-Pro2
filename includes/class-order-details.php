@@ -91,7 +91,7 @@ class EDDCDP_Order_Details {
         
         $customer = edd_get_customer_by('email', wp_get_current_user()->user_email);
         if (!$customer || $order->customer_id != $customer->id) {
-            wp_die(__('You do not have permission to view this order.', 'eddcdp'));
+            wp_die(__('You do not have permission to view this order.', 'edd-customer-dashboard-pro'));
         }
         
         return $order;
@@ -211,22 +211,22 @@ class EDDCDP_Order_Details {
         
         $status_config = array(
             'complete' => array(
-                'label' => __('Completed', 'eddcdp'),
+                'label' => __('Completed', 'edd-customer-dashboard-pro'),
                 'icon' => '✅',
                 'class' => 'bg-green-100 text-green-800'
             ),
             'pending' => array(
-                'label' => __('Pending', 'eddcdp'),
+                'label' => __('Pending', 'edd-customer-dashboard-pro'),
                 'icon' => '⏳',
                 'class' => 'bg-yellow-100 text-yellow-800'
             ),
             'processing' => array(
-                'label' => __('Processing', 'eddcdp'),
+                'label' => __('Processing', 'edd-customer-dashboard-pro'),
                 'icon' => '⚙️',
                 'class' => 'bg-blue-100 text-blue-800'
             ),
             'failed' => array(
-                'label' => __('Failed', 'eddcdp'),
+                'label' => __('Failed', 'edd-customer-dashboard-pro'),
                 'icon' => '❌',
                 'class' => 'bg-red-100 text-red-800'
             )

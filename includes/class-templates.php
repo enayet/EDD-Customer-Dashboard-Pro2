@@ -44,14 +44,14 @@ class EDDCDP_Templates {
         $template_path = $this->get_template_path($template_name);
         
         if (!$template_path) {
-            $this->render_error(__('Dashboard template not found.', 'eddcdp'));
+            $this->render_error(__('Dashboard template not found.', 'edd-customer-dashboard-pro'));
             return false;
         }
         
         $dashboard_file = $template_path . '/dashboard.php';
         
         if (!file_exists($dashboard_file)) {
-            $this->render_error(__('Dashboard template file is missing.', 'eddcdp'));
+            $this->render_error(__('Dashboard template file is missing.', 'edd-customer-dashboard-pro'));
             return false;
         }
         
@@ -259,7 +259,7 @@ class EDDCDP_Templates {
             );
             
             // Localize script
-            wp_localize_script('eddcdp-template-' . $template_name, 'eddcdp', array(
+            wp_localize_script('eddcdp-template-' . $template_name, 'edd-customer-dashboard-pro', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('eddcdp_ajax_nonce'),
                 'strings' => $this->get_js_strings()
@@ -342,16 +342,16 @@ class EDDCDP_Templates {
      */
     private function get_js_strings() {
         return array(
-            'download_success' => __('Download started successfully!', 'eddcdp'),
-            'license_copied' => __('License key copied to clipboard!', 'eddcdp'),
-            'copy_failed' => __('Failed to copy to clipboard.', 'eddcdp'),
-            'site_url_required' => __('Please enter a site URL.', 'eddcdp'),
-            'activation_success' => __('Site activated successfully!', 'eddcdp'),
-            'deactivation_success' => __('Site deactivated successfully!', 'eddcdp'),
-            'confirm_deactivate' => __('Are you sure you want to deactivate this site?', 'eddcdp'),
-            'confirm_remove_wishlist' => __('Are you sure you want to remove this item from your wishlist?', 'eddcdp'),
-            'cart_success' => __('Added to cart successfully!', 'eddcdp'),
-            'general_error' => __('An error occurred. Please try again.', 'eddcdp')
+            'download_success' => __('Download started successfully!', 'edd-customer-dashboard-pro'),
+            'license_copied' => __('License key copied to clipboard!', 'edd-customer-dashboard-pro'),
+            'copy_failed' => __('Failed to copy to clipboard.', 'edd-customer-dashboard-pro'),
+            'site_url_required' => __('Please enter a site URL.', 'edd-customer-dashboard-pro'),
+            'activation_success' => __('Site activated successfully!', 'edd-customer-dashboard-pro'),
+            'deactivation_success' => __('Site deactivated successfully!', 'edd-customer-dashboard-pro'),
+            'confirm_deactivate' => __('Are you sure you want to deactivate this site?', 'edd-customer-dashboard-pro'),
+            'confirm_remove_wishlist' => __('Are you sure you want to remove this item from your wishlist?', 'edd-customer-dashboard-pro'),
+            'cart_success' => __('Added to cart successfully!', 'edd-customer-dashboard-pro'),
+            'general_error' => __('An error occurred. Please try again.', 'edd-customer-dashboard-pro')
         );
     }
     
@@ -372,30 +372,5 @@ class EDDCDP_Templates {
         $this->template_cache = array();
     }
     
-    /**
-     * Validate template requirements
-     */
-    public function validate_template($template_name) {
-        $config = $this->get_template_config($this->get_template_path($template_name));
-        
-        if (!$config) {
-            return false;
-        }
-        
-        // Check EDD version
-        if (isset($config['requirements']['edd_version'])) {
-            if (version_compare(EDD_VERSION, $config['requirements']['edd_version'], '<')) {
-                return false;
-            }
-        }
-        
-        // Check PHP version
-        if (isset($config['requirements']['php_version'])) {
-            if (version_compare(PHP_VERSION, $config['requirements']['php_version'], '<')) {
-                return false;
-            }
-        }
-        
-        return true;
-    }
+
 }

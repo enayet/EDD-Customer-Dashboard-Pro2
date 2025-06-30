@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Header - Updated Design
+ * Template Header - Updated to remove Alpine.js
  */
 
 // Prevent direct access
@@ -28,26 +28,44 @@ if ($is_fullscreen) {
         <!-- Template CSS -->
         <link rel="stylesheet" href="<?php echo esc_url($template_url . 'style.css'); ?>?v=<?php echo esc_attr(EDDCDP_VERSION); ?>">
         
-        <!-- Alpine.js -->
-        <script defer src="<?php echo esc_url($template_url . 'assets/alpine.min.js'); ?>?v=<?php echo esc_attr(EDDCDP_VERSION); ?>"></script>
+        <!-- Template JavaScript -->
+        <script src="<?php echo esc_url($template_url . 'assets/dashboard.js'); ?>?v=<?php echo esc_attr(EDDCDP_VERSION); ?>"></script>
+        
+        <?php
+        // Allow other plugins to add head content
+        do_action('eddcdp_head');
+        ?>
     </head>
-    <body>
+    <body class="eddcdp-fullscreen-mode">
         
         <!-- Fullscreen Exit Button -->
         <?php EDDCDP_Fullscreen_Helper::render_exit_button(); ?>
         
+        <?php
+        // Allow other plugins to add body content
+        do_action('eddcdp_body_start');
+        ?>
+        
     <?php
 } else {
-    // Embedded mode - inject styles and scripts
+    // Embedded mode - inject styles and scripts into existing page
     ?>
     
     <!-- Template CSS -->
     <link rel="stylesheet" href="<?php echo esc_url($template_url . 'style.css'); ?>?v=<?php echo esc_attr(EDDCDP_VERSION); ?>">
     
-    <!-- Alpine.js -->
-    <script defer src="<?php echo esc_url($template_url . 'assets/alpine.min.js'); ?>?v=<?php echo esc_attr(EDDCDP_VERSION); ?>"></script>
+    <!-- Template JavaScript -->
+    <script src="<?php echo esc_url($template_url . 'assets/dashboard.js'); ?>?v=<?php echo esc_attr(EDDCDP_VERSION); ?>"></script>
+    
+    <?php
+    // Allow other plugins to add content
+    do_action('eddcdp_embedded_head');
+    ?>
     
     <div class="eddcdp-dashboard-wrapper">
         <div class="eddcdp-embedded-wrapper">
     <?php
+    
+    // Allow other plugins to add body content for embedded mode
+    do_action('eddcdp_embedded_body_start');
 }

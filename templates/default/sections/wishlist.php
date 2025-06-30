@@ -1,6 +1,6 @@
 <?php
 /**
- * Wishlist Section Template - Updated Design
+ * Wishlist Section Template - Fixed
  */
 
 // Prevent direct access
@@ -176,8 +176,12 @@ $public_wishlist_urls = $wishlist_handler->get_public_wishlist_urls();
                     <h4 style="margin: 0 0 5px 0; color: var(--dark);"><?php echo esc_html($wishlist['title']); ?></h4>
                     <p style="margin: 0; color: var(--gray); font-size: 0.9rem;">
                         <?php 
-                        /* translators: %d: Number of items in wishlist */
-                        printf(esc_html(_n('%d item', '%d items', $wishlist['item_count'], 'edd-customer-dashboard-pro')), esc_html(number_format_i18n($wishlist['item_count']))); 
+                        // Fix: Ensure item_count is a number before formatting
+                        $item_count = intval($wishlist['item_count']); // Convert to integer
+                        printf(
+                            esc_html(_n('%d item', '%d items', $item_count, 'edd-customer-dashboard-pro')), 
+                            $item_count
+                        ); 
                         ?>
                     </p>
                 </div>

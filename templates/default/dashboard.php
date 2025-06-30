@@ -1,6 +1,6 @@
 <?php
 /**
- * Default Dashboard Template - Updated to follow default.html pattern
+ * Default Dashboard Template - Fixed to match default.html design
  */
 
 // Prevent direct access
@@ -25,24 +25,7 @@ $is_fullscreen = defined('EDDCDP_IS_FULLSCREEN') && EDDCDP_IS_FULLSCREEN;
 ?>
 
 <div class="dashboard-container">
-    <!-- Dashboard Header -->
-    <div class="dashboard-header">
-        <div class="welcome-section">
-            <div class="welcome-text">
-                <h1>
-                    <?php 
-                    /* translators: %s: User display name */
-                    printf(esc_html__('Welcome back, %s!', 'edd-customer-dashboard-pro'), esc_html($current_user->display_name)); 
-                    ?>
-                </h1>
-                <p><?php esc_html_e('Manage your purchases, downloads, and account settings', 'edd-customer-dashboard-pro'); ?></p>
-            </div>
-            <div class="user-avatar">
-                <?php echo esc_html(strtoupper(substr($current_user->display_name, 0, 2))); ?>
-            </div>
-        </div>
-    </div>
-
+    
     <!-- Check what we're viewing -->
     <?php if ($order_details->is_viewing_order_details()) : ?>
         
@@ -63,64 +46,70 @@ $is_fullscreen = defined('EDDCDP_IS_FULLSCREEN') && EDDCDP_IS_FULLSCREEN;
         
         <!-- Normal Dashboard View -->
         
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="welcome-section">
+                <div class="welcome-text">
+                    <h1>
+                        <?php 
+                        /* translators: %s: User display name */
+                        printf(esc_html__('Welcome back, %s!', 'edd-customer-dashboard-pro'), esc_html($current_user->display_name)); 
+                        ?>
+                    </h1>
+                    <p><?php esc_html_e('Manage your purchases, downloads, and account settings', 'edd-customer-dashboard-pro'); ?></p>
+                </div>
+                <div class="user-avatar">
+                    <?php echo esc_html(strtoupper(substr($current_user->display_name, 0, 2))); ?>
+                </div>
+            </div>
+        </div>
+
         <!-- Stats Grid Section -->
         <?php include 'sections/stats.php'; ?>
         
         <!-- Navigation Tabs -->
         <div class="dashboard-nav">
-            <ul class="nav-tabs">
+            <div class="nav-tabs">
                 <?php if (!empty($enabled_sections['purchases'])) : ?>
-                <li>
-                    <a href="#" class="nav-tab active" data-section="purchases">
-                        📦 <?php esc_html_e('Purchases', 'edd-customer-dashboard-pro'); ?>
-                    </a>
-                </li>
+                <a href="#" class="nav-tab active" data-section="purchases">
+                    📦 <?php esc_html_e('Purchases', 'edd-customer-dashboard-pro'); ?>
+                </a>
                 <?php endif; ?>
                 
                 <?php if (!empty($enabled_sections['downloads'])) : ?>
-                <li>
-                    <a href="#" class="nav-tab" data-section="downloads">
-                        ⬇️ <?php esc_html_e('Downloads', 'edd-customer-dashboard-pro'); ?>
-                    </a>
-                </li>
+                <a href="#" class="nav-tab" data-section="downloads">
+                    ⬇️ <?php esc_html_e('Downloads', 'edd-customer-dashboard-pro'); ?>
+                </a>
                 <?php endif; ?>
                 
                 <?php if (!empty($enabled_sections['licenses'])) : ?>
-                <li>
-                    <a href="#" class="nav-tab" data-section="licenses">
-                        🔑 <?php esc_html_e('Licenses', 'edd-customer-dashboard-pro'); ?>
-                    </a>
-                </li>
+                <a href="#" class="nav-tab" data-section="licenses">
+                    🔑 <?php esc_html_e('Licenses', 'edd-customer-dashboard-pro'); ?>
+                </a>
                 <?php endif; ?>
                 
                 <?php if (!empty($enabled_sections['wishlist'])) : ?>
-                <li>
-                    <a href="#" class="nav-tab" data-section="wishlist">
-                        ❤️ <?php esc_html_e('Wishlist', 'edd-customer-dashboard-pro'); ?>
-                    </a>
-                </li>
+                <a href="#" class="nav-tab" data-section="wishlist">
+                    ❤️ <?php esc_html_e('Wishlist', 'edd-customer-dashboard-pro'); ?>
+                </a>
                 <?php endif; ?>
                 
                 <?php if (!empty($enabled_sections['analytics'])) : ?>
-                <li>
-                    <a href="#" class="nav-tab" data-section="analytics">
-                        📊 <?php esc_html_e('Analytics', 'edd-customer-dashboard-pro'); ?>
-                    </a>
-                </li>
+                <a href="#" class="nav-tab" data-section="analytics">
+                    📊 <?php esc_html_e('Analytics', 'edd-customer-dashboard-pro'); ?>
+                </a>
                 <?php endif; ?>
                 
                 <?php if (!empty($enabled_sections['support'])) : ?>
-                <li>
-                    <a href="#" class="nav-tab" data-section="support">
-                        💬 <?php esc_html_e('Support', 'edd-customer-dashboard-pro'); ?>
-                    </a>
-                </li>
+                <a href="#" class="nav-tab" data-section="support">
+                    💬 <?php esc_html_e('Support', 'edd-customer-dashboard-pro'); ?>
+                </a>
                 <?php endif; ?>
-            </ul>
+            </div>
         </div>
 
-        <!-- Main Content Area -->
-        <main class="dashboard-main">
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
             <!-- Tab Content Sections -->
             <?php if (!empty($enabled_sections['purchases'])) : ?>
             <div class="content-section active" id="purchases">
@@ -157,20 +146,26 @@ $is_fullscreen = defined('EDDCDP_IS_FULLSCREEN') && EDDCDP_IS_FULLSCREEN;
                 <?php include 'sections/support.php'; ?>
             </div>
             <?php endif; ?>
-        </main>
+        </div>
         
     <?php endif; ?>
 </div>
 
 <script>
-// Tab Navigation - Following default.html pattern
+// Tab Navigation - Fixed JavaScript
 document.addEventListener('DOMContentLoaded', function() {
     const navTabs = document.querySelectorAll('.nav-tab');
     const contentSections = document.querySelectorAll('.content-section');
 
+    // Debug: Check if elements are found
+    console.log('Nav tabs found:', navTabs.length);
+    console.log('Content sections found:', contentSections.length);
+
     navTabs.forEach(tab => {
         tab.addEventListener('click', function(e) {
             e.preventDefault();
+            
+            console.log('Tab clicked:', this.getAttribute('data-section'));
             
             // Remove active class from all tabs and sections
             navTabs.forEach(t => t.classList.remove('active'));
@@ -184,10 +179,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const targetElement = document.getElementById(targetSection);
             if (targetElement) {
                 targetElement.classList.add('active');
+                console.log('Activated section:', targetSection);
+            } else {
+                console.error('Target element not found:', targetSection);
             }
-            
-            // Update URL hash for deep linking
-            window.location.hash = targetSection;
         });
     });
 
@@ -209,31 +204,38 @@ document.addEventListener('DOMContentLoaded', function() {
     // Copy license key functionality
     document.querySelectorAll('.license-key').forEach(licenseKey => {
         licenseKey.style.cursor = 'pointer';
-        licenseKey.title = '<?php esc_attr_e('Click to copy', 'edd-customer-dashboard-pro'); ?>';
+        licenseKey.title = 'Click to copy';
         
         licenseKey.addEventListener('click', function() {
-            navigator.clipboard.writeText(this.textContent).then(() => {
-                const originalBg = this.style.background;
-                this.style.background = 'rgba(67, 233, 123, 0.2)';
-                this.style.transition = 'background 0.3s ease';
-                
-                setTimeout(() => {
-                    this.style.background = originalBg;
-                }, 1000);
-            });
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(this.textContent).then(() => {
+                    const originalBg = this.style.background;
+                    this.style.background = 'rgba(67, 233, 123, 0.2)';
+                    this.style.transition = 'background 0.3s ease';
+                    
+                    setTimeout(() => {
+                        this.style.background = originalBg;
+                    }, 1000);
+                });
+            }
         });
     });
 
     // Download button animations
     document.querySelectorAll('.btn').forEach(btn => {
-        if (btn.textContent.includes('<?php esc_js_e('Download', 'edd-customer-dashboard-pro'); ?>')) {
-            btn.addEventListener('click', function() {
+        if (btn.textContent.includes('Download')) {
+            btn.addEventListener('click', function(e) {
+                // Don't prevent default for actual download links
+                if (this.tagName === 'A' && this.href) {
+                    return;
+                }
+                
                 const originalText = this.innerHTML;
-                this.innerHTML = '⏳ <?php esc_js_e('Preparing...', 'edd-customer-dashboard-pro'); ?>';
+                this.innerHTML = '⏳ Preparing...';
                 this.disabled = true;
                 
                 setTimeout(() => {
-                    this.innerHTML = '✅ <?php esc_js_e('Downloaded', 'edd-customer-dashboard-pro'); ?>';
+                    this.innerHTML = '✅ Downloaded';
                     setTimeout(() => {
                         this.innerHTML = originalText;
                         this.disabled = false;
@@ -255,7 +257,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Global utility functions for other sections to use
+// Global utility functions
 window.eddcdpUtils = {
     switchTab: function(tabId) {
         const targetTab = document.querySelector(`[data-section="${tabId}"]`);
@@ -265,7 +267,6 @@ window.eddcdpUtils = {
     },
     
     showNotification: function(message, type = 'info') {
-        // Simple notification system following default.html pattern
         const notification = document.createElement('div');
         notification.className = 'eddcdp-notification';
         notification.style.cssText = `
@@ -298,8 +299,8 @@ window.eddcdpUtils = {
         notification.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
                 <span>${message}</span>
-                <button onclick="this.parentElement.parentElement.remove()" 
-                        style="background: none; border: none; color: inherit; font-size: 18px; cursor: pointer;">×</button>
+                <button type="button" onclick="this.closest('.eddcdp-notification').remove()" 
+                        style="background: none; border: none; color: inherit; font-size: 18px; cursor: pointer; padding: 0; margin: 0;">×</button>
             </div>
         `;
         
@@ -312,6 +313,25 @@ window.eddcdpUtils = {
         }, 5000);
     }
 };
+
+// Add slideInRight animation
+if (!document.querySelector('#eddcdp-animations')) {
+    const style = document.createElement('style');
+    style.id = 'eddcdp-animations';
+    style.textContent = `
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
 </script>
 
 <?php include 'footer.php'; ?>

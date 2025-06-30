@@ -29,7 +29,7 @@ if ($is_fullscreen) {
         <link rel="stylesheet" href="<?php echo esc_url($template_url . 'style.css'); ?>?v=<?php echo esc_attr(EDDCDP_VERSION); ?>">
         
         <!-- Template JavaScript -->
-        <script src="<?php echo esc_url($template_url . 'assets/dashboard.js'); ?>?v=<?php echo esc_attr(EDDCDP_VERSION); ?>"></script>
+<!--        <script src="<?php echo esc_url($template_url . 'assets/dashboard.js'); ?>?v=<?php echo esc_attr(EDDCDP_VERSION); ?>"></script>-->
         
         <?php
         // Allow other plugins to add head content
@@ -67,5 +67,5 @@ if ($is_fullscreen) {
     <?php
     
     // Allow other plugins to add body content for embedded mode
-    do_action('eddcdp_embedded_body_start');
+    //do_action('eddcdp_embedded_body_start');
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Template Footer - Updated
+ * Template Footer - Updated Design
  */
 
 // Prevent direct access

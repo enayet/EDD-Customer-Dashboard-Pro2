@@ -1,7 +1,6 @@
 <?php
 /**
- * Wishlist Section Template - Minimal Version
- * Based on actual EDD Wish Lists functions
+ * Wishlist Section Template - Updated Design
  */
 
 // Prevent direct access
@@ -11,9 +10,17 @@ if (!defined('ABSPATH')) {
 
 // Check if EDD Wish Lists is active
 if (!class_exists('EDD_Wish_Lists')) {
-    echo '<div class="bg-yellow-50/80 rounded-2xl p-6 border border-yellow-200/50">';
-    echo '<p class="text-yellow-800">' . esc_html__('Wish Lists extension is not active.', 'edd-customer-dashboard-pro') . '</p>';
-    echo '</div>';
+    ?>
+    <div class="empty-state">
+        <div class="empty-icon">❤️</div>
+        <h3><?php esc_html_e('Wish Lists Not Available', 'edd-customer-dashboard-pro'); ?></h3>
+        <p><?php esc_html_e('Wish Lists extension is not active.', 'edd-customer-dashboard-pro'); ?></p>
+        <button onclick="window.location.href='<?php echo esc_url(home_url('/downloads/')); ?>'" 
+                class="btn">
+            🛒 <?php esc_html_e('Browse Products', 'edd-customer-dashboard-pro'); ?>
+        </button>
+    </div>
+    <?php
     return;
 }
 
@@ -21,9 +28,13 @@ if (!class_exists('EDD_Wish_Lists')) {
 $current_user = wp_get_current_user();
 
 if (!is_user_logged_in()) {
-    echo '<div class="bg-yellow-50/80 rounded-2xl p-6 border border-yellow-200/50">';
-    echo '<p class="text-yellow-800">' . esc_html__('Please log in to view your wishlist.', 'edd-customer-dashboard-pro') . '</p>';
-    echo '</div>';
+    ?>
+    <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <h3><?php esc_html_e('Please Log In', 'edd-customer-dashboard-pro'); ?></h3>
+        <p><?php esc_html_e('Please log in to view your wishlist.', 'edd-customer-dashboard-pro'); ?></p>
+    </div>
+    <?php
     return;
 }
 
@@ -33,12 +44,10 @@ $wishlist_items = $wishlist_handler->get_user_wishlist_items();
 $public_wishlist_urls = $wishlist_handler->get_public_wishlist_urls();
 ?>
 
-<h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-    ❤️ <?php esc_html_e('Your Wishlist', 'edd-customer-dashboard-pro'); ?>
-</h2>
+<h2 class="section-title"><?php esc_html_e('Your Wishlist', 'edd-customer-dashboard-pro'); ?></h2>
 
 <?php if (!empty($wishlist_items)) : ?>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="wishlist-grid">
     <?php foreach ($wishlist_items as $item) : 
         $download_id = $item['id'];
         $download = get_post($download_id);
@@ -70,38 +79,57 @@ $public_wishlist_urls = $wishlist_handler->get_public_wishlist_urls();
             edd_item_in_cart($download_id);
     ?>
     
-    <div class="bg-gray-50/80 rounded-2xl p-6 border border-gray-200/50 text-center hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+    <div class="wishlist-item">
         <?php if ($thumbnail) : ?>
-        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl overflow-hidden">
-            <img src="<?php echo esc_url($thumbnail); ?>" alt="<?php echo esc_attr($download->post_title); ?>" class="w-full h-full object-cover">
+        <div class="product-image" style="background-image: url('<?php echo esc_url($thumbnail); ?>'); background-size: cover; background-position: center;">
         </div>
         <?php else : ?>
-        <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl mx-auto mb-4">
-            🎨
+        <div class="product-image">🎨</div>
+        <?php endif; ?>
+        
+        <div style="padding: 0 5px;">
+            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; color: var(--dark);">
+                <a href="<?php echo esc_url($download_url); ?>" 
+                   style="color: inherit; text-decoration: none;"
+                   onmouseover="this.style.color='var(--primary)'" 
+                   onmouseout="this.style.color='inherit'">
+                    <?php echo esc_html($download->post_title); ?>
+                </a>
+            </h3>
+            
+            <?php if ($price_name) : ?>
+            <p style="color: var(--gray); font-size: 0.9rem; margin-bottom: 8px;">
+                <?php echo esc_html($price_name); ?>
+            </p>
+            <?php endif; ?>
+            
+            <p style="font-size: 1.2rem; font-weight: 700; color: var(--primary); margin-bottom: 15px;">
+                <?php echo esc_html($formatted_price); ?>
+            </p>
         </div>
-        <?php endif; ?>
         
-        <h3 class="text-lg font-semibold text-gray-800 mb-2">
-            <a href="<?php echo esc_url($download_url); ?>" class="hover:text-indigo-600 transition-colors">
-                <?php echo esc_html($download->post_title); ?>
-            </a>
-        </h3>
-        
-        <?php if ($price_name) : ?>
-        <p class="text-sm text-gray-600 mb-2"><?php echo esc_html($price_name); ?></p>
-        <?php endif; ?>
-        
-        <p class="text-xl font-bold text-indigo-600 mb-4"><?php echo esc_html($formatted_price); ?></p>
-        
-        <div class="space-y-2">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
             <!-- Product Details Link -->
             <a href="<?php echo esc_url($download_url); ?>" 
-               class="block w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-xl font-medium hover:shadow-lg transition-all duration-300 text-decoration-none text-center">
-                👁️ <?php esc_html_e('Product Details', 'edd-customer-dashboard-pro'); ?>
+               class="btn btn-secondary">
+                👁️ <?php esc_html_e('View Details', 'edd-customer-dashboard-pro'); ?>
             </a>
             
+            <!-- Add to Cart or View Cart -->
+            <?php if ($in_cart) : ?>
+            <a href="<?php echo esc_url(edd_get_checkout_uri()); ?>" 
+               class="btn btn-success">
+                ✅ <?php esc_html_e('View Cart', 'edd-customer-dashboard-pro'); ?>
+            </a>
+            <?php else : ?>
+            <button onclick="addToCart(<?php echo esc_js($download_id); ?><?php echo $price_id !== null ? ', ' . esc_js($price_id) : ''; ?>)" 
+                    class="btn">
+                🛒 <?php esc_html_e('Add to Cart', 'edd-customer-dashboard-pro'); ?>
+            </button>
+            <?php endif; ?>
+            
             <!-- Remove from Wishlist Button -->
-            <form method="post" action="" class="w-full">
+            <form method="post" action="" style="margin: 0;">
                 <?php wp_nonce_field('eddcdp_remove_wishlist', 'eddcdp_nonce'); ?>
                 <input type="hidden" name="eddcdp_action" value="remove_from_wishlist">
                 <input type="hidden" name="download_id" value="<?php echo esc_attr($download_id); ?>">
@@ -110,7 +138,8 @@ $public_wishlist_urls = $wishlist_handler->get_public_wishlist_urls();
                 <?php endif; ?>
                 <button type="submit" 
                         onclick="return confirm('<?php esc_attr_e('Are you sure you want to remove this item from your wishlist?', 'edd-customer-dashboard-pro'); ?>')"
-                        class="w-full bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors">
+                        class="btn btn-secondary"
+                        style="width: 100%; background: rgba(245, 87, 108, 0.1); color: #d32f2f; border-color: rgba(245, 87, 108, 0.3);">
                     ❌ <?php esc_html_e('Remove', 'edd-customer-dashboard-pro'); ?>
                 </button>
             </form>
@@ -121,40 +150,46 @@ $public_wishlist_urls = $wishlist_handler->get_public_wishlist_urls();
 </div>
 
 <?php else : ?>
-<div class="bg-gray-50/80 rounded-2xl p-12 text-center border border-gray-200/50">
-    <div class="w-24 h-24 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center text-white text-4xl mx-auto mb-6">
-        ❤️
-    </div>
-    <h3 class="text-2xl font-bold text-gray-800 mb-3"><?php esc_html_e('Your Wishlist is Empty', 'edd-customer-dashboard-pro'); ?></h3>
-    <p class="text-gray-600 mb-6"><?php esc_html_e('Start adding products to your wishlist to keep track of items you want to purchase later!', 'edd-customer-dashboard-pro'); ?></p>
-    <a href="<?php echo esc_url(home_url('/downloads/')); ?>" 
-       class="bg-gradient-to-r from-pink-500 to-rose-600 text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300 text-decoration-none">
+<!-- Empty State -->
+<div class="empty-state">
+    <div class="empty-icon">❤️</div>
+    <h3><?php esc_html_e('Your Wishlist is Empty', 'edd-customer-dashboard-pro'); ?></h3>
+    <p><?php esc_html_e('Start adding products to your wishlist to keep track of items you want to purchase later!', 'edd-customer-dashboard-pro'); ?></p>
+    <button onclick="window.location.href='<?php echo esc_url(home_url('/downloads/')); ?>'" 
+            class="btn">
         🛒 <?php esc_html_e('Browse Products', 'edd-customer-dashboard-pro'); ?>
-    </a>
+    </button>
 </div>
 <?php endif; ?>
 
 <?php if (!empty($public_wishlist_urls)) : ?>
 <!-- Public Wishlist Sharing Section -->
-<div class="bg-blue-50/80 rounded-2xl p-6 border border-blue-200/50 mt-8">
-    <h3 class="text-xl font-semibold text-blue-800 mb-4 flex items-center gap-2">
+<div style="background: rgba(33, 150, 243, 0.05); border-radius: 12px; padding: 20px; margin-top: 30px; border: 1px solid rgba(33, 150, 243, 0.1);">
+    <h3 style="color: #1976d2; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
         🔗 <?php esc_html_e('Share Your Public Wishlists', 'edd-customer-dashboard-pro'); ?>
     </h3>
-    <div class="space-y-3">
+    <div style="display: grid; gap: 12px;">
         <?php foreach ($public_wishlist_urls as $wishlist) : ?>
-        <div class="bg-white/80 rounded-lg p-4 border border-blue-200">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div style="background: rgba(255, 255, 255, 0.8); border-radius: 8px; padding: 15px; border: 1px solid rgba(33, 150, 243, 0.2);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <div>
-                    <h4 class="font-medium text-gray-800"><?php echo esc_html($wishlist['title']); ?></h4>
-                    <p class="text-sm text-gray-600"><?php echo esc_html($wishlist['item_count']); ?></p>
+                    <h4 style="margin: 0 0 5px 0; color: var(--dark);"><?php echo esc_html($wishlist['title']); ?></h4>
+                    <p style="margin: 0; color: var(--gray); font-size: 0.9rem;">
+                        <?php 
+                        /* translators: %d: Number of items in wishlist */
+                        printf(esc_html(_n('%d item', '%d items', $wishlist['item_count'], 'edd-customer-dashboard-pro')), esc_html(number_format_i18n($wishlist['item_count']))); 
+                        ?>
+                    </p>
                 </div>
-                <div class="flex gap-2">
+                <div style="display: flex; gap: 8px;">
                     <a href="<?php echo esc_url($wishlist['url']); ?>" 
-                       class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-decoration-none text-sm">
+                       class="btn btn-secondary"
+                       style="padding: 8px 12px; font-size: 0.85rem;">
                         👁️ <?php esc_html_e('View', 'edd-customer-dashboard-pro'); ?>
                     </a>
-                    <button onclick="copyToClipboard('<?php echo esc_js($wishlist['url']); ?>')" 
-                            class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors text-sm">
+                    <button onclick="copyWishlistUrl('<?php echo esc_js($wishlist['url']); ?>')" 
+                            class="btn btn-secondary"
+                            style="padding: 8px 12px; font-size: 0.85rem;">
                         📋 <?php esc_html_e('Copy Link', 'edd-customer-dashboard-pro'); ?>
                     </button>
                 </div>
@@ -166,20 +201,57 @@ $public_wishlist_urls = $wishlist_handler->get_public_wishlist_urls();
 <?php endif; ?>
 
 <script>
-function copyToClipboard(text) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => {
-            showNotification('Link copied to clipboard!', 'success');
+// Add to cart functionality
+function addToCart(downloadId, priceId = null) {
+    const params = new URLSearchParams({
+        action: 'edd_add_to_cart',
+        download_id: downloadId
+    });
+    
+    if (priceId !== null) {
+        params.append('edd_options[price_id]', priceId);
+    }
+    
+    fetch('<?php echo esc_url(admin_url('admin-ajax.php')); ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('<?php esc_html_e('Added to cart successfully!', 'edd-customer-dashboard-pro'); ?>', 'success');
             
+            // Reload page to update cart status
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            showNotification(data.data || '<?php esc_html_e('Error adding to cart. Please try again.', 'edd-customer-dashboard-pro'); ?>', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('<?php esc_html_e('Error adding to cart. Please try again.', 'edd-customer-dashboard-pro'); ?>', 'error');
+    });
+}
+
+// Copy wishlist URL
+function copyWishlistUrl(url) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+            showNotification('<?php esc_html_e('Wishlist link copied to clipboard!', 'edd-customer-dashboard-pro'); ?>', 'success');
         }).catch(() => {
-            fallbackCopy(text);
+            fallbackCopyUrl(url);
         });
     } else {
-        fallbackCopy(text);
+        fallbackCopyUrl(url);
     }
 }
 
-function fallbackCopy(text) {
+function fallbackCopyUrl(text) {
     const textArea = document.createElement('textarea');
     textArea.value = text;
     textArea.style.position = 'fixed';
@@ -189,9 +261,9 @@ function fallbackCopy(text) {
     
     try {
         document.execCommand('copy');
-        showNotification('Link copied to clipboard!', 'success');
+        showNotification('<?php esc_html_e('Wishlist link copied to clipboard!', 'edd-customer-dashboard-pro'); ?>', 'success');
     } catch (err) {
-        showNotification('Failed to copy link.', 'error');
+        showNotification('<?php esc_html_e('Failed to copy link.', 'edd-customer-dashboard-pro'); ?>', 'error');
     }
     
     document.body.removeChild(textArea);
@@ -200,23 +272,39 @@ function fallbackCopy(text) {
 // Simple notification function
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm transition-all duration-300`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        max-width: 400px;
+        font-family: inherit;
+        font-size: 0.9rem;
+        animation: slideInRight 0.3s ease-out;
+    `;
     
     switch (type) {
         case 'success':
-            notification.className += ' bg-green-500 text-white';
+            notification.style.background = 'linear-gradient(135deg, #43e97b, #38f9d7)';
+            notification.style.color = 'white';
             break;
         case 'error':
-            notification.className += ' bg-red-500 text-white';
+            notification.style.background = 'linear-gradient(135deg, #f5576c, #d32f2f)';
+            notification.style.color = 'white';
             break;
         default:
-            notification.className += ' bg-blue-500 text-white';
+            notification.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+            notification.style.color = 'white';
     }
     
     notification.innerHTML = `
-        <div class="flex items-center justify-between">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
             <span>${message}</span>
-            <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200 text-xl">×</button>
+            <button onclick="this.parentElement.parentElement.remove()" 
+                    style="background: none; border: none; color: inherit; font-size: 18px; cursor: pointer; padding: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;">×</button>
         </div>
     `;
     
@@ -226,6 +314,25 @@ function showNotification(message, type = 'info') {
         if (notification.parentElement) {
             notification.remove();
         }
-    }, 3000);
+    }, 4000);
+}
+
+// Add slideInRight animation
+if (!document.querySelector('#wishlist-animations')) {
+    const style = document.createElement('style');
+    style.id = 'wishlist-animations';
+    style.textContent = `
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
 }
 </script>

@@ -1,6 +1,6 @@
 <?php
 /**
- * Stats Grid Section - Simple & Clean
+ * Stats Grid Section - Updated Design
  */
 
 // Prevent direct access
@@ -24,52 +24,29 @@ $license_count = eddcdp_get_customer_active_license_count($current_user->ID);
 $wishlist_count = eddcdp_get_customer_wishlist_count($current_user->ID);
 ?>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-3xl font-bold text-gray-800 mb-1"><?php echo esc_html(number_format_i18n($purchase_count)); ?></p>
-                <p class="text-sm font-medium text-gray-500 uppercase tracking-wide"><?php esc_html_e('Total Purchases', 'edd-customer-dashboard-pro'); ?></p>
-            </div>
-            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white text-xl group-hover:scale-110 transition-transform">
-                📦
-            </div>
-        </div>
+<!-- Stats Overview -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon purchases">📦</div>
+        <div class="stat-number"><?php echo esc_html(number_format_i18n($purchase_count)); ?></div>
+        <div class="stat-label"><?php esc_html_e('Total Purchases', 'edd-customer-dashboard-pro'); ?></div>
     </div>
     
-    <div class="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-3xl font-bold text-gray-800 mb-1"><?php echo esc_html(number_format_i18n($download_count)); ?></p>
-                <p class="text-sm font-medium text-gray-500 uppercase tracking-wide"><?php esc_html_e('Downloads', 'edd-customer-dashboard-pro'); ?></p>
-            </div>
-            <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center text-white text-xl group-hover:scale-110 transition-transform">
-                ⬇️
-            </div>
-        </div>
+    <div class="stat-card">
+        <div class="stat-icon downloads">⬇️</div>
+        <div class="stat-number"><?php echo esc_html(number_format_i18n($download_count)); ?></div>
+        <div class="stat-label"><?php esc_html_e('Downloads', 'edd-customer-dashboard-pro'); ?></div>
     </div>
     
-    <div class="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-3xl font-bold text-gray-800 mb-1"><?php echo esc_html(number_format_i18n($license_count)); ?></p>
-                <p class="text-sm font-medium text-gray-500 uppercase tracking-wide"><?php esc_html_e('Active Licenses', 'edd-customer-dashboard-pro'); ?></p>
-            </div>
-            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-xl group-hover:scale-110 transition-transform">
-                🔑
-            </div>
-        </div>
+    <div class="stat-card">
+        <div class="stat-icon licenses">🔑</div>
+        <div class="stat-number"><?php echo esc_html(number_format_i18n($license_count)); ?></div>
+        <div class="stat-label"><?php esc_html_e('Active Licenses', 'edd-customer-dashboard-pro'); ?></div>
     </div>
     
-    <div class="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-3xl font-bold text-gray-800 mb-1"><?php echo esc_html(number_format_i18n($wishlist_count)); ?></p>
-                <p class="text-sm font-medium text-gray-500 uppercase tracking-wide"><?php esc_html_e('Wishlist Items', 'edd-customer-dashboard-pro'); ?></p>
-            </div>
-            <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center text-white text-xl group-hover:scale-110 transition-transform">
-                ❤️
-            </div>
-        </div>
+    <div class="stat-card">
+        <div class="stat-icon wishlist">❤️</div>
+        <div class="stat-number"><?php echo esc_html(number_format_i18n($wishlist_count)); ?></div>
+        <div class="stat-label"><?php esc_html_e('Wishlist Items', 'edd-customer-dashboard-pro'); ?></div>
     </div>
 </div>

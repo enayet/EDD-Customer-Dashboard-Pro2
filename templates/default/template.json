@@ -1,7 +1,7 @@
 {
-    "name": "Default Dashboard",
-    "description": "Modern, clean dashboard interface",
-    "version": "1.0.0",
+    "name": "Default Dashboard - Updated",
+    "description": "Modern glassmorphism dashboard with enhanced UX and comprehensive features",
+    "version": "2.0.0",
     "author": "EDD Customer Dashboard Pro",
     "preview": "preview.png",
     "supports": [
@@ -12,8 +12,25 @@
         "analytics",
         "support"
     ],
+    "features": [
+        "Glassmorphism design",
+        "Responsive layout",
+        "Alpine.js interactivity",
+        "License management",
+        "Download tracking",
+        "Support center",
+        "Purchase analytics",
+        "Wishlist integration"
+    ],
     "requirements": {
         "edd_version": "3.0.0",
-        "php_version": "7.4"
-    }
+        "php_version": "7.4",
+        "wordpress_version": "5.0"
+    },
+    "browser_support": [
+        "Chrome 60+",
+        "Firefox 55+", 
+        "Safari 12+",
+        "Edge 79+"
+    ]
 }

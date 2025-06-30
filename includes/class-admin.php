@@ -148,7 +148,7 @@ class EDDCDP_Admin {
         
         wp_enqueue_style(
             'eddcdp-admin',
-            EDDCDP_PLUGIN_URL . 'assets/css/admin.css',
+            EDDCDP_PLUGIN_URL . 'assets/admin.css',
             array(),
             EDDCDP_VERSION
         );

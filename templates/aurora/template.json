@@ -1,0 +1,27 @@
+{
+    "name": "Aurora Dashboard",
+    "description": "Modern sidebar-based dashboard with clean aesthetics and intuitive navigation",
+    "version": "1.0.0",
+    "author": "EDD Customer Dashboard Pro",
+    "preview": "preview.png",
+    "supports": [
+        "purchases",
+        "downloads", 
+        "licenses",
+        "wishlist",
+        "analytics",
+        "support"
+    ],
+    "requirements": {
+        "edd_version": "3.0.0",
+        "php_version": "7.4"
+    },
+    "layout": "sidebar",
+    "features": [
+        "responsive_design",
+        "modern_ui",
+        "sidebar_navigation",
+        "stats_cards",
+        "search_functionality"
+    ]
+}
